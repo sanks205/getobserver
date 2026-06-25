@@ -1,0 +1,10 @@
+INFO - 2026-06-19 09:00:00 --> Application initialized
+DEBUG - 2026-06-19 09:00:01 --> Config loaded from cache
+ERROR - 2026-06-19 09:01:00 --> Query error: SQLSTATE[HY000] [2002] Connection refused (host 10.0.0.5:3306)
+ERROR - 2026-06-19 09:02:10 --> Query error: SQLSTATE[HY000] [2002] Connection refused (host 10.0.0.6:3306)
+ERROR - 2026-06-19 09:03:20 --> Query error: SQLSTATE[HY000] [2002] Connection refused (host 10.0.0.7:3306)
+ERROR - 2026-06-19 09:04:30 --> Query error: SQLSTATE[HY000] [2002] Connection refused (host 10.0.0.8:3306)
+ERROR - 2026-06-19 09:05:00 --> Deadlock found when trying to get lock; try restarting transaction (txn 91823)
+ERROR - 2026-06-19 09:06:00 --> Deadlock found when trying to get lock; try restarting transaction (txn 91999)
+[2026-06-19 09:07:00] production.ERROR: cURL error 28: Operation timed out after 30000 milliseconds
+INFO - 2026-06-19 09:08:00 --> Request completed

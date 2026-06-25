@@ -1,0 +1,9 @@
+{
+  "name": "demo/booking-system",
+  "description": "Intentionally flawed CodeIgniter-style demo app for testing Observer.",
+  "type": "project",
+  "require": {
+    "php": ">=7.4",
+    "codeigniter/framework": "3.1.11"
+  }
+}
