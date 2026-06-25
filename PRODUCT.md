@@ -192,4 +192,4 @@ The diagnostic core, report, and AI layer are already language-agnostic — only
 
 ---
 
-*This document describes the product as a whole. For build instructions and usage see [README.md](README.md); for the launch plan and costs see [docs/GO-TO-MARKET.md](docs/GO-TO-MARKET.md).*
+*This document describes the product as a whole. For build instructions and usage see [README.md](README.md).*

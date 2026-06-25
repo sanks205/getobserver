@@ -1,4 +1,6 @@
-# AI Production Debugging Assistant
+# Observer
+
+*AI Production Debugging Assistant — find what's wrong in production, in one command.*
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Go](https://img.shields.io/badge/Go-1.26%2B-00ADD8?logo=go&logoColor=white)
@@ -15,9 +17,27 @@ searching through huge codebases and server logs.
 
 The CLI binary is named **`observer`**.
 
-> **Status:** Phases 1–9 complete (CLI, detection, static analysis, runtime capture,
-> log analysis, AI, report, packaging). MVP under active, phase-by-phase
-> development — see the [Roadmap](#roadmap) and [PRODUCT.md](PRODUCT.md).
+> **Status:** Phases 1–13 complete — CLI, technology detection, static analysis,
+> runtime capture, log analysis, AI, HTML report, packaging, local dashboard,
+> dependency CVEs, and CI/team workflow. Pro desktop & hosted Cloud are
+> [Phase 14](#roadmap). See [PRODUCT.md](PRODUCT.md).
+
+---
+
+## Demo
+
+![Observer scanning a project and opening the production-health report](docs/observer-demo.gif)
+
+Point it at any codebase and get one self-contained HTML report — no server, no
+account, no instrumentation:
+
+```bash
+observer analyze ./examples/php-demo --ai --out report.html
+```
+
+Observer detects the stack, flags security / runtime / dependency issues with
+severity and suggested fixes, scores the project on **Security** and **Code
+Health** (A–F), and writes a shareable `report.html` you can open or print to PDF.
 
 ---
 
@@ -76,7 +96,7 @@ ai-production-debugging-assistant/
 
 Observer ships as a **single self-contained executable** — no runtime, no
 dependencies, nothing installed on your system. Download the binary for your OS
-from the [Releases](https://github.com/aipda/observer/releases) page and run it:
+from the [Releases](https://github.com/sanks205/getobserver/releases) page and run it:
 
 | OS | File |
 |---|---|
@@ -92,8 +112,8 @@ On macOS/Linux, make it executable: `chmod +x observer_*` (optionally rename to 
 Requires [Go 1.26+](https://go.dev/dl/).
 
 ```bash
-git clone https://github.com/aipda/observer.git ai-production-debugging-assistant
-cd ai-production-debugging-assistant
+git clone https://github.com/sanks205/getobserver.git
+cd getobserver
 go build -o observer ./cmd/cli
 ```
 
@@ -241,8 +261,7 @@ detected signals, code structure, and file-type breakdown.
 | 13 | CI & team workflow (SARIF, quality gate, baseline, GitHub workflow) | ✅ Done |
 | 14 | Desktop app (Pro) & hosted Cloud (Team), multi-language agents | ⏳ Planned |
 
-For the product vision, editions, and positioning see **[PRODUCT.md](PRODUCT.md)**;
-for the launch plan and costs see **[docs/GO-TO-MARKET.md](docs/GO-TO-MARKET.md)**.
+For the product vision, editions, and positioning see **[PRODUCT.md](PRODUCT.md)**.
 
 ---
 
