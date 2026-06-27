@@ -60,6 +60,17 @@
   .feat h3{margin:0 0 6px;font-size:1.05rem;}
   .feat p{margin:0;color:var(--muted);font-size:.92rem;}
   .feat .ic{width:34px;height:34px;border-radius:9px;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);display:grid;place-items:center;margin-bottom:12px;font-weight:800;}
+  /* comparison */
+  .cmpwrap{overflow-x:auto;border:1px solid var(--border);border-radius:14px;}
+  table.cmp{width:100%;border-collapse:collapse;min-width:640px;}
+  table.cmp th,table.cmp td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:.9rem;vertical-align:top;}
+  table.cmp thead th{color:var(--muted);text-transform:uppercase;font-size:.66rem;letter-spacing:.05em;font-weight:700;}
+  table.cmp thead th.obs{color:var(--accent);}
+  table.cmp tbody th{font-weight:600;color:var(--text);font-size:.85rem;}
+  table.cmp td.obs{background:color-mix(in srgb,var(--accent) 12%,transparent);}
+  table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:none;}
+  .cmpnote{color:var(--muted);font-size:.92rem;margin:18px 0 0;max-width:72ch;}
+  .cmpnote b{color:var(--text);}
   /* pricing */
   .price{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   .tier{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;}
@@ -78,6 +89,7 @@
     <div class="brand"><svg width="22" height="22" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".45"/><circle cx="10" cy="10" r="3.3" fill="currentColor"/></svg> Observer</div>
     <div class="links">
       <a href="#signals">Features</a>
+      <a href="#compare">Compare</a>
       <a href="#pricing">Pricing</a>
       <a href="https://github.com/sanks205/getobserver">GitHub</a>
       <a class="btn btn-primary" href="https://github.com/sanks205/getobserver/releases">Download</a>
@@ -128,25 +140,46 @@
     </div>
   </section>
 
+  <section id="compare">
+    <h2>How Observer compares</h2>
+    <p class="section-lede">Observer isn't trying to replace SonarQube or Sentry — it's a different shape of tool: a zero-setup, offline snapshot that unifies every signal into one report.</p>
+    <div class="cmpwrap">
+      <table class="cmp">
+        <thead>
+          <tr><th></th><th class="obs">Observer</th><th>SonarQube / Semgrep</th><th>Snyk</th><th>Sentry</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>Setup</th><td class="obs">One binary, offline, no account</td><td>Server/CI or cloud account</td><td>Cloud account</td><td>Instrument app + account</td></tr>
+          <tr><th>Covers</th><td class="obs">Code + deps + runtime + logs, in one report</td><td>Code</td><td>Dependencies + code</td><td>Runtime errors</td></tr>
+          <tr><th>Static-analysis depth</th><td class="obs">Core rules + optional Semgrep</td><td>Deeper (many languages)</td><td>Good</td><td>—</td></tr>
+          <tr><th>Air-gapped / no signup</th><td class="obs">✓</td><td>—</td><td>—</td><td>—</td></tr>
+          <tr><th>Pricing</th><td class="obs">Free + one-time Pro</td><td>Subscription</td><td>Per-developer subscription</td><td>Usage + per-contributor</td></tr>
+          <tr><th>Best for</th><td class="obs">Audits, handovers, SMB, offline</td><td>Continuous team quality</td><td>Dependency-heavy teams</td><td>Live production monitoring</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cmpnote"><b>Use Observer when</b> you need a one-shot audit, a legacy/client handover, an air-gapped scan, or a unified health snapshot without a server or per-seat pricing. <b>Reach for the others when</b> you need deep continuous static analysis at scale or always-on production monitoring — many teams run both.</p>
+  </section>
+
   <section id="pricing">
     <h2>Pricing</h2>
-    <p class="section-lede">Open-core: the CLI is free forever. Pay only for the dashboard, team, and hosted features.</p>
+    <p class="section-lede">Open-core: the full CLI <em>and</em> the local dashboard are free forever. Pro add-ons are a one-time purchase — buy only what you need.</p>
     <div class="price">
       <div class="tier">
         <h3>Community</h3><div class="who">Individuals, OSS, evaluation</div>
-        <div class="amt">Free</div>
-        <ul><li>CLI scan + HTML report</li><li>All built-in rules + CVE scan</li><li>Runtime &amp; log analysis</li><li>Bring-your-own AI key</li></ul>
+        <div class="amt">Free <small>MIT, open source</small></div>
+        <ul><li>CLI scan + HTML report</li><li>All built-in rules + CVE scan</li><li>Local dashboard, history &amp; trends</li><li>Runtime &amp; log analysis · BYO AI key</li></ul>
         <a class="btn btn-ghost" href="https://github.com/sanks205/getobserver/releases">Download</a>
       </div>
       <div class="tier featured">
-        <h3>Pro</h3><div class="who">Freelancers, agencies, SMB teams</div>
-        <div class="amt">$129 <small>one-time</small></div>
-        <ul><li>Everything in Community</li><li>Dashboard with history &amp; trends</li><li>PDF + branded reports</li><li>Scheduled scans</li></ul>
-        <a class="btn btn-primary" href="#" onclick="return false" style="opacity:.75;cursor:default">Coming soon</a>
+        <h3>Pro</h3><div class="who">Freelancers, agencies, SMB — buy only what you need</div>
+        <div class="amt">$89 <small>all-access · one-time</small></div>
+        <ul><li><a href="https://observerly1.gumroad.com/l/observer-pdf">Branded PDF reports — $39</a></li><li><a href="https://observerly1.gumroad.com/l/observer-schedule">Scheduled / automatic scans — $29</a></li><li><a href="https://observerly1.gumroad.com/l/observer-rules-php">Premium framework rules — $49</a></li></ul>
+        <a class="btn btn-primary" href="https://observerly1.gumroad.com/l/observer-pro">Get All-Access — $89</a>
       </div>
       <div class="tier">
         <h3>Cloud / Team</h3><div class="who">Teams &amp; organizations</div>
-        <div class="amt">Subscription</div>
+        <div class="amt">Subscription <small>future</small></div>
         <ul><li>Everything in Pro</li><li>Hosted, multi-user</li><li>Team, roles &amp; audit log</li><li>Hosted AI included</li></ul>
         <a class="btn btn-ghost" href="#">Coming soon</a>
       </div>
