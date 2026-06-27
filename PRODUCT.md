@@ -28,8 +28,8 @@
 A single diagnostic engine that tells a developer **what is wrong with an application and why** — across code, runtime, and logs — and explains it in plain language with concrete fixes. Usable in three forms, all sharing the same core:
 
 - **CLI** — run locally, in CI, or on a server.
-- **Local dashboard / desktop app** — pick a folder, click scan, read the report.
-- **Cloud / team** — hosted, multi-user, continuous, integrated.
+- **Local dashboard** — pick a folder, click scan, read the report (free); Observer Pro unlocks branded PDF, scheduled scans, and premium rules.
+- **Cloud / team** — hosted, multi-user, continuous, integrated (future).
 
 ## 2. The problem
 
@@ -57,7 +57,8 @@ Output: an interactive HTML report with an executive summary, the eight standard
 
 ## 4. What's built today
 
-Status as of the current build (Phases 1–7 complete; 8–10 pending):
+The free CLI is complete through **Phase 13**. **Observer Pro is now available** as
+a separate product (à-la-carte paid features — see §8).
 
 | Phase | Capability | Status |
 |------:|-----------|:------:|
@@ -68,9 +69,12 @@ Status as of the current build (Phases 1–7 complete; 8–10 pending):
 | 5 | Log analyzer (`observer analyze-log`) | ✅ |
 | 6 | AI analysis (OpenAI + local heuristic, provider-agnostic) | ✅ |
 | 7 | Professional multi-section report (filters, search, deep links) | ✅ |
-| 8 | Email reporting (SMTP) | ⏳ |
-| 9 | Docker support | ⏳ |
-| 10 | GitHub-quality polish | ⏳ |
+| 8 | Email reporting (SMTP) | ✅ |
+| 9 | Packaging & distribution — cross-platform single-binary builds | ✅ |
+| 10 | GitHub-quality polish (README, badges, contributing) | ✅ |
+| 11 | `observer serve` — local web dashboard (multi-project, history, deltas) | ✅ |
+| 12 | Dependency CVE scanning (OSV.dev) + optional Semgrep | ✅ |
+| 13 | CI & team workflow (SARIF, quality gate, baseline, GitHub Action) | ✅ |
 
 **Proven characteristics:**
 - **Fast** — a 17,000-file / 290 MB project analyzes in ~2 seconds (parallel workers + substring pre-gating).
@@ -149,15 +153,15 @@ Open-core value ladder (pricing illustrative, to be validated):
 
 | Tier | Audience | Includes | Pricing model |
 |---|---|---|---|
-| **Community** (OSS, free) | Individuals, OSS, evaluation | CLI, single HTML report, core rules, **bring-your-own** AI key | Free |
-| **Pro** (desktop) | Freelancers, agencies, SMB | `observer serve` dashboard, multi-project, history/trends, PDF + branding, scheduled scans, expanded rules | **One-time license** (illustrative $99–$149), optional paid major upgrades |
-| **Cloud / Team** | Teams, orgs | Hosted, multi-user, CI integration, PR comments, Slack/Jira, retention, **hosted AI included** | **Subscription** (illustrative per-seat or flat team tiers) |
+| **Community** (OSS, free) | Individuals, OSS, evaluation | Full CLI + HTML report, all core rules, **local dashboard** (`observer serve`) with multi-project history & trends, dependency CVE scan, SARIF/CI + GitHub Action, **bring-your-own** AI key | Free |
+| **Pro** (add-ons) | Freelancers, agencies, SMB | À-la-carte, one-time license keys: **Branded PDF reports**, **Scheduled / automatic scans**, **Premium framework rule packs** (Laravel / CodeIgniter / WordPress) — or an all-access bundle | **One-time, per feature** (illustrative: $29–$49 each, $89 bundle) |
+| **Cloud / Team** | Teams, orgs | Hosted, multi-user, CI integration, PR comments, Slack/Jira, retention, **hosted AI included** | **Subscription** (future) |
 
-**Why hybrid:** one-time fits the offline desktop tier (low friction, matches the offline strength); subscription is required where *we* carry ongoing cost (hosted infra + AI tokens). The free OSS CLI is the adoption funnel and credibility engine.
+**Why this shape:** one-time à-la-carte licenses fit an offline tool — customers buy only what they need, with no recurring cost to them or ongoing infra cost to us, and activation works offline after a one-time check. Subscription is reserved for the future hosted Cloud, where *we* carry ongoing cost (infra + AI tokens). The free OSS CLI is the adoption funnel and credibility engine.
 
 ## 9. Roadmap
 
-**Shipped:** Phases 1–7 (see §4).
+**Shipped:** Phases 1–13 (see §4), plus the **Observer Pro** tier.
 
 **Near term (OSS completion):**
 - **Phase 8** — Email reporting (SMTP via env).
@@ -169,7 +173,8 @@ Open-core value ladder (pricing illustrative, to be validated):
 - **Phase 12 — Dependency security & (optional) engine wrappers**: ✅ dependency CVE scanning via OSV.dev (PHP/npm/PyPI/Go — no extra software, opt-in network). Planned: *optional, auto-detected* wrappers for PHPStan/Psalm, Semgrep, ESLint, gosec, Bandit that enrich results only if those tools are present — never required, preserving the zero-dependency promise. *Closes the accuracy gap with Sonar/Snyk/CodeGuru.*
 - **Phase 13 — CI & team workflow**: ✅ SARIF output (GitHub code scanning + automatic PR annotations), quality gate (`--fail-on`), baseline/suppression ("report only new issues"), and a ready GitHub Actions workflow + [CI guide](docs/CI.md).
 - **Phase 13.5 — Scores & standards mapping**: ✅ two density-based 0–100 grades — a **Security score** and a **Code Health score** (Sonar-style separation) — shown in the report, dashboard, and CLI and recomputed for the selected scan scope; plus **CWE + OWASP Top 10 tags** on findings (report + SARIF) for security/compliance credibility.
-- **Phase 14 — Desktop app & Cloud**: Wails desktop app (one-time Pro) and/or hosted Cloud (subscription) with multi-language runtime agents (Node, Python, Java).
+- **Observer Pro — ✅ shipped (separate product)**: à-la-carte, license-gated features — Branded PDF reports, scheduled / automatic scans, and premium framework rule packs (Laravel / CodeIgniter / WordPress) — delivered as a closed build and activated with a license key (instant Gumroad key, or offline signed key for air-gapped use). The local dashboard itself stays free.
+- **Phase 14 — Cloud & multi-language agents (future)**: hosted Cloud (subscription) and runtime agents for Node / Python / Java.
 
 ### Platform coverage goal
 

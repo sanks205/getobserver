@@ -19,8 +19,9 @@ The CLI binary is named **`observer`**.
 
 > **Status:** Phases 1–13 complete — CLI, technology detection, static analysis,
 > runtime capture, log analysis, AI, HTML report, packaging, local dashboard,
-> dependency CVEs, and CI/team workflow. Pro desktop & hosted Cloud are
-> [Phase 14](#roadmap). See [PRODUCT.md](PRODUCT.md).
+> dependency CVEs, and CI/team workflow. **Observer Pro** adds paid add-ons
+> (branded PDF, scheduled scans, premium framework rules); a hosted Cloud is
+> future. See [PRODUCT.md](PRODUCT.md).
 
 ---
 
@@ -38,6 +39,29 @@ observer analyze ./examples/php-demo --ai --out report.html
 Observer detects the stack, flags security / runtime / dependency issues with
 severity and suggested fixes, scores the project on **Security** and **Code
 Health** (A–F), and writes a shareable `report.html` you can open or print to PDF.
+
+---
+
+## How Observer compares
+
+Observer isn't trying to replace SonarQube or Sentry — it's a different *shape* of
+tool: a zero-setup, offline snapshot that unifies code, dependencies, runtime, and
+logs into one report. The honest picture:
+
+|  | **Observer** | SonarQube / Semgrep | Snyk | Sentry |
+|---|---|---|---|---|
+| **Setup** | One binary, offline, no account | Server/CI or cloud account | Cloud account | Instrument app + account |
+| **Covers** | Code + deps + runtime + logs, in **one report** | Code | Dependencies + code | Runtime errors |
+| **Static-analysis depth** | Core rules + optional Semgrep | **Deeper** (many languages) | Good | — |
+| **Works air-gapped / no signup** | ✅ | — | — | — |
+| **Pricing** | Free + one-time Pro | Subscription | Per-developer subscription | Usage + per-contributor |
+| **Best for** | Audits, handovers, SMB, offline | Continuous team quality | Dependency-heavy teams | Live production monitoring |
+
+**Use Observer when** you need a one-shot audit, a legacy/client handover, an
+air-gapped scan, or a unified health snapshot without standing up a server or
+paying per seat. **Reach for the others when** you need deep continuous static
+analysis at scale (SonarQube/Semgrep) or always-on production monitoring
+(Sentry/Datadog) — many teams happily run both.
 
 ---
 
@@ -262,6 +286,20 @@ detected signals, code structure, and file-type breakdown.
 | 14 | Desktop app (Pro) & hosted Cloud (Team), multi-language agents | ⏳ Planned |
 
 For the product vision, editions, and positioning see **[PRODUCT.md](PRODUCT.md)**.
+
+---
+
+## Observer Pro
+
+The CLI and local dashboard are **free forever**. **Observer Pro** adds optional paid
+features — one-time purchase, activated with a license key, fully offline after activation:
+
+- **Branded PDF reports** — client-ready PDF with your logo &amp; brand — [$39](https://observerly1.gumroad.com/l/observer-pdf)
+- **Scheduled / automatic scans** — re-scan on a schedule, alert on new issues — [$29](https://observerly1.gumroad.com/l/observer-schedule)
+- **Premium rule packs** — deeper Laravel / CodeIgniter / WordPress security rules — [$49](https://observerly1.gumroad.com/l/observer-rules-php)
+
+Or get everything in the **[All-Access bundle — $89](https://observerly1.gumroad.com/l/observer-pro)**.
+Activate with `observer pro activate <key>`.
 
 ---
 
