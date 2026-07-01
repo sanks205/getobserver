@@ -22,12 +22,15 @@ import (
 
 	"github.com/aipda/observer/internal/ai"
 	"github.com/aipda/observer/internal/analyzer"
+	"github.com/aipda/observer/internal/bandit"
 	"github.com/aipda/observer/internal/baseline"
 	"github.com/aipda/observer/internal/deps"
 	"github.com/aipda/observer/internal/detector"
 	"github.com/aipda/observer/internal/email"
+	"github.com/aipda/observer/internal/gosec"
 	"github.com/aipda/observer/internal/logger"
 	"github.com/aipda/observer/internal/notify"
+	"github.com/aipda/observer/internal/phpstan"
 	"github.com/aipda/observer/internal/reporter"
 	"github.com/aipda/observer/internal/runtime"
 	"github.com/aipda/observer/internal/sarif"
@@ -75,6 +78,9 @@ func runAnalyze(args []string) int {
 	minSevFlag := fs.String("min-severity", "", "minimum severity to report: Low|Medium|High|Critical (default: all)")
 	cveFlag := fs.Bool("cve", false, "scan dependencies for known vulnerabilities via OSV.dev (requires network)")
 	semgrepFlag := fs.Bool("semgrep", false, "also run Semgrep if installed, for deeper multi-language detection (auto-skips if absent)")
+	phpstanFlag := fs.Bool("phpstan", false, "also run the project's PHPStan if present (vendor/bin/phpstan + phpstan.neon) for deeper PHP analysis")
+	banditFlag := fs.Bool("bandit", false, "also run Bandit if installed, for Python security analysis (auto-skips if absent)")
+	gosecFlag := fs.Bool("gosec", false, "also run gosec if installed, for Go security analysis (auto-skips if absent)")
 	sarifFlag := fs.String("sarif", "", "also write findings as SARIF to this file (for GitHub code scanning / CI)")
 	jsonFlag := fs.String("json", "", "also write findings + scores as JSON to this file")
 	csvFlag := fs.String("csv", "", "also write findings as CSV (Excel-compatible) to this file")
@@ -189,6 +195,83 @@ func runAnalyze(args []string) int {
 			}
 			analysis.AddIssues(issues...)
 			fmt.Fprintf(os.Stderr, "Semgrep: %d additional finding(s)\n", len(issues))
+		}
+	}
+
+	// Theme 1 — optional PHPStan engine (opt-in via --phpstan; uses the project's
+	// own PHPStan + config; auto-skips if not present).
+	if *phpstanFlag && analysis != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		findings, err := phpstan.Scan(ctx, target)
+		cancel()
+		switch {
+		case errors.Is(err, phpstan.ErrNotAvailable):
+			fmt.Fprintln(os.Stderr, "note: --phpstan set but PHPStan isn't installed in the project (vendor/bin/phpstan); skipping (see https://phpstan.org)")
+		case errors.Is(err, phpstan.ErrNoConfig):
+			fmt.Fprintln(os.Stderr, "note: --phpstan set but no phpstan.neon(.dist) config found in the project; skipping")
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "warning: phpstan run failed: %v\n", err)
+		default:
+			var issues []analyzer.Issue
+			for _, f := range findings {
+				issues = append(issues, analyzer.Issue{
+					RuleID: f.RuleID, Severity: analyzer.Severity(f.Severity), Category: f.Category,
+					Title: f.Title, File: f.File, Line: f.Line,
+					Explanation: f.Message, Recommendation: "Review the PHPStan finding and fix the reported issue.",
+				})
+			}
+			analysis.AddIssues(issues...)
+			fmt.Fprintf(os.Stderr, "PHPStan: %d additional finding(s)\n", len(issues))
+		}
+	}
+
+	// Theme 1 — optional Bandit engine (opt-in via --bandit; Python security; auto-skips if not installed).
+	if *banditFlag && analysis != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		findings, err := bandit.Scan(ctx, target)
+		cancel()
+		switch {
+		case errors.Is(err, bandit.ErrNotAvailable):
+			fmt.Fprintln(os.Stderr, "note: --bandit set but Bandit isn't installed; skipping (pip install bandit)")
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "warning: bandit run failed: %v\n", err)
+		default:
+			var issues []analyzer.Issue
+			for _, f := range findings {
+				issues = append(issues, analyzer.Issue{
+					RuleID: f.RuleID, Severity: analyzer.Severity(f.Severity), Category: f.Category,
+					Title: f.Title, File: f.File, Line: f.Line, Snippet: f.Snippet,
+					Explanation: f.Message, Recommendation: "Review the Bandit finding and remediate.",
+					CWE: f.CWE,
+				})
+			}
+			analysis.AddIssues(issues...)
+			fmt.Fprintf(os.Stderr, "Bandit: %d additional finding(s)\n", len(issues))
+		}
+	}
+
+	// Theme 1 — optional gosec engine (opt-in via --gosec; Go security; auto-skips if not installed).
+	if *gosecFlag && analysis != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		findings, err := gosec.Scan(ctx, target)
+		cancel()
+		switch {
+		case errors.Is(err, gosec.ErrNotAvailable):
+			fmt.Fprintln(os.Stderr, "note: --gosec set but gosec isn't installed; skipping (https://github.com/securego/gosec)")
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "warning: gosec run failed: %v\n", err)
+		default:
+			var issues []analyzer.Issue
+			for _, f := range findings {
+				issues = append(issues, analyzer.Issue{
+					RuleID: f.RuleID, Severity: analyzer.Severity(f.Severity), Category: f.Category,
+					Title: f.Title, File: f.File, Line: f.Line, Snippet: f.Snippet,
+					Explanation: f.Message, Recommendation: "Review the gosec finding and remediate.",
+					CWE: f.CWE,
+				})
+			}
+			analysis.AddIssues(issues...)
+			fmt.Fprintf(os.Stderr, "gosec: %d additional finding(s)\n", len(issues))
 		}
 	}
 
@@ -803,6 +886,9 @@ Usage:
       --webhook <url>     POST the JSON report to a generic webhook
       --cve               scan dependencies for known vulnerabilities (OSV.dev; needs network)
       --semgrep           also run Semgrep if installed (deeper, multi-language detection)
+      --phpstan           also run the project's PHPStan (vendor/bin/phpstan + phpstan.neon)
+      --bandit            also run Bandit if installed (Python security analysis)
+      --gosec             also run gosec if installed (Go security analysis)
       --sarif <file>      also write findings as SARIF (GitHub code scanning / CI)
       --json <file>       also write findings + scores as JSON
       --csv <file>        also write findings as CSV (opens in Excel)

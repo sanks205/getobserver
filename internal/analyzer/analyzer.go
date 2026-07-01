@@ -72,6 +72,23 @@ var ruleMeta = map[string]struct{ CWE, OWASP string }{
 	"SEC_SSRF":                 {"CWE-918", "A10:2021 Server-Side Request Forgery (SSRF)"},
 	"SEC_INSECURE_DESERIALIZE": {"CWE-502", "A08:2021 Software and Data Integrity Failures"},
 	"SEC_TLS_VERIFY_DISABLED":  {"CWE-295", "A05:2021 Security Misconfiguration"},
+	"JS_DANGEROUS_INNERHTML":   {"CWE-79", "A03:2021 Injection"},
+	"JS_DOM_XSS":               {"CWE-79", "A03:2021 Injection"},
+	"JS_CHILD_PROCESS":         {"CWE-78", "A03:2021 Injection"},
+	"PY_EVAL_EXEC":             {"CWE-95", "A03:2021 Injection"},
+	"PY_OS_SYSTEM":             {"CWE-78", "A03:2021 Injection"},
+	"PY_SUBPROCESS_SHELL":      {"CWE-78", "A03:2021 Injection"},
+	"PY_PICKLE":                {"CWE-502", "A08:2021 Software and Data Integrity Failures"},
+	"PY_YAML_LOAD":             {"CWE-502", "A08:2021 Software and Data Integrity Failures"},
+	"PY_TLS_VERIFY_DISABLED":   {"CWE-295", "A05:2021 Security Misconfiguration"},
+	"JAVA_RUNTIME_EXEC":        {"CWE-78", "A03:2021 Injection"},
+	"JAVA_SQL_CONCAT":          {"CWE-89", "A03:2021 Injection"},
+	"JAVA_DESERIALIZE":         {"CWE-502", "A08:2021 Software and Data Integrity Failures"},
+	"JAVA_WEAK_HASH":           {"CWE-327", "A02:2021 Cryptographic Failures"},
+	"RUBY_EVAL":                {"CWE-95", "A03:2021 Injection"},
+	"RUBY_SYSTEM_EXEC":         {"CWE-78", "A03:2021 Injection"},
+	"RUBY_YAML_LOAD":           {"CWE-502", "A08:2021 Software and Data Integrity Failures"},
+	"RUBY_MARSHAL":             {"CWE-502", "A08:2021 Software and Data Integrity Failures"},
 }
 
 // CVSS returns an indicative CVSS-style base score (0–10) derived from
@@ -435,14 +452,19 @@ func analyzeFile(rel, ext string, lines []string) []Issue {
 			continue
 		}
 		ctx := lineCtx{rel: rel, ext: ext, lineNo: i + 1, line: line, lower: strings.ToLower(line)}
+		// Secrets run on the raw line — a leaked credential matters even in a comment.
 		issues = append(issues, detectSecret(ctx)...)
 		if !mask[i] {
 			continue
 		}
-		issues = append(issues, runLineRules(ctx)...)
-		issues = append(issues, detectRawSQL(ctx)...)
-		issues = append(issues, detectNullRefChain(ctx)...)
-		issues = append(issues, detectXSS(ctx)...)
+		// For code rules, strip any trailing line comment so trigger words inside a
+		// comment (e.g. `x = f()  // avoid eval()`) don't cause false positives.
+		code := stripTrailingComment(line, ext)
+		cctx := lineCtx{rel: rel, ext: ext, lineNo: i + 1, line: code, lower: strings.ToLower(code)}
+		issues = append(issues, runLineRules(cctx)...)
+		issues = append(issues, detectRawSQL(cctx)...)
+		issues = append(issues, detectNullRefChain(cctx)...)
+		issues = append(issues, detectXSS(cctx)...)
 	}
 	issues = append(issues, detectEmptyCatch(rel, ext, lines, mask)...)
 	return issues
@@ -479,6 +501,45 @@ func computeCodeMask(lines []string, ext string) []bool {
 		}
 	}
 	return mask
+}
+
+// stripTrailingComment removes a trailing line comment ("//" for all code; "#"
+// for PHP/Python/Ruby) from a code line, without touching markers that appear
+// inside string literals (e.g. "http://…") — so rules match the code, not the
+// comment. Block comments are already handled by computeCodeMask.
+func stripTrailingComment(line, ext string) string {
+	hash := ext == ".php" || ext == ".py" || ext == ".rb"
+	var quote byte // 0 when not inside a string literal
+	for i := 0; i < len(line); i++ {
+		c := line[i]
+		if quote != 0 {
+			if c == '\\' {
+				i++ // skip the escaped character
+				continue
+			}
+			if c == quote {
+				quote = 0
+			}
+			continue
+		}
+		switch c {
+		case '\'', '"', '`':
+			quote = c
+		case '/':
+			if i+1 < len(line) && line[i+1] == '/' {
+				return strings.TrimRight(line[:i], " \t")
+			}
+		case '#':
+			if hash {
+				// PHP 8 attributes use #[...]; those aren't comments.
+				if ext == ".php" && i+1 < len(line) && line[i+1] == '[' {
+					continue
+				}
+				return strings.TrimRight(line[:i], " \t")
+			}
+		}
+	}
+	return line
 }
 
 // AddIssues appends externally-produced issues (e.g. dependency CVEs), updates
