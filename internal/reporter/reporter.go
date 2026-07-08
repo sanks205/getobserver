@@ -134,6 +134,7 @@ type issueItem struct {
 	OWASPLink      template.URL // link to the OWASP Top 10 category
 	Link           template.URL // vscode:// deep link to the source location
 	HasLink        bool
+	FixExample     string // generic before→after fix, shown for every finding (offline, no --ai needed)
 }
 
 // maxReportIssues caps how many findings are rendered into the (client-side
@@ -489,6 +490,7 @@ func toIssueItems(rootAbs string, issues []analyzer.Issue) []issueItem {
 			OWASPLink:      owaspURL(owasp),
 			Link:           link,
 			HasLink:        hasLink,
+			FixExample:     ai.GenericFix(cwe, is.Category),
 		})
 	}
 	return out
