@@ -89,6 +89,11 @@
     .pill{display:inline-block;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:7px 13px;cursor:pointer;color:var(--text);text-decoration:none;font-size:.88rem;}
     .pill:hover{border-color:var(--accent);color:var(--accent);}
     .fix{margin-top:5px;}
+    .fixwrap{margin-top:6px;}
+    .fixwrap summary{cursor:pointer;color:var(--accent);font-size:.8rem;font-weight:600;list-style:none;}
+    .fixwrap summary::before{content:"▸ ";}
+    .fixwrap[open] summary::before{content:"▾ ";}
+    .fixcode{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-top:6px;font-family:var(--mono);font-size:.78rem;line-height:1.5;white-space:pre-wrap;word-break:break-word;color:var(--text);overflow-x:auto;}
     .banner{border-radius:12px;padding:13px 16px;margin:14px 0;font-weight:600;border:1px solid var(--border);display:flex;align-items:center;gap:8px;}
     .banner.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent);}
     .banner.fail{background:color-mix(in srgb,var(--crit) 14%,transparent);color:var(--crit);border-color:color-mix(in srgb,var(--crit) 40%,transparent);}
@@ -264,6 +269,7 @@
             {{if .Snippet}}<div><code>{{.Snippet}}</code></div>{{end}}
             <div class="muted" style="margin-top:4px">{{.Explanation}}</div>
             <div class="fix"><em>Fix:</em> {{.Recommendation}}</div>
+            {{if .FixExample}}<details class="fixwrap"><summary>Suggested fix</summary><pre class="fixcode">{{.FixExample}}</pre></details>{{end}}
           </td>
         </tr>{{end}}
       </tbody>
