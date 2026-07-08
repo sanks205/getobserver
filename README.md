@@ -53,7 +53,7 @@ logs into one report. The honest picture:
 | **Setup** | One binary, offline, no account | Server/CI or cloud account | Cloud account | Instrument app + account |
 | **Covers** | Code + deps + runtime + logs, in **one report** | Code | Dependencies + code | Runtime errors |
 | **Static-analysis depth** | Core rules + optional Semgrep | **Deeper** (many languages) | Good | — |
-| **Works air-gapped / no signup** | ✅ | — | — | — |
+| **Works air-gapped / no signup** | ✅ (enforceable — `--assert-offline`) | — | — | — |
 | **Pricing** | Free + one-time Pro | Subscription | Per-developer subscription | Usage + per-contributor |
 | **Best for** | Audits, handovers, SMB, offline | Continuous team quality | Dependency-heavy teams | Live production monitoring |
 
@@ -62,6 +62,29 @@ air-gapped scan, or a unified health snapshot without standing up a server or
 paying per seat. **Reach for the others when** you need deep continuous static
 analysis at scale (SonarQube/Semgrep) or always-on production monitoring
 (Sentry/Datadog) — many teams happily run both.
+
+---
+
+## Privacy & air-gapped use
+
+Observer runs **fully offline by default** — nothing about your code ever leaves your
+machine. There is no account, no telemetry, and no phone-home. The only features that
+touch the network are explicitly opt-in: `--cve` (OSV.dev dependency lookup), `--ai`
+*with* an `OPENAI_API_KEY`, and the `--email` / `--slack` / `--teams` / `--webhook`
+notifiers. Leave them off and the scan is entirely local.
+
+For regulated, air-gapped, or client-confidential work you can make that guarantee
+**enforceable**:
+
+```bash
+observer analyze ./my-project --assert-offline
+```
+
+`--assert-offline` refuses to run if any network-requiring flag was passed, and unsets
+`OPENAI_API_KEY` so the AI layer stays on its local heuristic. It prints
+`Offline mode: no network I/O.` so you can evidence it in an audit. Ideal for finance,
+healthcare, government/defense, or auditing a client's code under NDA — the code stays
+put, and you can prove it.
 
 ---
 
@@ -178,6 +201,10 @@ observer analyze ./examples/php-demo --categories "Security,Database" --min-seve
 # Scan dependencies for known vulnerabilities (OSV.dev; needs network)
 observer analyze ./my-project --cve
 
+# Air-gapped / regulated: guarantee NO network I/O — refuses --cve/--email/--slack/
+# --teams/--webhook and forces AI to the local heuristic. Prints "Offline mode: no network I/O."
+observer analyze ./my-project --assert-offline
+
 # Deeper, multi-language detection if you have Semgrep installed (auto-skips if not)
 observer analyze ./my-project --semgrep
 
@@ -281,7 +308,7 @@ detected signals, code structure, and file-type breakdown.
 | 10 | GitHub quality (README, badges, download/build, contributing) | ✅ Done |
 | 11 | `observer serve` — local web dashboard (multi-project, history, deltas) | ✅ Done |
 | 12 | Dependency CVE scanning (OSV.dev — PHP/npm/PyPI/Go) | ✅ Done |
-| 12+ | Optional engine wrappers — Semgrep ✅ (auto-detected); PHPStan/ESLint planned | 🚧 In progress |
+| 12+ | Optional engine wrappers — Semgrep / PHPStan / Bandit / gosec ✅ (auto-detected); ESLint planned | 🚧 In progress |
 | 13 | CI & team workflow (SARIF, quality gate, baseline, GitHub workflow) | ✅ Done |
 | 14 | Desktop app (Pro) & hosted Cloud (Team), multi-language agents | ⏳ Planned |
 
