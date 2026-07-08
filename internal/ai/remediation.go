@@ -63,6 +63,16 @@ var remByCWE = map[string]remediation{
 		Complexity: "Medium", Effort: "~30 min",
 		FixExample: "Before: $h = md5($password);\nAfter:  $h = password_hash($password, PASSWORD_DEFAULT); // bcrypt/argon2",
 	},
+	"CWE-352": { // CSRF
+		Exploit:    "A malicious page makes an authenticated user's browser submit a forged state-changing request (transfer, password/email change) without their intent.",
+		Complexity: "Low", Effort: "~20 min",
+		FixExample: "Enable CSRF protection and include the token in every form.\nCodeIgniter: $config['csrf_protection'] = TRUE;\nLaravel:     add the @csrf directive inside each <form>.",
+	},
+	"CWE-321": { // empty / hardcoded encryption key
+		Exploit:    "A missing or hardcoded key lets anyone who knows (or guesses) it forge sessions/tokens or decrypt data.",
+		Complexity: "Low", Effort: "~15 min",
+		FixExample: "Load a strong, random key from the environment — never commit it.\nBefore: $config['encryption_key'] = '';\nAfter:  $config['encryption_key'] = getenv('APP_KEY'); // 32+ random bytes",
+	},
 	"CWE-209": { // info exposure via errors / debug
 		Exploit:    "Verbose errors leak stack traces, queries, and paths that help an attacker map the system.",
 		Complexity: "Low", Effort: "~10 min",
@@ -112,6 +122,15 @@ var remByCategory = map[string]remediation{
 		Complexity: "Medium", Effort: "varies",
 		FixExample: "Reproduce from the stack trace, fix the root cause, and add a regression test.",
 	},
+}
+
+// GenericFix returns the built-in, offline before→after remediation example for
+// a finding's CWE (falling back to its category). It lets the report show a
+// suggested fix for every finding even without --ai; returns "" when there is no
+// specific guidance for that class. The guidance is generic (about the issue
+// class, not the user's code), so it never fabricates specifics.
+func GenericFix(cwe, category string) string {
+	return remediationFor(Finding{CWE: cwe, Category: category}).FixExample
 }
 
 // remediationFor returns the best-matching guidance for a finding: by CWE first,
