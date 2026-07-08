@@ -41,7 +41,7 @@ import (
 )
 
 // version is stamped at build time via -ldflags "-X main.version=...".
-var version = "0.1.0"
+var version = "0.2.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -91,6 +91,7 @@ func runAnalyze(args []string) int {
 	failOn := fs.String("fail-on", "", "exit non-zero if any finding is at/above this severity: Low|Medium|High|Critical")
 	baselineFile := fs.String("baseline", "", "suppress findings recorded in this baseline file (report only new issues)")
 	writeBaseline := fs.String("write-baseline", "", "write the current findings to this baseline file and exit-code 0")
+	assertOffline := fs.Bool("assert-offline", false, "guarantee no network I/O: refuse network flags (--cve/--email/--slack/--teams/--webhook) and force AI to the local heuristic")
 
 	// Parse flags that precede the project path. flag.Parse stops at the first
 	// non-flag token, so we then take that token as the path and re-parse the
@@ -115,6 +116,38 @@ func runAnalyze(args []string) int {
 	if !info.IsDir() {
 		fmt.Fprintf(os.Stderr, "error: %q is not a directory\n", target)
 		return 1
+	}
+
+	// Air-gapped guarantee: fail fast if any network-requiring option was asked
+	// for, and force the AI layer to its local (offline) heuristic. Observer is
+	// already offline by default — this flag makes that contract enforceable for
+	// regulated / air-gapped environments.
+	if *assertOffline {
+		var netFlags []string
+		if *cveFlag {
+			netFlags = append(netFlags, "--cve")
+		}
+		if *emailTo != "" {
+			netFlags = append(netFlags, "--email")
+		}
+		if *slackFlag != "" {
+			netFlags = append(netFlags, "--slack")
+		}
+		if *teamsFlag != "" {
+			netFlags = append(netFlags, "--teams")
+		}
+		if *webhookFlag != "" {
+			netFlags = append(netFlags, "--webhook")
+		}
+		if len(netFlags) > 0 {
+			fmt.Fprintf(os.Stderr, "error: --assert-offline forbids network operations, but these were requested: %s\n", strings.Join(netFlags, ", "))
+			return 1
+		}
+		if os.Getenv("OPENAI_API_KEY") != "" {
+			_ = os.Unsetenv("OPENAI_API_KEY") // force the AI layer to the local heuristic
+			fmt.Println("Offline mode: ignoring OPENAI_API_KEY — AI will use the local heuristic.")
+		}
+		fmt.Println("Offline mode: no network I/O.")
 	}
 
 	// Set OBSERVER_TIMING=1 to print per-phase timing to stderr.
@@ -895,6 +928,7 @@ Usage:
       --fail-on <sev>     exit non-zero if any finding >= severity (CI quality gate)
       --baseline <file>   suppress known findings; report only new issues
       --write-baseline <file>  record current findings as the baseline, then exit
+      --assert-offline    guarantee no network I/O (refuse --cve/--email/--slack/--teams/--webhook; AI stays local)
 
   observer analyze-log <path>               Analyze application logs, print a summary
   observer serve [--addr 127.0.0.1:7777]    Start the local web dashboard
