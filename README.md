@@ -43,6 +43,11 @@ Observer detects the stack, flags security / runtime / dependency issues with
 severity and suggested fixes, scores the project on **Security** and **Code
 Health** (A–F), and writes a shareable `report.html` you can open or print to PDF.
 
+> **🎉 Launch offer** — Observer's core is **free & MIT, so start there.** If it earns a place in
+> your workflow, the optional [**Observer Pro**](#observer-pro) add-ons (branded PDF reports,
+> scheduled scans, deeper framework rules) are **25% off** during launch with code **`LAUNCH25`** —
+> one-time purchase, first 25 buyers.
+
 ---
 
 ## How Observer compares
@@ -352,6 +357,9 @@ features — one-time purchase, activated with a license key, fully offline afte
 
 Or get everything in the **[All-Access bundle — $89](https://observerly1.gumroad.com/l/observer-pro)**.
 Activate with `observer pro activate <key>`.
+
+> **🎉 Launch offer — 25% off** with code **`LAUNCH25`** at checkout (one-time, first 25 buyers).
+> No pressure: run the free tool first, and if it earns a spot in your workflow, the discount's here when you want it.
 
 ---
 
