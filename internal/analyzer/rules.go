@@ -45,7 +45,7 @@ var lineRules = []lineRule{
 		re:             regexp.MustCompile(`\beval\s*\(`),
 	},
 	{
-		id: "PHP_SUPERGLOBAL_INPUT", severity: Medium, category: "Security",
+		id: "PHP_SUPERGLOBAL_INPUT", severity: Low, category: "Security",
 		title:          "Unvalidated request input",
 		explanation:    "Reading $_GET/$_POST/$_REQUEST directly uses raw, unvalidated user input, which often flows into queries or output.",
 		recommendation: "Validate and sanitize input (e.g. filter_input, the framework's input/validation layer) before use.",
@@ -496,7 +496,7 @@ func detectNullRefChain(c lineCtx) []Issue {
 	}
 	if nullableChain.MatchString(c.line) {
 		return []Issue{{
-			RuleID: "NPE_NULLABLE_CHAIN", Severity: Medium, Category: "Error Handling",
+			RuleID: "NPE_NULLABLE_CHAIN", Severity: Low, Category: "Error Handling",
 			Title: "Possible null reference", File: c.rel, Line: c.lineNo, Snippet: snippet(c.line),
 			Explanation:    "Methods like row()/first()/find() return null when no record is found; chaining a call on the result then triggers a fatal error.",
 			Recommendation: "Check the result for null before dereferencing it.",

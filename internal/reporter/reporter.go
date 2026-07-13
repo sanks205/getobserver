@@ -60,20 +60,24 @@ type HTMLModel struct {
 	Infrastructure []techItem
 
 	// Phase 3 static analysis.
-	FilesScanned      int
-	TotalIssues       int
-	SecScore          int
-	SecGrade          string
-	HealthScore       int
-	HealthGrade       string
-	RemediationEffort string
-	IssueSummary      []sevCount
-	Issues            []issueItem
-	FindingCategories []string
-	CriticalCount     int
-	SecurityCount     int
-	PerformanceCount  int
-	IssuesCapped      bool
+	FilesScanned        int
+	TotalIssues         int
+	SecScore            int
+	SecGrade            string
+	SecurityRating      string // standards-aligned A–E (worst security severity present)
+	SecurityRatingBasis string // the worst severity behind the rating (e.g. "High")
+	HealthScore         int
+	HealthGrade         string
+	RemediationEffort   string
+	IssueSummary        []sevCount
+	Issues              []issueItem
+	IssueGroups         []issueGroup // findings grouped by rule (collapses duplicates)
+	TopPriorities       []issueGroup // highest-severity groups for the "Fix these first" list
+	FindingCategories   []string
+	CriticalCount       int
+	SecurityCount       int
+	PerformanceCount    int
+	IssuesCapped        bool
 
 	// Phase 4 runtime errors.
 	HasRuntime         bool
@@ -271,6 +275,7 @@ func RenderHTML(d Data) (string, error) {
 		model.FilesScanned = analysis.FilesScanned
 		model.ScanInfo = scanInfo(analysis.FilesScanned, d.DurationMs)
 		model.SecScore, model.SecGrade = analyzer.SecurityScore(analysis)
+		model.SecurityRating, model.SecurityRatingBasis = analyzer.SecurityRating(analysis)
 		model.HealthScore, model.HealthGrade = analyzer.HealthScore(analysis)
 		model.RemediationEffort = formatEffort(analyzer.RemediationMinutes(analysis))
 		model.TotalIssues = len(analysis.Issues)
@@ -284,6 +289,8 @@ func RenderHTML(d Data) (string, error) {
 		model.SecurityCount = analysis.ByCategory["Security"]
 		model.PerformanceCount = analysis.ByCategory["Performance"]
 		model.FindingCategories = sortedKeys(analysis.ByCategory)
+		model.IssueGroups = groupIssues(res.RootPath, analysis.Issues)
+		model.TopPriorities = topPriorities(model.IssueGroups, 6)
 
 		comp := compliance.Build(analysis.Issues)
 		model.HasCompliance = true
@@ -492,6 +499,120 @@ func toIssueItems(rootAbs string, issues []analyzer.Issue) []issueItem {
 			HasLink:        hasLink,
 			FixExample:     ai.GenericFix(cwe, is.Category),
 		})
+	}
+	return out
+}
+
+// issueOccurrence is one location where a grouped finding appears.
+type issueOccurrence struct {
+	Location string
+	Link     template.URL
+	HasLink  bool
+	Snippet  string
+}
+
+// issueGroup collapses all occurrences of the same rule into one entry, so a
+// report on a large codebase shows dozens of issue *types* rather than thousands
+// of near-identical rows.
+type issueGroup struct {
+	Severity       string
+	Category       string
+	Title          string
+	RuleID         string
+	CVSS           string
+	CWE            string
+	OWASP          string
+	CWELink        template.URL
+	OWASPLink      template.URL
+	Explanation    string
+	Recommendation string
+	FixExample     string
+	Count          int // total occurrences (may exceed len(Occurrences))
+	Occurrences    []issueOccurrence
+	ExtraCount     int // occurrences beyond the per-group display cap
+}
+
+// maxOccurrencesPerGroup bounds how many locations are rendered per group so the
+// HTML stays a sane size even when one rule fires thousands of times.
+const maxOccurrencesPerGroup = 100
+
+func sevRank(s string) int {
+	switch s {
+	case "Critical":
+		return 4
+	case "High":
+		return 3
+	case "Medium":
+		return 2
+	case "Low":
+		return 1
+	}
+	return 0
+}
+
+// groupIssues buckets issues by rule (falling back to title), sorted by severity
+// then frequency. Occurrences per group are capped; the overflow is counted.
+func groupIssues(rootAbs string, issues []analyzer.Issue) []issueGroup {
+	byKey := map[string]*issueGroup{}
+	order := make([]string, 0)
+	for _, is := range issues {
+		key := is.RuleID
+		if key == "" {
+			key = is.Title
+		}
+		g := byKey[key]
+		if g == nil {
+			cwe := firstNonEmpty(is.CWE, analyzer.CWEFor(is.RuleID))
+			owasp := firstNonEmpty(is.OWASP, analyzer.OWASPFor(is.RuleID))
+			g = &issueGroup{
+				Severity: string(is.Severity), Category: is.Category, Title: is.Title,
+				RuleID: is.RuleID, CVSS: analyzer.CVSS(is.Severity),
+				CWE: cwe, OWASP: owasp, CWELink: cweURL(cwe), OWASPLink: owaspURL(owasp),
+				Explanation: is.Explanation, Recommendation: is.Recommendation,
+				FixExample: ai.GenericFix(cwe, is.Category),
+			}
+			byKey[key] = g
+			order = append(order, key)
+		}
+		g.Count++
+		if sevRank(string(is.Severity)) > sevRank(g.Severity) {
+			g.Severity = string(is.Severity)
+			g.CVSS = analyzer.CVSS(is.Severity)
+		}
+		if len(g.Occurrences) < maxOccurrencesPerGroup {
+			link, hasLink := editorLink(rootAbs, is.File, is.Line)
+			g.Occurrences = append(g.Occurrences, issueOccurrence{
+				Location: fmt.Sprintf("%s:%d", is.File, is.Line),
+				Link:     link, HasLink: hasLink, Snippet: is.Snippet,
+			})
+		} else {
+			g.ExtraCount++
+		}
+	}
+	groups := make([]issueGroup, 0, len(order))
+	for _, k := range order {
+		groups = append(groups, *byKey[k])
+	}
+	sort.SliceStable(groups, func(i, j int) bool {
+		if ri, rj := sevRank(groups[i].Severity), sevRank(groups[j].Severity); ri != rj {
+			return ri > rj
+		}
+		return groups[i].Count > groups[j].Count
+	})
+	return groups
+}
+
+// topPriorities returns up to n highest-severity Critical/High groups for the
+// "Fix these first" list. Input is assumed already severity-sorted.
+func topPriorities(groups []issueGroup, n int) []issueGroup {
+	out := make([]issueGroup, 0, n)
+	for _, g := range groups {
+		if g.Severity == "Critical" || g.Severity == "High" {
+			out = append(out, g)
+			if len(out) >= n {
+				break
+			}
+		}
 	}
 	return out
 }

@@ -122,6 +122,11 @@ var remByCategory = map[string]remediation{
 		Complexity: "Medium", Effort: "varies",
 		FixExample: "Reproduce from the stack trace, fix the root cause, and add a regression test.",
 	},
+	"Infrastructure": {
+		Exploit:    "A misconfigured container/host/web-server setting widens the attack surface or leaks data/credentials from the deployment.",
+		Complexity: "Low", Effort: "~15–30 min",
+		FixExample: "Harden the config: run as a non-root user, pin image versions/digests, keep secrets out of images/.env, disable directory listing & version banners, and require TLS 1.2+.",
+	},
 }
 
 // GenericFix returns the built-in, offline before→after remediation example for

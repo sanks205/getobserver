@@ -47,8 +47,9 @@
     nav.toc .count{color:var(--muted);font-variant-numeric:tabular-nums;}
     main{padding:24px 30px 80px;min-width:0;}
     .appbar{display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;}
-    .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:1.05rem;letter-spacing:-.01em;color:var(--text);}
-    .brand svg{color:var(--accent);}
+    .brand{display:flex;align-items:center;gap:10px;color:var(--text);}
+    .brand .logo{color:var(--accent);flex-shrink:0;}
+    .brandname{font-weight:800;font-size:1.16rem;letter-spacing:-.02em;}
     .appbar-actions{display:flex;gap:8px;}
     .themebtn,.printbtn{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:7px 12px;cursor:pointer;font-size:.85rem;font-family:inherit;}
     .themebtn:hover,.printbtn:hover{border-color:var(--accent);color:var(--accent);}
@@ -94,11 +95,41 @@
     .fixwrap summary::before{content:"▸ ";}
     .fixwrap[open] summary::before{content:"▾ ";}
     .fixcode{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-top:6px;font-family:var(--mono);font-size:.78rem;line-height:1.5;white-space:pre-wrap;word-break:break-word;color:var(--text);overflow-x:auto;}
+    /* Fix These First list */
+    .prio{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+    .prio-item{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;}
+    .prio-title{font-weight:600;flex:1;min-width:0;}
+    .prio-meta{font-size:.78rem;white-space:nowrap;font-variant-numeric:tabular-nums;}
+    /* Grouped findings */
+    #findings-list{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+    .fgroup{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .fgroup>summary{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;list-style:none;}
+    .fgroup>summary::-webkit-details-marker{display:none;}
+    .fgroup>summary::before{content:"▸";color:var(--muted);font-size:.8rem;flex-shrink:0;}
+    .fgroup[open]>summary::before{content:"▾";}
+    .fgroup>summary:hover{background:var(--surface2);}
+    .fgroup-title{font-weight:600;flex:1;min-width:0;}
+    .fgroup-cat{font-size:.78rem;white-space:nowrap;}
+    .fgroup-count{font-size:.76rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:2px 9px;white-space:nowrap;}
+    .fgroup-body{padding:4px 16px 14px;border-top:1px solid var(--border);}
+    .fgroup-tags{margin:9px 0 4px;}
+    .occ{margin-top:10px;}
+    .occ-h{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+    .occ-row{display:flex;gap:10px;align-items:baseline;padding:3px 0;flex-wrap:wrap;font-size:.86rem;border-top:1px solid color-mix(in srgb,var(--border) 55%,transparent);}
+    .occ-row:first-of-type{border-top:none;}
+    .occ-snip{font-size:.76rem;opacity:.85;}
     .banner{border-radius:12px;padding:13px 16px;margin:14px 0;font-weight:600;border:1px solid var(--border);display:flex;align-items:center;gap:8px;}
     .banner.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent);}
     .banner.fail{background:color-mix(in srgb,var(--crit) 14%,transparent);color:var(--crit);border-color:color-mix(in srgb,var(--crit) 40%,transparent);}
     .banner.info{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,transparent);font-weight:500;}
     .score-A{--c:var(--ok);color:var(--ok);} .score-B{--c:#3f9f6b;color:#3f9f6b;} .score-C{--c:var(--med);color:var(--med);} .score-D{--c:var(--high);color:var(--high);} .score-F{--c:var(--crit);color:var(--crit);}
+    .secrating{display:inline-block;min-width:1.4em;text-align:center;border-radius:7px;padding:0 .3em;font-weight:800;}
+    .secrating-A{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok);}
+    .secrating-B{background:color-mix(in srgb,#3f9f6b 24%,transparent);color:#3f9f6b;}
+    .secrating-C{background:color-mix(in srgb,var(--med) 26%,transparent);color:var(--med);}
+    .secrating-D{background:color-mix(in srgb,var(--high) 24%,transparent);color:var(--high);}
+    .secrating-E{background:color-mix(in srgb,var(--crit) 24%,transparent);color:var(--crit);}
+    .scoring-note{font-size:.8rem;margin-top:12px;line-height:1.5;}
     .tag{display:inline-block;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:1px 8px;margin-right:5px;font-size:.72rem;text-decoration:none;}
     a.tag:hover{border-color:var(--accent);color:var(--accent);}
     .aicard{margin:12px 0;border-left:3px solid var(--accent);}
@@ -108,7 +139,12 @@
     .airow .ailbl{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;min-width:104px;flex-shrink:0;}
     .fixex{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin:0;font-family:var(--mono);font-size:.8rem;white-space:pre-wrap;overflow-x:auto;}
     /* instrument-panel hero */
-    .hero{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 26px;box-shadow:var(--shadow);}
+    .hero{position:relative;overflow:hidden;display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px 26px;box-shadow:var(--shadow);}
+    /* radar-ripple watermark (echoes the logo) — decorative, theme-aware, zero assets */
+    .hero::after{content:"";position:absolute;left:-70px;bottom:-90px;width:280px;height:280px;pointer-events:none;z-index:0;
+      background:repeating-radial-gradient(circle, color-mix(in srgb,var(--accent) 26%,transparent) 0 2px, transparent 2px 20px);
+      -webkit-mask-image:radial-gradient(circle,#000,transparent 68%);mask-image:radial-gradient(circle,#000,transparent 68%);opacity:.28;}
+    .hero>*{position:relative;z-index:1;}
     .stats{display:flex;gap:28px;flex-wrap:wrap;}
     .stat .k{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;}
     .stat .v{font-weight:700;font-size:1.15rem;margin-top:2px;font-variant-numeric:tabular-nums;}
@@ -130,9 +166,9 @@
       nav.toc,.controls,.printbtn,.appbar-actions{display:none!important;}
       .layout{grid-template-columns:1fr;max-width:none;}
       body{background:#fff;color:#000;}
-      .card,table,.banner,.hero,.aicard{break-inside:avoid;}
+      .card,table,.banner,.hero,.aicard,.fgroup,.prio-item{break-inside:avoid;}
       a{color:#000;}
-      #findings-table tbody tr{display:table-row!important;}
+      .fgroup>summary::before{content:"";}
     }
   </style>
   <script>
@@ -144,16 +180,13 @@
 <div class="layout">
   <nav class="toc">
     <h4>Contents</h4>
-    <a href="#summary">1. Executive Summary</a>
-    <a href="#tech">2. Technology Stack</a>
-    <a href="#critical">3. Critical Issues <span class="count">{{.CriticalCount}}</span></a>
-    <a href="#security">4. Security Findings <span class="count">{{.SecurityCount}}</span></a>
-    <a href="#performance">5. Performance Issues <span class="count">{{.PerformanceCount}}</span></a>
+    <a href="#summary">Executive Summary</a>
+    <a href="#tech">Technology Stack</a>
+    <a href="#priorities">Fix These First <span class="count">{{len .TopPriorities}}</span></a>
     <a href="#findings">All Findings <span class="count">{{.TotalIssues}}</span></a>
-    {{if .HasRuntime}}<a href="#runtime">6. Runtime Errors <span class="count">{{.TotalRuntimeEvents}}</span></a>{{end}}
+    {{if .HasRuntime}}<a href="#runtime">Runtime Errors <span class="count">{{.TotalRuntimeEvents}}</span></a>{{end}}
     {{if .HasLogs}}<a href="#logs">Log Analysis <span class="count">{{.TotalLogErrors}}</span></a>{{end}}
-    {{if .HasAI}}<a href="#ai">7. AI Recommendations</a>
-    <a href="#priority">8. Suggested Fix Priority</a>{{end}}
+    {{if .HasAI}}<a href="#ai">AI Recommendations</a>{{end}}
     {{if .HasCompliance}}<a href="#compliance">Compliance &amp; Standards</a>{{end}}
     <a href="#structure">Project Structure</a>
   </nav>
@@ -161,8 +194,12 @@
   <main>
     <div class="appbar">
       <div class="brand">
-        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".45"/><circle cx="10" cy="10" r="3.3" fill="currentColor"/></svg>
-        Observer
+        <svg class="logo" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+        </svg>
+        <span class="brandname">Observer</span>
       </div>
       <div class="appbar-actions">
         <button class="themebtn" onclick="toggleTheme()" title="Toggle light / dark" aria-label="Toggle light or dark theme">◐ Theme</button>
@@ -186,7 +223,7 @@
     <div class="banner info">Baseline active — <strong>{{.BaselineNew}} new</strong> finding(s) since baseline ({{.BaselineSuppressed}} known suppressed).</div>
     {{end}}
 
-    <h2 id="summary">1. Executive Summary</h2>
+    <h2 id="summary">Executive Summary</h2>
     {{if .HasAI}}
     <div class="card" style="margin-bottom:10px">{{.AISummary}}</div>
     <p class="muted">AI provider: <code>{{.AIProvider}}</code> — explanations are grounded in the detected findings.</p>
@@ -194,6 +231,7 @@
     <div class="hero">
       <div class="hero-left">
         <div class="stats">
+          <div class="stat"><div class="k">Security rating</div><div class="v"><span class="secrating secrating-{{.SecurityRating}}" title="Standards-aligned: worst security severity present = {{.SecurityRatingBasis}}">{{.SecurityRating}}</span></div></div>
           <div class="stat"><div class="k">Language</div><div class="v">{{.Language}}</div></div>
           <div class="stat"><div class="k">Findings</div><div class="v">{{.TotalIssues}}</div></div>
           <div class="stat"><div class="k">Est. fix effort</div><div class="v">{{.RemediationEffort}}</div></div>
@@ -219,30 +257,41 @@
       </div>
     </div>
 
-    <h2 id="tech">2. Technology Stack</h2>
+    <p class="muted scoring-note">
+      <strong>How scoring works:</strong> severity, CWE and OWASP tags follow industry standards (CVSS-aligned).
+      The <strong>Security rating (A–E)</strong> is standards-style — it reflects the single most severe security
+      issue present (E = Critical … A = none), the same model tools like SonarQube use. The <strong>0–100 scores</strong>
+      are Observer's own density-based health index (severity-weighted findings per file), so they also reflect volume.
+    </p>
+
+    <h2 id="tech">Technology Stack</h2>
     {{template "techtable" dict "Title" "Frameworks" "Items" .Frameworks}}
     {{template "techtable" dict "Title" "Databases" "Items" .Databases}}
     {{template "techtable" dict "Title" "Infrastructure" "Items" .Infrastructure}}
 
-    <h2 id="critical">3. Critical Issues</h2>
-    <p class="muted">{{.CriticalCount}} issue(s) at Critical or High severity — the recommended action list.</p>
-    <a class="pill" data-quick="criticalhigh|all" href="#findings">Show Critical &amp; High in All Findings ↓</a>
-
-    <h2 id="security">4. Security Findings</h2>
-    <p class="muted">{{.SecurityCount}} security-category finding(s).</p>
-    <a class="pill" data-quick="all|Security" href="#findings">Show Security in All Findings ↓</a>
-
-    <h2 id="performance">5. Performance Issues</h2>
-    <p class="muted">{{.PerformanceCount}} performance-category finding(s).</p>
-    <a class="pill" data-quick="all|Performance" href="#findings">Show Performance in All Findings ↓</a>
+    <h2 id="priorities">Fix These First</h2>
+    {{if .TopPriorities}}
+    <p class="muted">The highest-severity issues, grouped and ranked. Start here — the full list of locations and the fix for each is in All Findings, just below.</p>
+    <div class="prio">
+      {{range .TopPriorities}}
+      <div class="prio-item">
+        <span class="sevbadge sev-{{.Severity}}">{{.Severity}}</span>
+        <span class="prio-title">{{.Title}}</span>
+        <span class="prio-meta muted">{{.Category}} · {{.Count}}×</span>
+      </div>
+      {{end}}
+    </div>
+    <a class="pill" data-quick="criticalhigh|all" href="#findings">Show all Critical &amp; High ↓</a>
+    {{else}}
+    <p class="empty">No Critical or High severity issues detected — a good sign.</p>
+    {{end}}
 
     <h2 id="findings">All Findings</h2>
     <p class="muted">
-      {{.TotalIssues}} issue(s) across {{.FilesScanned}} scanned file(s). Findings are heuristic — confirm before acting.
-      Locations are <strong>clickable</strong> and open in VS Code at the exact line.
-      {{if .IssuesCapped}}<br><em>Showing the first {{len .Issues}} (highest severity); refine filters or re-run the CLI for the rest.</em>{{end}}
+      {{.TotalIssues}} occurrence(s) across {{.FilesScanned}} scanned file(s), grouped into {{len .IssueGroups}} issue type(s), highest severity first.
+      Expand a row to see every location (clickable — opens in VS Code) and the suggested fix. Findings are heuristic — confirm before acting.
     </p>
-    {{if .Issues}}
+    {{if .IssueGroups}}
     <div class="controls">
       <button data-sevfilter="all" class="active">All</button>
       <button data-sevfilter="Critical">Critical</button>
@@ -256,30 +305,44 @@
       <input id="searchBox" type="search" placeholder="Search findings…">
       <span class="muted" id="matchCount"></span>
     </div>
-    <table id="findings-table">
-      <thead><tr><th>Severity</th><th>Category</th><th>Location</th><th>Issue &amp; Recommendation</th></tr></thead>
-      <tbody>
-        {{range .Issues}}<tr data-sev="{{.Severity}}" data-cat="{{.Category}}">
-          <td><span class="sevbadge sev-{{.Severity}}">{{.Severity}}</span><div class="muted" style="font-size:.7rem;margin-top:2px">CVSS ~{{.CVSS}}</div></td>
-          <td class="muted">{{.Category}}</td>
-          <td>{{if .HasLink}}<a href="{{.Link}}" title="Open in VS Code">{{.Location}}</a>{{else}}<code>{{.Location}}</code>{{end}}</td>
-          <td>
-            <strong>{{.Title}}</strong>
-            {{if or .CWE .OWASP}}<div style="margin:3px 0">{{if .CWE}}<a class="tag" href="{{.CWELink}}" target="_blank" rel="noopener">{{.CWE}}</a>{{end}}{{if .OWASP}}<a class="tag" href="{{.OWASPLink}}" target="_blank" rel="noopener">OWASP {{.OWASP}}</a>{{end}}</div>{{end}}
-            {{if .Snippet}}<div><code>{{.Snippet}}</code></div>{{end}}
-            <div class="muted" style="margin-top:4px">{{.Explanation}}</div>
-            <div class="fix"><em>Fix:</em> {{.Recommendation}}</div>
-            {{if .FixExample}}<details class="fixwrap"><summary>Suggested fix</summary><pre class="fixcode">{{.FixExample}}</pre></details>{{end}}
-          </td>
-        </tr>{{end}}
-      </tbody>
-    </table>
+    <div id="findings-list">
+      {{range .IssueGroups}}
+      <details class="fgroup" data-sev="{{.Severity}}" data-cat="{{.Category}}">
+        <summary>
+          <span class="sevbadge sev-{{.Severity}}">{{.Severity}}</span>
+          <span class="fgroup-title">{{.Title}}</span>
+          <span class="fgroup-cat muted">{{.Category}}</span>
+          <span class="fgroup-count">{{.Count}}×</span>
+        </summary>
+        <div class="fgroup-body">
+          <div class="fgroup-tags">
+            {{if .CWE}}<a class="tag" href="{{.CWELink}}" target="_blank" rel="noopener">{{.CWE}}</a>{{end}}
+            {{if .OWASP}}<a class="tag" href="{{.OWASPLink}}" target="_blank" rel="noopener">OWASP {{.OWASP}}</a>{{end}}
+            <span class="muted" style="font-size:.72rem">CVSS ~{{.CVSS}}</span>
+          </div>
+          {{if .Explanation}}<div class="muted" style="margin:4px 0">{{.Explanation}}</div>{{end}}
+          <div class="fix"><em>Fix:</em> {{.Recommendation}}</div>
+          {{if .FixExample}}<details class="fixwrap"><summary>Suggested fix</summary><pre class="fixcode">{{.FixExample}}</pre></details>{{end}}
+          <div class="occ">
+            <div class="occ-h">Where — {{.Count}} occurrence(s)</div>
+            {{range .Occurrences}}
+            <div class="occ-row">
+              {{if .HasLink}}<a href="{{.Link}}" title="Open in VS Code">{{.Location}}</a>{{else}}<code>{{.Location}}</code>{{end}}
+              {{if .Snippet}}<code class="occ-snip">{{.Snippet}}</code>{{end}}
+            </div>
+            {{end}}
+            {{if .ExtraCount}}<div class="muted" style="font-size:.8rem;margin-top:4px">… and {{.ExtraCount}} more occurrence(s)</div>{{end}}
+          </div>
+        </div>
+      </details>
+      {{end}}
+    </div>
     {{else}}
     <p class="empty">No issues detected by the current rule set.</p>
     {{end}}
 
     {{if .HasRuntime}}
-    <h2 id="runtime">6. Runtime Errors</h2>
+    <h2 id="runtime">Runtime Errors</h2>
     <p class="muted">{{.TotalRuntimeEvents}} captured event(s), grouped by signature (most frequent first).</p>
     {{if .RuntimeGroups}}
     <table>
@@ -317,7 +380,7 @@
     {{end}}
 
     {{if .HasAI}}
-    <h2 id="ai">7. AI Recommendations</h2>
+    <h2 id="ai">AI Recommendations</h2>
     {{if .AIInsights}}
     {{range .AIInsights}}
     <div class="card aicard">
@@ -337,7 +400,7 @@
     {{end}}
     {{else}}<p class="empty">No AI insights generated.</p>{{end}}
 
-    <h2 id="priority">8. Suggested Fix Priority</h2>
+    <h2 id="priority">Suggested Fix Priority</h2>
     {{if .AIPriorities}}
     <ol>{{range .AIPriorities}}<li>{{.}}</li>{{end}}</ol>
     {{else}}<p class="empty">No prioritization available.</p>{{end}}
@@ -401,10 +464,28 @@
 
 <script>
 (function () {
-  var rows = Array.prototype.slice.call(document.querySelectorAll('#findings-table tbody tr'));
+  var rows = Array.prototype.slice.call(document.querySelectorAll('#findings-list .fgroup'));
   if (!rows.length) return;
   var state = { sev: 'all', cat: 'all', q: '' };
   var matchEl = document.getElementById('matchCount');
+
+  // Label each filter with how many issue types it covers, e.g. "High (2)".
+  (function labelCounts() {
+    var sev = { all: rows.length, Critical: 0, High: 0, Medium: 0, Low: 0 }, cat = {};
+    rows.forEach(function (r) {
+      var s = r.getAttribute('data-sev'); if (sev[s] != null) sev[s]++;
+      var c = r.getAttribute('data-cat'); cat[c] = (cat[c] || 0) + 1;
+    });
+    document.querySelectorAll('[data-sevfilter]').forEach(function (b) {
+      var k = b.getAttribute('data-sevfilter');
+      if (sev[k] != null) b.textContent = b.textContent.replace(/\s*\(\d+\)$/, '') + ' (' + sev[k] + ')';
+    });
+    var cs = document.getElementById('catFilter');
+    if (cs) Array.prototype.forEach.call(cs.options, function (o) {
+      var n = o.value === 'all' ? rows.length : (cat[o.value] || 0);
+      o.textContent = o.textContent.replace(/\s*\(\d+\)$/, '') + ' (' + n + ')';
+    });
+  })();
 
   function matches(r) {
     var okSev = state.sev === 'all'
@@ -421,7 +502,7 @@
       r.style.display = ok ? '' : 'none';
       if (ok) shown++;
     });
-    if (matchEl) matchEl.textContent = shown + ' shown';
+    if (matchEl) matchEl.textContent = shown + ' of ' + rows.length + ' issue type(s) shown';
   }
   function setActiveSev(val) {
     document.querySelectorAll('[data-sevfilter]').forEach(function (b) {
@@ -449,6 +530,14 @@
   });
 
   apply();
+
+  // Expand all visible groups when printing / saving to PDF, then restore.
+  window.addEventListener('beforeprint', function () {
+    rows.forEach(function (d) { d.dataset._open = d.open ? '1' : ''; d.open = true; });
+  });
+  window.addEventListener('afterprint', function () {
+    rows.forEach(function (d) { d.open = d.dataset._open === '1'; });
+  });
 })();
 </script>
 </body>

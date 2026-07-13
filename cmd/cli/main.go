@@ -27,6 +27,7 @@ import (
 	"github.com/aipda/observer/internal/deps"
 	"github.com/aipda/observer/internal/detector"
 	"github.com/aipda/observer/internal/email"
+	"github.com/aipda/observer/internal/eslint"
 	"github.com/aipda/observer/internal/gosec"
 	"github.com/aipda/observer/internal/logger"
 	"github.com/aipda/observer/internal/notify"
@@ -41,7 +42,7 @@ import (
 )
 
 // version is stamped at build time via -ldflags "-X main.version=...".
-var version = "0.2.0"
+var version = "0.3.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -81,6 +82,7 @@ func runAnalyze(args []string) int {
 	phpstanFlag := fs.Bool("phpstan", false, "also run the project's PHPStan if present (vendor/bin/phpstan + phpstan.neon) for deeper PHP analysis")
 	banditFlag := fs.Bool("bandit", false, "also run Bandit if installed, for Python security analysis (auto-skips if absent)")
 	gosecFlag := fs.Bool("gosec", false, "also run gosec if installed, for Go security analysis (auto-skips if absent)")
+	eslintFlag := fs.Bool("eslint", false, "also run ESLint if available, for JS/TS analysis (auto-skips if absent)")
 	sarifFlag := fs.String("sarif", "", "also write findings as SARIF to this file (for GitHub code scanning / CI)")
 	jsonFlag := fs.String("json", "", "also write findings + scores as JSON to this file")
 	csvFlag := fs.String("csv", "", "also write findings as CSV (Excel-compatible) to this file")
@@ -305,6 +307,30 @@ func runAnalyze(args []string) int {
 			}
 			analysis.AddIssues(issues...)
 			fmt.Fprintf(os.Stderr, "gosec: %d additional finding(s)\n", len(issues))
+		}
+	}
+
+	// Theme 1 — optional ESLint engine (opt-in via --eslint; JS/TS code quality; auto-skips if not available).
+	if *eslintFlag && analysis != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		findings, err := eslint.Scan(ctx, target)
+		cancel()
+		switch {
+		case errors.Is(err, eslint.ErrNotAvailable):
+			fmt.Fprintln(os.Stderr, "note: --eslint set but ESLint isn't available; skipping (npm install eslint)")
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "warning: eslint run failed: %v\n", err)
+		default:
+			var issues []analyzer.Issue
+			for _, f := range findings {
+				issues = append(issues, analyzer.Issue{
+					RuleID: f.RuleID, Severity: analyzer.Severity(f.Severity), Category: f.Category,
+					Title: f.Title, File: f.File, Line: f.Line, Snippet: f.Snippet,
+					Explanation: f.Message, Recommendation: "Review the ESLint finding and remediate.",
+				})
+			}
+			analysis.AddIssues(issues...)
+			fmt.Fprintf(os.Stderr, "eslint: %d additional finding(s)\n", len(issues))
 		}
 	}
 
@@ -922,6 +948,7 @@ Usage:
       --phpstan           also run the project's PHPStan (vendor/bin/phpstan + phpstan.neon)
       --bandit            also run Bandit if installed (Python security analysis)
       --gosec             also run gosec if installed (Go security analysis)
+      --eslint            also run ESLint if available (JS/TS code-quality analysis)
       --sarif <file>      also write findings as SARIF (GitHub code scanning / CI)
       --json <file>       also write findings + scores as JSON
       --csv <file>        also write findings as CSV (opens in Excel)

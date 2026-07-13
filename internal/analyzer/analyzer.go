@@ -178,7 +178,7 @@ func Score(r *Result) (int, string) {
 // score (vulnerabilities, secrets, injection, dependency CVEs, dangerous
 // configuration). Everything else counts toward Code Health.
 var securityCategories = map[string]bool{
-	"Security": true, "Database": true, "Dependencies": true, "Configuration": true,
+	"Security": true, "Database": true, "Dependencies": true, "Configuration": true, "Infrastructure": true,
 }
 
 // SecurityScore scores only the security-relevant findings.
@@ -212,10 +212,43 @@ func grade(score int) string {
 	}
 }
 
+// SecurityRating returns a standards-style letter rating (A–E) based on the most
+// severe security-relevant finding present — the model SonarQube and similar
+// tools use. Unlike the density Score it is count-independent (one Critical → E
+// regardless of how many findings exist), so it maps cleanly onto CVSS severity
+// bands. It returns the rating and the worst severity label behind it.
+//
+//	E = a Critical present · D = High · C = Medium · B = Low · A = none
+func SecurityRating(r *Result) (string, string) {
+	if r == nil {
+		return "A", "none"
+	}
+	worst := 0
+	for _, is := range r.Issues {
+		if !securityCategories[is.Category] {
+			continue
+		}
+		if o := severityRank(is.Severity); o > worst {
+			worst = o
+		}
+	}
+	switch worst {
+	case 4:
+		return "E", "Critical"
+	case 3:
+		return "D", "High"
+	case 2:
+		return "C", "Medium"
+	case 1:
+		return "B", "Low"
+	}
+	return "A", "none"
+}
+
 // AllCategories lists the issue categories the analyzer can produce, for use in
 // the dashboard checkboxes and CLI help.
 var AllCategories = []string{
-	"Security", "Database", "Error Handling", "Performance", "Configuration", "Dependencies",
+	"Security", "Database", "Error Handling", "Performance", "Configuration", "Dependencies", "Infrastructure",
 }
 
 // ParseSeverity maps a string (case-insensitive) to a Severity; anything
@@ -388,6 +421,14 @@ func Analyze(root string) (*Result, error) {
 		}
 		res.add(results[i]...)
 	}
+
+	// Infrastructure & config scanning (A2): Dockerfiles, compose, k8s, .env,
+	// web-server configs — always on, so the report covers the whole stack.
+	if infraIssues, n := scanInfra(abs); n > 0 {
+		res.FilesScanned += n
+		res.add(infraIssues...)
+	}
+
 	sortIssues(res.Issues)
 	return res, nil
 }
