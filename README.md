@@ -1,6 +1,8 @@
 # Observer
 
-*AI Production Debugging Assistant — find what's wrong in production, in one command.*
+**Finds what's wrong — and shows you the fix.**
+
+*Code, dependencies, config, and infra — one scan, one report. Offline, single binary, no account.*
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Go](https://img.shields.io/badge/Go-1.26%2B-00ADD8?logo=go&logoColor=white)
@@ -9,8 +11,9 @@
 
 > A developer-friendly tool that analyzes an application/codebase and generates a
 > **production health report** — combining static analysis, technology detection,
-> runtime error analysis, log analysis, dependency analysis, and AI-powered
-> explanations.
+> runtime error analysis, log analysis, dependency analysis, infrastructure &
+> config checks (Dockerfile / compose / Kubernetes / .env / web-server), and
+> AI-powered explanations.
 
 The goal: help developers quickly identify production issues without manually
 searching through huge codebases and server logs.
@@ -51,7 +54,7 @@ logs into one report. The honest picture:
 |  | **Observer** | SonarQube / Semgrep | Snyk | Sentry |
 |---|---|---|---|---|
 | **Setup** | One binary, offline, no account | Server/CI or cloud account | Cloud account | Instrument app + account |
-| **Covers** | Code + deps + runtime + logs, in **one report** | Code | Dependencies + code | Runtime errors |
+| **Covers** | Code + deps + runtime + logs + **infra/config**, in **one report** | Code | Dependencies + code | Runtime errors |
 | **Static-analysis depth** | Core rules + optional Semgrep | **Deeper** (many languages) | Good | — |
 | **Works air-gapped / no signup** | ✅ (enforceable — `--assert-offline`) | — | — | — |
 | **Pricing** | Free + one-time Pro | Subscription | Per-developer subscription | Usage + per-contributor |
@@ -154,6 +157,25 @@ from the [Releases](https://github.com/sanks205/getobserver/releases) page and r
 
 On macOS/Linux, make it executable: `chmod +x observer_*` (optionally rename to `observer`).
 
+Binaries are currently **unsigned** — verify your download against `SHA256SUMS.txt` on the
+[release](https://github.com/sanks205/getobserver/releases). (Signed/notarized builds are on the roadmap.)
+
+### Install via a package manager
+
+**Windows — [Scoop](https://scoop.sh):**
+
+```powershell
+scoop install https://raw.githubusercontent.com/sanks205/getobserver/main/packaging/scoop/observer.json
+```
+
+**macOS / Linux — [Homebrew](https://brew.sh):**
+
+```bash
+brew install https://raw.githubusercontent.com/sanks205/getobserver/main/packaging/homebrew/observer.rb
+```
+
+Both install the `observer` command onto your PATH and verify the download's SHA-256.
+
 ### Build from source
 
 Requires [Go 1.26+](https://go.dev/dl/).
@@ -207,6 +229,9 @@ observer analyze ./my-project --assert-offline
 
 # Deeper, multi-language detection if you have Semgrep installed (auto-skips if not)
 observer analyze ./my-project --semgrep
+
+# Auto-detect and fold in other engines you already have (each auto-skips if absent):
+observer analyze ./my-project --phpstan --bandit --gosec --eslint
 
 # CI: emit SARIF and fail the build on High+ findings (see docs/CI.md)
 observer analyze . --sarif observer.sarif --fail-on High
@@ -308,7 +333,7 @@ detected signals, code structure, and file-type breakdown.
 | 10 | GitHub quality (README, badges, download/build, contributing) | ✅ Done |
 | 11 | `observer serve` — local web dashboard (multi-project, history, deltas) | ✅ Done |
 | 12 | Dependency CVE scanning (OSV.dev — PHP/npm/PyPI/Go) | ✅ Done |
-| 12+ | Optional engine wrappers — Semgrep / PHPStan / Bandit / gosec ✅ (auto-detected); ESLint planned | 🚧 In progress |
+| 12+ | Optional engine wrappers — Semgrep / PHPStan / Bandit / gosec / ESLint ✅ (auto-detected) | ✅ Done |
 | 13 | CI & team workflow (SARIF, quality gate, baseline, GitHub workflow) | ✅ Done |
 | 14 | Desktop app (Pro) & hosted Cloud (Team), multi-language agents | ⏳ Planned |
 
@@ -323,7 +348,7 @@ features — one-time purchase, activated with a license key, fully offline afte
 
 - **Branded PDF reports** — client-ready PDF with your logo &amp; brand — [$39](https://observerly1.gumroad.com/l/observer-pdf)
 - **Scheduled / automatic scans** — re-scan on a schedule, alert on new issues — [$29](https://observerly1.gumroad.com/l/observer-schedule)
-- **Premium rule packs** — deeper Laravel / CodeIgniter / WordPress security rules — [$49](https://observerly1.gumroad.com/l/observer-rules-php)
+- **Premium rule packs** — deeper framework security rules: Laravel · CodeIgniter · WordPress · Symfony · Django · Rails · Spring · Express — [$49](https://observerly1.gumroad.com/l/observer-rules-php)
 
 Or get everything in the **[All-Access bundle — $89](https://observerly1.gumroad.com/l/observer-pro)**.
 Activate with `observer pro activate <key>`.
