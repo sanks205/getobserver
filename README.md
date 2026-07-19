@@ -9,6 +9,26 @@
 ![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20macOS%20%7C%20linux-lightgrey)
 ![Single binary](https://img.shields.io/badge/install-single%20binary%2C%20no%20deps-success)
 
+## ⬇️ Get Observer
+
+Grab the single binary for your OS — no runtime, no dependencies, no account:
+
+| Windows | macOS (Apple Silicon) | macOS (Intel) | Linux |
+|:---:|:---:|:---:|:---:|
+| [**Download**](https://github.com/sanks205/getobserver/releases/latest/download/observer_windows_amd64.exe) | [**Download**](https://github.com/sanks205/getobserver/releases/latest/download/observer_darwin_arm64) | [**Download**](https://github.com/sanks205/getobserver/releases/latest/download/observer_darwin_amd64) | [**Download**](https://github.com/sanks205/getobserver/releases/latest/download/observer_linux_amd64) |
+
+<sub>Prefer a package manager? Scoop · Homebrew · `go install` — see [Installation](#installation). On macOS/Linux: `chmod +x observer_*`.</sub>
+
+Then point it at any project:
+
+```bash
+observer analyze . --out report.html
+```
+
+You get **one self-contained `report.html`** — grouped findings, a standards-aligned Security Rating (A–E), and a suggested fix for every issue. Fully offline; open it in a browser or print to PDF.
+
+---
+
 > A developer-friendly tool that analyzes an application/codebase and generates a
 > **production health report** — combining static analysis, technology detection,
 > runtime error analysis, log analysis, dependency analysis, infrastructure &
