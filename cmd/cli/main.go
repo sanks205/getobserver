@@ -42,10 +42,17 @@ import (
 )
 
 // version is stamped at build time via -ldflags "-X main.version=...".
-var version = "0.3.0"
+var version = "0.4.0"
 
 func main() {
 	if len(os.Args) < 2 {
+		// Double-clicked (no terminal)? Launch the dashboard + open the browser,
+		// so non-CLI users get a click-and-scan GUI with zero typing. From a real
+		// shell, fall back to showing help.
+		if launchedByDoubleClick() {
+			fmt.Println("Starting the Observer dashboard… (run 'observer help' for the command line)")
+			os.Exit(runServe(nil, true))
+		}
 		usage()
 		os.Exit(1)
 	}
@@ -56,7 +63,7 @@ func main() {
 	case "analyze-log":
 		os.Exit(runAnalyzeLog(os.Args[2:]))
 	case "serve":
-		os.Exit(runServe(os.Args[2:]))
+		os.Exit(runServe(os.Args[2:], false))
 	case "version", "-v", "--version":
 		fmt.Printf("observer %s\n", version)
 	case "help", "-h", "--help":
@@ -751,10 +758,11 @@ func printAI(rep *ai.Report) {
 }
 
 // runServe implements `observer serve`: start the local web dashboard.
-func runServe(args []string) int {
+func runServe(args []string, openUI bool) int {
 	fs := flag.NewFlagSet("serve", flag.ExitOnError)
 	addr := fs.String("addr", "127.0.0.1:7777", "address to listen on")
 	dataDir := fs.String("data", "", "directory to store scans (default: user config dir)")
+	open := fs.Bool("open", false, "open the dashboard in your browser after starting")
 	_ = fs.Parse(args)
 
 	store, err := storage.New(*dataDir)
@@ -764,9 +772,18 @@ func runServe(args []string) int {
 	}
 	srv := server.New(store)
 
-	fmt.Printf("Observer dashboard running at http://%s\n", *addr)
+	url := "http://" + *addr
+	fmt.Printf("Observer dashboard running at %s\n", url)
 	fmt.Printf("Storing scans in %s\n", store.Dir())
 	fmt.Println("Press Ctrl+C to stop.")
+
+	// Open the browser shortly after the listener comes up (double-click GUI, or --open).
+	if openUI || *open {
+		go func() {
+			time.Sleep(600 * time.Millisecond)
+			openBrowser(url)
+		}()
+	}
 
 	if err := http.ListenAndServe(*addr, srv.Routes()); err != nil {
 		fmt.Fprintf(os.Stderr, "error: server stopped: %v\n", err)
@@ -958,9 +975,11 @@ Usage:
       --assert-offline    guarantee no network I/O (refuse --cve/--email/--slack/--teams/--webhook; AI stays local)
 
   observer analyze-log <path>               Analyze application logs, print a summary
-  observer serve [--addr 127.0.0.1:7777]    Start the local web dashboard
+  observer serve [--addr ...] [--open]      Start the local web dashboard (--open launches the browser)
   observer version                          Print version
   observer help                             Show this help
+
+  Tip: double-click the executable (no terminal) to open the click-and-scan dashboard automatically.
 
 Examples:
   observer analyze ./examples/php-demo --out report.html
