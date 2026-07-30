@@ -93,6 +93,31 @@ analysis at scale (SonarQube/Semgrep) or always-on production monitoring
 
 ---
 
+## Gate AI-generated code
+
+AI writes a lot of code now — and it ships the exact issues Observer already catches
+(hardcoded secrets, injection, weak crypto, risky deps) at a higher rate than hand-written
+code. Observer is an **offline safety net for those changes**: instead of re-scanning the
+whole project, scan only what changed.
+
+```bash
+# Scan only what you (or your AI assistant) just changed, vs the last commit
+observer analyze . --diff
+
+# PR review — only the lines this branch added since it forked from main
+observer analyze . --diff-base main --fail-on High
+
+# Pre-commit gate — block a commit if staged changes add a High-severity finding
+observer install-hook            # one-time; bypass a commit with `git commit --no-verify`
+```
+
+Add `--attest attestation.json` to any scan to emit a machine-readable record —
+*"scanned by Observer, 0 High, PASS"* — to attach to a PR or keep for an audit trail.
+It's the same offline binary: your code never leaves your machine, and there's no account.
+*(Observer Pro can cryptographically sign the attestation for tamper-evident evidence.)*
+
+---
+
 ## Privacy & air-gapped use
 
 Observer runs **fully offline by default** — nothing about your code ever leaves your
@@ -271,6 +296,14 @@ observer analyze . --slack "$SLACK_WEBHOOK"   # or --teams <url> / --webhook <ur
 observer analyze . --write-baseline .observer-baseline.json
 observer analyze . --baseline .observer-baseline.json --fail-on Medium
 
+# Scan only what changed (AI safety net) — vs HEAD, a base branch, or staged changes
+observer analyze . --diff --fail-on High
+observer analyze . --diff-base main --fail-on High
+observer analyze . --diff-staged --out "" --attest attestation.json
+
+# Install a git pre-commit hook that gates staged changes (bypass: git commit --no-verify)
+observer install-hook
+
 # Email the report (configure SMTP via env vars; see below)
 observer analyze ./examples/php-demo --email "dev@example.com,lead@example.com"
 ```
@@ -360,7 +393,8 @@ detected signals, code structure, and file-type breakdown.
 | 12 | Dependency CVE scanning (OSV.dev — PHP/npm/PyPI/Go) | ✅ Done |
 | 12+ | Optional engine wrappers — Semgrep / PHPStan / Bandit / gosec / ESLint ✅ (auto-detected) | ✅ Done |
 | 13 | CI & team workflow (SARIF, quality gate, baseline, GitHub workflow) | ✅ Done |
-| 14 | Desktop app (Pro) & hosted Cloud (Team), multi-language agents | ⏳ Planned |
+| 14 | Changed-code scanning — `--diff` gate + attestation + pre-commit hook (AI-code safety net) | ✅ Done |
+| 15 | Desktop app (Pro) & hosted Cloud (Team), multi-language agents | ⏳ Planned |
 
 For the product vision, editions, and positioning see **[PRODUCT.md](PRODUCT.md)**.
 
