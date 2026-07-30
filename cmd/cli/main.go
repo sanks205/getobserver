@@ -16,18 +16,21 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/aipda/observer/internal/ai"
 	"github.com/aipda/observer/internal/analyzer"
+	"github.com/aipda/observer/internal/attest"
 	"github.com/aipda/observer/internal/bandit"
 	"github.com/aipda/observer/internal/baseline"
 	"github.com/aipda/observer/internal/deps"
 	"github.com/aipda/observer/internal/detector"
 	"github.com/aipda/observer/internal/email"
 	"github.com/aipda/observer/internal/eslint"
+	"github.com/aipda/observer/internal/gitdiff"
 	"github.com/aipda/observer/internal/gosec"
 	"github.com/aipda/observer/internal/logger"
 	"github.com/aipda/observer/internal/notify"
@@ -42,7 +45,7 @@ import (
 )
 
 // version is stamped at build time via -ldflags "-X main.version=...".
-var version = "0.4.0"
+var version = "0.5.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -64,6 +67,8 @@ func main() {
 		os.Exit(runAnalyzeLog(os.Args[2:]))
 	case "serve":
 		os.Exit(runServe(os.Args[2:], false))
+	case "install-hook":
+		os.Exit(runInstallHook(os.Args[2:]))
 	case "version", "-v", "--version":
 		fmt.Printf("observer %s\n", version)
 	case "help", "-h", "--help":
@@ -101,6 +106,10 @@ func runAnalyze(args []string) int {
 	baselineFile := fs.String("baseline", "", "suppress findings recorded in this baseline file (report only new issues)")
 	writeBaseline := fs.String("write-baseline", "", "write the current findings to this baseline file and exit-code 0")
 	assertOffline := fs.Bool("assert-offline", false, "guarantee no network I/O: refuse network flags (--cve/--email/--slack/--teams/--webhook) and force AI to the local heuristic")
+	diffFlag := fs.Bool("diff", false, "scan only lines changed in the working tree vs HEAD (review what you or an AI assistant just wrote); run from the repo root")
+	diffStaged := fs.Bool("diff-staged", false, "scan only staged changes (git diff --cached) — ideal for a pre-commit hook")
+	diffBase := fs.String("diff-base", "", "scan only lines changed on the current branch since it diverged from this ref (e.g. main) — PR review")
+	attestFile := fs.String("attest", "", "write a scan attestation (JSON: tool, version, scope, findings, gate result) to this file — evidence a change was checked")
 
 	// Parse flags that precede the project path. flag.Parse stops at the first
 	// non-flag token, so we then take that token as the path and re-parse the
@@ -366,6 +375,33 @@ func runAnalyze(args []string) int {
 		}
 	}
 
+	// v0.5 — scope the scan to changed lines only (--diff / --diff-staged / --diff-base).
+	// Applied before the gate so a per-change gate fails only on findings the change
+	// introduced. Runs from the repo root; findings on unchanged lines are dropped.
+	diffActive := *diffFlag || *diffStaged || *diffBase != ""
+	diffScope := ""
+	diffFilesChanged := 0
+	if analysis != nil && diffActive {
+		mode := gitdiff.WorkingTree
+		diffScope = "diff"
+		switch {
+		case *diffBase != "":
+			mode = gitdiff.BaseRef
+			diffScope = "diff-base:" + *diffBase
+		case *diffStaged:
+			mode = gitdiff.Staged
+			diffScope = "diff-staged"
+		}
+		changes, err := gitdiff.Resolve(target, mode, *diffBase)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: --diff could not read git changes: %v\n", err)
+			return 1
+		}
+		diffFilesChanged = changes.FileCount()
+		analysis = analysis.Keep(func(is analyzer.Issue) bool { return changes.Contains(is.File, is.Line) })
+		fmt.Fprintf(os.Stderr, "Diff mode: %d changed file(s); %d finding(s) on changed lines\n", diffFilesChanged, len(analysis.Issues))
+	}
+
 	// Phase 13 — baseline suppression ("report only new issues").
 	baselineApplied, baselineSuppressed, baselineNew := false, 0, 0
 	if analysis != nil && *baselineFile != "" {
@@ -389,6 +425,39 @@ func runAnalyze(args []string) int {
 		gateFailCount = analyzer.CountAtLeast(analysis, analyzer.ParseSeverity(*failOn))
 	}
 	scanMs := time.Since(t0).Milliseconds()
+
+	// v0.5 — write a scan attestation ("this change was checked") if requested.
+	if *attestFile != "" {
+		findings := map[string]int{}
+		total := 0
+		if analysis != nil {
+			for sev, n := range analysis.BySeverity {
+				if n > 0 {
+					findings[string(sev)] = n
+				}
+			}
+			total = len(analysis.Issues)
+		}
+		scope := diffScope
+		if scope == "" {
+			scope = "full"
+		}
+		absTarget, _ := filepath.Abs(target)
+		att := attest.Attestation{
+			Tool: "observer", Version: version,
+			GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+			Scope:       scope, Target: absTarget, FilesChanged: diffFilesChanged,
+			Findings: findings, Total: total,
+		}
+		if gateEnabled {
+			att.Gate = &attest.Gate{Threshold: *failOn, FailCount: gateFailCount, Passed: gateFailCount == 0}
+		}
+		if err := attest.Write(*attestFile, att); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: could not write attestation: %v\n", err)
+		} else {
+			fmt.Printf("Attestation written to %s\n", *attestFile)
+		}
+	}
 
 	// Phase 4 — runtime errors captured by observer-agent (opt-in via --runtime).
 	var rtSummary *runtime.Summary
@@ -429,12 +498,17 @@ func runAnalyze(args []string) int {
 		AI: aiReport, DurationMs: scanMs,
 		BaselineApplied: baselineApplied, BaselineSuppressed: baselineSuppressed, BaselineNew: baselineNew,
 		GateEnabled: gateEnabled, GateThreshold: *failOn, GateFailCount: gateFailCount,
+		Version: version, DiffScope: diffScope, DiffFilesChanged: diffFilesChanged,
 	}
-	if err := reporter.GenerateHTML(data, *out); err != nil {
-		fmt.Fprintf(os.Stderr, "error: failed to write report: %v\n", err)
-		return 1
+	// An empty --out skips the HTML report entirely (for CI gates / pre-commit
+	// hooks that only care about the exit code, SARIF, or the attestation).
+	if *out != "" {
+		if err := reporter.GenerateHTML(data, *out); err != nil {
+			fmt.Fprintf(os.Stderr, "error: failed to write report: %v\n", err)
+			return 1
+		}
+		fmt.Printf("\nReport written to %s\n", outPath)
 	}
-	fmt.Printf("\nReport written to %s\n", outPath)
 
 	// Phase 13 — SARIF output for GitHub code scanning / CI.
 	if *sarifFlag != "" && analysis != nil {
@@ -757,6 +831,61 @@ func printAI(rep *ai.Report) {
 	}
 }
 
+// preCommitHook is the shell script written by `observer install-hook`. It
+// blocks a commit when staged changes introduce a High-severity finding.
+const preCommitHook = `#!/bin/sh
+# Observer pre-commit hook — blocks a commit if staged changes introduce a
+# High-severity finding. Installed by: observer install-hook
+# Bypass once with: git commit --no-verify
+if ! command -v observer >/dev/null 2>&1; then
+  echo "observer not on PATH; skipping Observer check" >&2
+  exit 0
+fi
+if ! observer analyze . --diff-staged --fail-on High --out "" >/dev/null 2>&1; then
+  echo "" >&2
+  echo "Observer blocked this commit: staged changes contain a High-severity finding." >&2
+  echo "  See details: observer analyze . --diff-staged" >&2
+  echo "  Commit anyway: git commit --no-verify" >&2
+  exit 1
+fi
+exit 0
+`
+
+// runInstallHook writes the Observer pre-commit hook into the repo's hooks dir.
+func runInstallHook(args []string) int {
+	fs := flag.NewFlagSet("install-hook", flag.ExitOnError)
+	force := fs.Bool("force", false, "overwrite an existing pre-commit hook")
+	_ = fs.Parse(args)
+
+	// Resolve the hooks directory via git (handles worktrees & custom hooksPath).
+	out, err := exec.Command("git", "rev-parse", "--git-path", "hooks").Output()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error: not a git repository — run this from inside your repo")
+		return 1
+	}
+	hooksDir := strings.TrimSpace(string(out))
+	if hooksDir == "" {
+		hooksDir = ".git/hooks"
+	}
+	if err := os.MkdirAll(hooksDir, 0o755); err != nil {
+		fmt.Fprintf(os.Stderr, "error: could not create %s: %v\n", hooksDir, err)
+		return 1
+	}
+	hookPath := filepath.Join(hooksDir, "pre-commit")
+	if _, err := os.Stat(hookPath); err == nil && !*force {
+		fmt.Fprintf(os.Stderr, "error: %s already exists — re-run with --force to overwrite\n", hookPath)
+		return 1
+	}
+	if err := os.WriteFile(hookPath, []byte(preCommitHook), 0o755); err != nil {
+		fmt.Fprintf(os.Stderr, "error: could not write hook: %v\n", err)
+		return 1
+	}
+	fmt.Printf("Installed Observer pre-commit hook at %s\n", hookPath)
+	fmt.Println("It blocks a commit if staged changes introduce a High-severity finding.")
+	fmt.Println("Bypass once with: git commit --no-verify")
+	return 0
+}
+
 // runServe implements `observer serve`: start the local web dashboard.
 func runServe(args []string, openUI bool) int {
 	fs := flag.NewFlagSet("serve", flag.ExitOnError)
@@ -973,9 +1102,14 @@ Usage:
       --baseline <file>   suppress known findings; report only new issues
       --write-baseline <file>  record current findings as the baseline, then exit
       --assert-offline    guarantee no network I/O (refuse --cve/--email/--slack/--teams/--webhook; AI stays local)
+      --diff              scan only lines changed vs HEAD (review what you or an AI just wrote)
+      --diff-staged       scan only staged changes (for a pre-commit hook)
+      --diff-base <ref>   scan only changes on this branch since it forked from <ref> (PR review)
+      --attest <file>     write a JSON attestation (scope, findings, gate result) — proof a change was checked
 
   observer analyze-log <path>               Analyze application logs, print a summary
   observer serve [--addr ...] [--open]      Start the local web dashboard (--open launches the browser)
+  observer install-hook [--force]           Install a git pre-commit hook that gates staged changes
   observer version                          Print version
   observer help                             Show this help
 
@@ -983,7 +1117,8 @@ Usage:
 
 Examples:
   observer analyze ./examples/php-demo --out report.html
-  observer analyze ./project --logs ./application/logs --runtime ./runtime.jsonl
+  observer analyze . --diff --fail-on High           # gate what changed (AI safety net)
+  observer analyze . --diff-staged --attest a.json    # pre-commit: scan staged code + proof
   observer analyze-log ./application/logs
 `, version)
 }
