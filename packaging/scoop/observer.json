@@ -1,17 +1,17 @@
 {
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Offline CLI that scans a codebase for security, runtime & production-health issues - one HTML report, single binary, no setup.",
   "homepage": "https://github.com/sanks205/getobserver",
   "license": "MIT",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/sanks205/getobserver/releases/download/v0.4.0/observer_windows_amd64.exe",
-      "hash": "870eaa7200c67d5ad42040d44bb00ce7cbc6df84af3f7e13c66344f79a887f0c",
+      "url": "https://github.com/sanks205/getobserver/releases/download/v0.5.0/observer_windows_amd64.exe",
+      "hash": "937829dc97d61de947b52d9a9414d9a4d59b5875040591c06664b52d801b90de",
       "bin": [["observer_windows_amd64.exe", "observer"]]
     },
     "arm64": {
-      "url": "https://github.com/sanks205/getobserver/releases/download/v0.4.0/observer_windows_arm64.exe",
-      "hash": "45276884ad988926569002fa2910b1d5f467c8468253d1e804be87a4e7c7ff6e",
+      "url": "https://github.com/sanks205/getobserver/releases/download/v0.5.0/observer_windows_arm64.exe",
+      "hash": "9ac4d73469ac19ad91255ea08b1f6cc427b9681c5879d473380ad1473aad2175",
       "bin": [["observer_windows_arm64.exe", "observer"]]
     }
   },
