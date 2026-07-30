@@ -49,7 +49,11 @@ type HTMLModel struct {
 	GatePassed         bool
 	GateThreshold      string
 	GateFailCount      int
-	TotalFiles         int
+	// v0.5 — changed-code scan / attestation stamp.
+	Version          string
+	DiffScope        string // "" = full scan; else "diff" / "diff-staged" / "diff-base:<ref>"
+	DiffFilesChanged int
+	TotalFiles       int
 	TotalDirs          int
 	Categories         []kv
 	TopExtensions      []kv
@@ -219,6 +223,11 @@ type Data struct {
 	GateEnabled        bool
 	GateThreshold      string
 	GateFailCount      int
+
+	// v0.5 — changed-code scan / attestation stamp (set by the CLI).
+	Version          string
+	DiffScope        string
+	DiffFilesChanged int
 }
 
 // GenerateHTML renders the report and writes it to outPath.
@@ -316,6 +325,9 @@ func RenderHTML(d Data) (string, error) {
 	model.GateThreshold = d.GateThreshold
 	model.GateFailCount = d.GateFailCount
 	model.GatePassed = d.GateFailCount == 0
+	model.Version = d.Version
+	model.DiffScope = d.DiffScope
+	model.DiffFilesChanged = d.DiffFilesChanged
 	if d.AI != nil {
 		model.HasAI = true
 		model.AIProvider = d.AI.Provider
