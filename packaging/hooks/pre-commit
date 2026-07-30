@@ -1,0 +1,17 @@
+#!/bin/sh
+# Observer pre-commit hook — blocks a commit if staged changes introduce a
+# High-severity finding. Install automatically with:  observer install-hook
+# (or copy this file to .git/hooks/pre-commit and `chmod +x` it).
+# Bypass once with: git commit --no-verify
+if ! command -v observer >/dev/null 2>&1; then
+  echo "observer not on PATH; skipping Observer check" >&2
+  exit 0
+fi
+if ! observer analyze . --diff-staged --fail-on High --out "" >/dev/null 2>&1; then
+  echo "" >&2
+  echo "Observer blocked this commit: staged changes contain a High-severity finding." >&2
+  echo "  See details: observer analyze . --diff-staged" >&2
+  echo "  Commit anyway: git commit --no-verify" >&2
+  exit 1
+fi
+exit 0
