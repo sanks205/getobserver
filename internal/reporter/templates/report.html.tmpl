@@ -229,6 +229,9 @@
     {{if .BaselineApplied}}
     <div class="banner info">Baseline active — <strong>{{.BaselineNew}} new</strong> finding(s) since baseline ({{.BaselineSuppressed}} known suppressed).</div>
     {{end}}
+    {{if .DiffScope}}
+    <div class="banner info">🔍 Changed-code scan (<code>{{.DiffScope}}</code>) — {{.DiffFilesChanged}} changed file(s){{if .GateEnabled}} · gate {{if .GatePassed}}<strong>PASS</strong>{{else}}<strong>FAIL</strong>{{end}}{{end}}. Scanned by Observer{{if .Version}} v{{.Version}}{{end}}.</div>
+    {{end}}
 
     <h2 id="summary">Executive Summary</h2>
     {{if .HasAI}}
