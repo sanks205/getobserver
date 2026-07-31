@@ -258,7 +258,7 @@
       <div class="gauges">
         <div class="gaugewrap">
           <div class="gauge score-{{.SecGrade}}" style="--v:{{.SecScore}}"><div class="gauge-inner"><span class="num">{{.SecScore}}</span><span class="grade">{{.SecGrade}}</span></div></div>
-          <div class="gaugelbl">Security</div>
+          <div class="gaugelbl">Security density</div>
         </div>
         <div class="gaugewrap">
           <div class="gauge score-{{.HealthGrade}}" style="--v:{{.HealthScore}}"><div class="gauge-inner"><span class="num">{{.HealthScore}}</span><span class="grade">{{.HealthGrade}}</span></div></div>
@@ -271,7 +271,10 @@
       <strong>How scoring works:</strong> severity, CWE and OWASP tags follow industry standards (CVSS-aligned).
       The <strong>Security rating (A–E)</strong> is standards-style — it reflects the single most severe security
       issue present (E = Critical … A = none), the same model tools like SonarQube use. The <strong>0–100 scores</strong>
-      are Observer's own density-based health index (severity-weighted findings per file), so they also reflect volume.
+      are Observer's own density-based health index (severity-weighted findings per file), so they also reflect volume
+      — a good density can still accompany a real high-severity finding, so read the <strong>rating</strong> and the
+      findings, not just the number. A clean result means no issues of the types Observer checks, not a guarantee the
+      code is secure.
     </p>
 
     <h2 id="tech">Technology Stack</h2>
