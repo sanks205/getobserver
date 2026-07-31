@@ -45,7 +45,7 @@ import (
 )
 
 // version is stamped at build time via -ldflags "-X main.version=...".
-var version = "0.5.0"
+var version = "0.5.1"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -668,9 +668,18 @@ func printIssues(a *analyzer.Result) {
 	if a == nil {
 		return
 	}
+	rating, basis := analyzer.SecurityRating(a)
 	secScore, secGrade := analyzer.SecurityScore(a)
 	hScore, hGrade := analyzer.HealthScore(a)
-	fmt.Printf("\nSecurity score: %d/100 (%s)   Code health: %d/100 (%s)\n", secScore, secGrade, hScore, hGrade)
+	// Lead with the worst-severity Security Rating (SonarQube-style) — the honest
+	// risk verdict. The 0-100 numbers are issue *density* for context, NOT an
+	// all-clear: a good density can still hide a real high-severity finding.
+	basisNote := "no security issues of the types Observer checks"
+	if rating != "A" {
+		basisNote = "highest severity present: " + basis
+	}
+	fmt.Printf("\nSecurity Rating: %s  (%s)\n", rating, basisNote)
+	fmt.Printf("Issue density:   Security %d/100 (%s) · Code health %d/100 (%s)\n", secScore, secGrade, hScore, hGrade)
 	mins := analyzer.RemediationMinutes(a)
 	fmt.Printf("Static analysis: %d issue(s) in %d source file(s)   Est. fix effort: ~%dh %dm\n",
 		len(a.Issues), a.FilesScanned, mins/60, mins%60)
@@ -690,6 +699,8 @@ func printIssues(a *analyzer.Result) {
 		}
 		fmt.Printf("  [%-8s] %s:%d  %s\n", is.Severity, is.File, is.Line, is.Title)
 	}
+	fmt.Println("\nNote: a clean result means no issues of the types Observer checks —")
+	fmt.Println("it is not a guarantee that the code is secure.")
 }
 
 // maxAIFindings caps how many findings are sent to the AI layer, keeping the
