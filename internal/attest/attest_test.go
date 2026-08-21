@@ -10,7 +10,7 @@ import (
 func TestWriteRoundTrip(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "attest.json")
 	in := Attestation{
-		Tool: "observer", Version: "0.5.0", GeneratedAt: "2026-01-01T00:00:00Z",
+		Tool: "observer", Version: "0.6.0", GeneratedAt: "2026-01-01T00:00:00Z",
 		Scope: "diff-staged", Target: "/repo", FilesChanged: 2,
 		Findings: map[string]int{"High": 1, "Medium": 2}, Total: 3,
 		Gate: &Gate{Threshold: "High", FailCount: 1, Passed: false},
