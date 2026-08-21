@@ -10,15 +10,23 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/aipda/observer/internal/analyzer"
+	"github.com/aipda/observer/internal/bandit"
 	"github.com/aipda/observer/internal/detector"
+	"github.com/aipda/observer/internal/eslint"
+	"github.com/aipda/observer/internal/gosec"
+	"github.com/aipda/observer/internal/phpstan"
 	"github.com/aipda/observer/internal/reporter"
 	"github.com/aipda/observer/internal/scanner"
+	"github.com/aipda/observer/internal/semgrep"
 	"github.com/aipda/observer/internal/storage"
 )
 
@@ -36,6 +44,7 @@ func New(store *storage.Store) *Server {
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.handleIndex)
+	mux.HandleFunc("/api/prepare-scan", s.handlePrepareScan)
 	mux.HandleFunc("/api/scan", s.handleScan)
 	mux.HandleFunc("/api/scans", s.handleScans)
 	mux.HandleFunc("/report/", s.handleReport)
@@ -78,6 +87,52 @@ func (s *Server) handleScan(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, rec)
 }
 
+// handlePrepareScan checks which recommended local engines are missing for the
+// project's stack WITHOUT running a full scan. The dashboard uses this to show
+// an optional accuracy-upgrade prompt before scanning, so the user can install
+// engines first. It never blocks the scan — missing engines are only a hint.
+func (s *Server) handlePrepareScan(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "POST required", http.StatusMethodNotAllowed)
+		return
+	}
+	var req scanRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Path == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "missing 'path'"})
+		return
+	}
+	tech, _ := detector.Detect(req.Path)
+	missing := recommendedEngines(req.Path, tech)
+	// Large-project hint from the last scan's file count (drives a "deep scan may
+	// take a while" note when engines will run).
+	large := false
+	if prev, ok := s.store.LatestForPath(req.Path); ok && prev.FilesScanned > 1500 {
+		large = true
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"missing": missing,
+		"stack":   stackNames(tech),
+		"large":   large,
+	})
+}
+
+// scanTimeout is the maximum wall-clock time allowed for the engine phase of a
+// scan (all optional engines share this single budget). It is configurable via
+// the OBSERVER_SCAN_TIMEOUT env var (a Go duration string such as "15m" or
+// "30m"); it defaults to 15 minutes. A cap is kept as a safety net so a very
+// large project cannot strand a scan indefinitely, but it is high enough that
+// deep scans of big codebases (PHPStan + Semgrep over thousands of files) finish.
+func scanTimeout() time.Duration {
+	const def = 15 * time.Minute
+	const max = 60 * time.Minute
+	if v := os.Getenv("OBSERVER_SCAN_TIMEOUT"); v != "" {
+		if d, err := time.ParseDuration(v); err == nil && d >= time.Minute && d <= max {
+			return d
+		}
+	}
+	return def
+}
+
 // runScan executes the diagnostic core, applies the customer's category/severity
 // scope, renders + stores the report, and returns the saved record (with scan
 // duration and the count of issues new since the last scan).
@@ -90,6 +145,118 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 	}
 	tech, _ := detector.Detect(req.Path)
 	analysis, _ := analyzer.Analyze(req.Path)
+
+	// Theme 1 — optional local engines run AUTOMATICALLY in the dashboard whenever
+	// installed (no flags). Each engine self-reports availability and is skipped if
+	// absent, so users without engines stay fast (built-in only) while users who
+	// install them get deeper, type-aware analysis with far fewer false positives.
+	// engineMode records which path the scan took.
+	engineMode := "builtin"
+	if analysis != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), scanTimeout())
+		defer cancel()
+
+		// Semgrep — multi-language security/taint analysis.
+		if findings, err := semgrep.Scan(ctx, req.Path, os.Getenv("SEMGREP_CONFIG")); err != nil {
+			if !errors.Is(err, semgrep.ErrNotAvailable) {
+				fmt.Fprintf(os.Stderr, "warning: semgrep run failed: %v\n", err)
+			}
+		} else {
+			var issues []analyzer.Issue
+			for _, f := range findings {
+				issues = append(issues, analyzer.Issue{
+					RuleID: f.RuleID, Severity: analyzer.Severity(f.Severity), Category: f.Category,
+					Title: f.Title, File: f.File, Line: f.Line, Snippet: f.Snippet,
+					Explanation: f.Message, Recommendation: "Review the Semgrep finding and remediate.",
+					CWE: f.CWE, OWASP: f.OWASP,
+				})
+			}
+			analysis.AddIssues(issues...)
+			engineMode = "deep"
+		}
+
+		// PHPStan — type-aware PHP/Laravel analysis. If the project has no config,
+		// Observer creates a minimal phpstan.neon so it still runs.
+		findings, err := phpstan.Scan(ctx, req.Path)
+		if errors.Is(err, phpstan.ErrNoConfig) {
+			if phpstan.EnsureConfig(req.Path) == nil {
+				findings, err = phpstan.Scan(ctx, req.Path)
+			}
+		}
+		switch {
+		case errors.Is(err, phpstan.ErrNotAvailable):
+			// not installed — skip
+		case err != nil:
+			fmt.Fprintf(os.Stderr, "warning: phpstan run failed: %v\n", err)
+		default:
+			var issues []analyzer.Issue
+			for _, f := range findings {
+				issues = append(issues, analyzer.Issue{
+					RuleID: f.RuleID, Severity: analyzer.Severity(f.Severity), Category: f.Category,
+					Title: f.Title, File: f.File, Line: f.Line,
+					Explanation: f.Message, Recommendation: "Review the PHPStan finding and fix the reported issue.",
+				})
+			}
+			analysis.AddIssues(issues...)
+			engineMode = "deep"
+		}
+
+		// Bandit — Python security patterns.
+		if findings, err := bandit.Scan(ctx, req.Path); err != nil {
+			if !errors.Is(err, bandit.ErrNotAvailable) {
+				fmt.Fprintf(os.Stderr, "warning: bandit run failed: %v\n", err)
+			}
+		} else {
+			var issues []analyzer.Issue
+			for _, f := range findings {
+				issues = append(issues, analyzer.Issue{
+					RuleID: f.RuleID, Severity: analyzer.Severity(f.Severity), Category: f.Category,
+					Title: f.Title, File: f.File, Line: f.Line, Snippet: f.Snippet,
+					Explanation: f.Message, Recommendation: "Review the Bandit finding and remediate.",
+					CWE: f.CWE,
+				})
+			}
+			analysis.AddIssues(issues...)
+			engineMode = "deep"
+		}
+
+		// gosec — Go security analysis.
+		if findings, err := gosec.Scan(ctx, req.Path); err != nil {
+			if !errors.Is(err, gosec.ErrNotAvailable) {
+				fmt.Fprintf(os.Stderr, "warning: gosec run failed: %v\n", err)
+			}
+		} else {
+			var issues []analyzer.Issue
+			for _, f := range findings {
+				issues = append(issues, analyzer.Issue{
+					RuleID: f.RuleID, Severity: analyzer.Severity(f.Severity), Category: f.Category,
+					Title: f.Title, File: f.File, Line: f.Line, Snippet: f.Snippet,
+					Explanation: f.Message, Recommendation: "Review the gosec finding and remediate.",
+					CWE: f.CWE,
+				})
+			}
+			analysis.AddIssues(issues...)
+			engineMode = "deep"
+		}
+
+		// ESLint — JavaScript/TypeScript lint + security rules.
+		if findings, err := eslint.Scan(ctx, req.Path); err != nil {
+			if !errors.Is(err, eslint.ErrNotAvailable) {
+				fmt.Fprintf(os.Stderr, "warning: eslint run failed: %v\n", err)
+			}
+		} else {
+			var issues []analyzer.Issue
+			for _, f := range findings {
+				issues = append(issues, analyzer.Issue{
+					RuleID: f.RuleID, Severity: analyzer.Severity(f.Severity), Category: f.Category,
+					Title: f.Title, File: f.File, Line: f.Line, Snippet: f.Snippet,
+					Explanation: f.Message, Recommendation: "Review the ESLint finding and remediate.",
+				})
+			}
+			analysis.AddIssues(issues...)
+			engineMode = "deep"
+		}
+	}
 
 	// Apply the chosen scope (categories + minimum severity).
 	if analysis != nil {
@@ -115,6 +282,7 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 		Language:   res.DominantLang,
 		Stack:      stackNames(tech),
 		DurationMs: durationMs,
+		EngineMode: engineMode,
 	}
 	if analysis != nil {
 		rec.Total = len(analysis.Issues)
@@ -127,11 +295,11 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 		rec.HealthScore, rec.HealthGrade = analyzer.HealthScore(analysis)
 	}
 
-	// "New since last scan" — delta vs the previous scan of this path.
+	// "New since last scan" — net delta vs the previous scan of this path.
+	// Stored as a signed value so reductions show as negative (e.g. -5 means
+	// five issues were fixed since the last scan).
 	if prev, ok := s.store.LatestForPath(res.RootPath); ok {
-		if d := rec.Total - prev.Total; d > 0 {
-			rec.NewSince = d
-		}
+		rec.NewSince = rec.Total - prev.Total
 	}
 
 	if err := s.store.Save(rec, html); err != nil {
