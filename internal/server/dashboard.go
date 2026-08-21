@@ -58,12 +58,36 @@ const dashboardHTML = `<!doctype html>
   .score-A{color:var(--ok);} .score-B{color:#3f9f6b;} .score-C{color:var(--med);} .score-D{color:var(--high);} .score-F{color:var(--crit);}
   .sev{font-weight:700;} .c{color:var(--crit);} .h{color:var(--high);} .m{color:var(--med);} .l{color:var(--low);}
   .pill{display:inline-block;background:color-mix(in srgb,var(--high) 20%,transparent);color:var(--high);border-radius:999px;padding:2px 9px;font-size:.78rem;font-weight:700;}
+  .pill-ok{display:inline-block;background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok);border-radius:999px;padding:2px 9px;font-size:.78rem;font-weight:700;}
+  .scanbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .scanbar input[type=text]{flex:1;min-width:200px;margin:0;}
+  .scanbar .lbl{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;}
+  .scanNav{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap;}
+  .pager{display:flex;gap:8px;align-items:center;}
+  .pg{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:7px 14px;cursor:pointer;font-family:inherit;font-size:.85rem;}
+  .pg:hover:not([disabled]){border-color:var(--accent);color:var(--accent);}
+  .pg[disabled]{opacity:.45;cursor:default;}
+  .pg-info{color:var(--muted);font-size:.85rem;}
   .empty{color:var(--muted);font-style:italic;}
   .trendrow{display:flex;align-items:center;gap:16px;padding:9px 0;border-bottom:1px solid var(--border);}
   .trendrow:last-child{border-bottom:none;}
   .trendrow .tname{width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .trendrow .tn{color:var(--muted);font-size:.78rem;}
   @media (max-width:640px){ .trendrow .tname{width:120px;} input[type=text]{min-width:160px;} }
+  .eng-card{margin-top:16px;border:1px solid var(--border);border-left:3px solid var(--accent);background:var(--surface2);border-radius:12px;padding:15px 17px;}
+  .eng-title{font-weight:700;margin-bottom:4px;}
+  .eng-sub{color:var(--muted);font-size:.87rem;margin:0 0 10px;}
+  .eng-list{margin:0 0 6px;padding-left:18px;}
+  .eng-list li{margin:7px 0;font-size:.9rem;}
+  .eng-list code{display:inline-block;margin-top:3px;background:var(--bg);color:var(--accent);border:1px solid var(--border);border-radius:7px;padding:3px 8px;font-family:var(--mono);font-size:.82rem;}
+  .eng-auto{color:var(--ok);font-size:.8rem;margin-left:6px;}
+  .eng-warn{color:var(--med);font-size:.85rem;margin:8px 0 0;}
+  .eng-note{color:var(--high);font-size:.85rem;margin:8px 0 0;}
+  .eng-remember{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:.86rem;color:var(--muted);cursor:pointer;}
+  .eng-actions{display:flex;gap:10px;margin-top:12px;}
+  .eng-actions button{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:9px 16px;cursor:pointer;font-family:inherit;font-size:.9rem;}
+  .eng-actions button:hover{border-color:var(--accent);color:var(--accent);}
+  .eng-actions #engContinue{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700;}
 </style>
 <script>
   (function(){try{var t=localStorage.getItem("observer-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
@@ -102,6 +126,7 @@ const dashboardHTML = `<!doctype html>
       </select>
     </div>
     <div class="err" id="err"></div>
+    <div id="enginePrompt" style="display:none"></div>
   </div>
 
   <div class="panel" id="trendsPanel" style="display:none">
@@ -111,10 +136,18 @@ const dashboardHTML = `<!doctype html>
 
   <div class="panel">
     <h3>Scans</h3>
+    <div class="scanbar">
+      <input id="scanSearch" type="text" placeholder="Search by project name or path…" oninput="onScanSearch()">
+      <span class="lbl">Per page</span>
+      <select id="scanSize" onchange="onScanSize()">
+        <option>10</option><option>25</option><option>50</option><option>100</option>
+      </select>
+    </div>
     <table>
-      <thead><tr><th>Project</th><th>When</th><th>Security</th><th>Health</th><th>Issues</th><th>New</th><th>Time</th><th>Report</th></tr></thead>
+      <thead><tr><th>Project</th><th>When</th><th>Security</th><th>Health</th><th>Issues</th><th>Change</th><th>Time</th><th>Report</th></tr></thead>
       <tbody id="scans"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody>
     </table>
+    <div id="scanNav" class="scanNav"></div>
   </div>
 </div>
 
@@ -125,7 +158,7 @@ function fmtIssues(r){var p=[];if(r.critical)p.push('<span class="sev c">'+r.cri
 function scoreCell(v,g){return '<span class="scorepill score-'+esc(g)+'"><i class="gradedot"></i>'+(v||0)+'</span> <span class="muted">('+esc(g||'-')+')</span>';}
 function sparkline(vals){var W=170,H=34;var pts=vals.map(function(v,i){var x=(vals.length<2?0:(i/(vals.length-1))*W);var y=H-(Math.max(0,Math.min(100,v))/100)*H;return x.toFixed(1)+','+y.toFixed(1);}).join(' ');var last=vals[vals.length-1];var color=last>=80?'#2ea043':last>=60?'#d99700':'#e5484d';var area=pts+' '+W+','+H+' 0,'+H;return '<svg width="'+W+'" height="'+H+'" style="background:var(--surface2);border-radius:6px"><polygon points="'+area+'" fill="'+color+'" opacity=".13"/><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2"/></svg>';}
 function renderTrends(recs){var byPath={};recs.forEach(function(r){(byPath[r.path]=byPath[r.path]||[]).push(r);});var rows=[];Object.keys(byPath).forEach(function(p){var list=byPath[p].slice().sort(function(a,b){return (a.created_at||'').localeCompare(b.created_at||'');});if(list.length<2)return;var scores=list.map(function(x){return x.security_score||0;});var last=list[list.length-1];rows.push('<div class="trendrow"><span class="tname" title="'+esc(p)+'">'+esc(last.project)+' <span class="tn">('+list.length+' scans)</span></span>'+sparkline(scores)+'<span class="scorepill score-'+esc(last.security_grade)+'"><i class="gradedot"></i>'+(last.security_score||0)+' ('+esc(last.security_grade||'-')+')</span></div>');});document.getElementById('trends').innerHTML=rows.join('');document.getElementById('trendsPanel').style.display=rows.length?'':'none';}
-function render(recs){var tb=document.getElementById('scans');if(!recs||!recs.length){tb.innerHTML='<tr><td colspan="8" class="empty">No scans yet — run one above.</td></tr>';return;}tb.innerHTML=recs.map(function(r){var when=(r.created_at||'').replace('T',' ').replace(/(\+|Z).*$/,'');var nw=r.new_since>0?'<span class="pill">+'+r.new_since+'</span>':'';return '<tr>'+
+function render(recs){var tb=document.getElementById('scans');if(!recs||!recs.length){tb.innerHTML='<tr><td colspan="8" class="empty">No scans yet — run one above.</td></tr>';return;}tb.innerHTML=recs.map(function(r){var when=(r.created_at||'').replace('T',' ').replace(/(\+|Z).*$/,'');var nw=r.new_since>0?'<span class="pill">+'+r.new_since+'</span>':r.new_since<0?'<span class="pill-ok">'+r.new_since+'</span>':'<span class="pill" style="opacity:.55">0</span>';return '<tr>'+
   '<td><div class="proj">'+esc(r.project)+'</div><div class="path">'+esc(r.path)+'</div></td>'+
   '<td class="muted">'+esc(when)+'</td>'+
   '<td>'+scoreCell(r.security_score,r.security_grade)+'</td>'+
@@ -135,8 +168,100 @@ function render(recs){var tb=document.getElementById('scans');if(!recs||!recs.le
   '<td class="muted">'+fmtDur(r.duration_ms)+'</td>'+
   '<td><a href="/report/'+encodeURIComponent(r.id)+'" target="_blank">Open ↗</a></td>'+
   '</tr>';}).join('');}
-function refresh(){fetch('/api/scans').then(function(x){return x.json();}).then(function(recs){render(recs);renderTrends(recs);}).catch(function(){});}
-function scan(){var path=document.getElementById('path').value.trim();var err=document.getElementById('err');err.textContent='';if(!path){err.textContent='Enter a project folder path.';return;}var cats=Array.prototype.slice.call(document.querySelectorAll('.cat:checked')).map(function(c){return c.value;});var minSev=document.getElementById('minSev').value;var btn=document.getElementById('scanBtn'),st=document.getElementById('status');btn.disabled=true;st.textContent='Scanning…';fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:path,categories:cats,min_severity:minSev})}).then(function(x){return x.json().then(function(j){return {ok:x.ok,j:j};});}).then(function(r){btn.disabled=false;st.textContent='';if(!r.ok){err.textContent=r.j.error||'Scan failed.';return;}refresh();}).catch(function(){btn.disabled=false;st.textContent='';err.textContent='Request failed.';});}
+var ALL_RECS=[];var SCAN_PAGE=1;var SCAN_SIZE=10;var SCAN_Q='';
+function applyAndRender(){
+  var q=SCAN_Q.trim().toLowerCase();
+  var filtered=ALL_RECS.filter(function(r){if(!q)return true;return (r.project||'').toLowerCase().indexOf(q)>=0||(r.path||'').toLowerCase().indexOf(q)>=0;});
+  var total=filtered.length;
+  var pages=Math.max(1,Math.ceil(total/SCAN_SIZE));
+  if(SCAN_PAGE>pages)SCAN_PAGE=pages;
+  if(SCAN_PAGE<1)SCAN_PAGE=1;
+  var start=(SCAN_PAGE-1)*SCAN_SIZE;
+  render(filtered.slice(start,start+SCAN_SIZE));
+  var nav=document.getElementById('scanNav');
+  if(!nav)return;
+  if(total<=SCAN_SIZE){nav.innerHTML='';return;}
+  nav.innerHTML='<div class="pager">'+'<button class="pg" '+(SCAN_PAGE<=1?'disabled':'')+' onclick="scanGo('+(SCAN_PAGE-1)+')">‹ Prev</button>'+'<span class="pg-info">Page '+SCAN_PAGE+' / '+pages+'</span>'+'<button class="pg" '+(SCAN_PAGE>=pages?'disabled':'')+' onclick="scanGo('+(SCAN_PAGE+1)+')">Next ›</button>'+'</div>';
+}
+function scanGo(p){SCAN_PAGE=p;applyAndRender();}
+function onScanSearch(){SCAN_Q=document.getElementById('scanSearch').value||'';SCAN_PAGE=1;applyAndRender();}
+function onScanSize(){SCAN_SIZE=parseInt(document.getElementById('scanSize').value,10)||10;SCAN_PAGE=1;applyAndRender();}
+function refresh(){fetch('/api/scans').then(function(x){return x.json();}).then(function(recs){ALL_RECS=recs||[];SCAN_PAGE=1;applyAndRender();renderTrends(recs);}).catch(function(){});}
+function rememberedChoice(path){try{return localStorage.getItem('observer-choice:'+path);}catch(e){return null;}}
+function rememberChoice(path){try{localStorage.setItem('observer-choice:'+path,'continue');}catch(e){}}
+function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+function scan(){
+  var path=document.getElementById('path').value.trim();
+  var err=document.getElementById('err'); err.textContent='';
+  if(!path){err.textContent='Enter a project folder path.';return;}
+  var cats=Array.prototype.slice.call(document.querySelectorAll('.cat:checked')).map(function(c){return c.value;});
+  var minSev=document.getElementById('minSev').value;
+  var btn=document.getElementById('scanBtn'),st=document.getElementById('status');
+
+  // User previously chose to skip the prompt for this folder -> scan directly.
+  if(rememberedChoice(path)==='continue'){ doScan(path,cats,minSev,btn,st); return; }
+
+  // Pre-scan: recommend engines (no full scan yet).
+  btn.disabled=true; st.textContent='Checking project…';
+  fetch('/api/prepare-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:path})})
+    .then(function(x){return x.json().then(function(j){return {ok:x.ok,j:j};});})
+    .then(function(r){
+      btn.disabled=false; st.textContent='';
+      if(r.ok && r.j.missing && r.j.missing.length){ showEnginePrompt(path,cats,minSev,r.j,false,btn,st); return; }
+      doScan(path,cats,minSev,btn,st);
+    })
+    .catch(function(){ btn.disabled=false; st.textContent=''; doScan(path,cats,minSev,btn,st); });
+}
+
+function showEnginePrompt(path,cats,minSev,pj,rechecked,btn,st){
+  var box=document.getElementById('enginePrompt');
+  var stack=(pj.stack||[]).join(', ');
+  var html='<div class="eng-card">';
+  html+='<div class="eng-title">Recommended for accurate analysis of this '+(stack||'project')+' project</div>';
+  html+='<div class="eng-sub">Install any to cut false positives. They run 100% locally — nothing leaves your machine. You can scan now with the built-in engine only, or install first for deeper results.</div>';
+  html+='<ul class="eng-list">';
+  (pj.missing||[]).forEach(function(e){
+    html+='<li><b>'+escapeHtml(e.name)+'</b> — '+escapeHtml(e.reason);
+    html+='<br><code>'+escapeHtml(e.command)+'</code>';
+    if(e.auto_config){ html+=' <span class="eng-auto">(Observer creates its config)</span>'; }
+    html+='</li>';
+  });
+  html+='</ul>';
+  if(pj.large){ html+='<div class="eng-warn">Deep scan on large projects may take a few minutes.</div>'; }
+  if(rechecked){ html+='<div class="eng-note">Still not found — make sure the engine is on your PATH, then press Re-scan.</div>'; }
+  html+='<label class="eng-remember"><input type="checkbox" id="engRemember"> Remember my choice for this folder</label>';
+  html+='<div class="eng-actions"><button id="engContinue">Continue (built-in scan)</button><button id="engRescan">Re-scan after install</button></div>';
+  html+='</div>';
+  box.innerHTML=html; box.style.display='block';
+
+  document.getElementById('engContinue').onclick=function(){
+    box.style.display='none';
+    if(document.getElementById('engRemember').checked){ rememberChoice(path); }
+    doScan(path,cats,minSev,btn,st);
+  };
+  document.getElementById('engRescan').onclick=function(){
+    st.textContent='Re-checking…';
+    fetch('/api/prepare-scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:path})})
+      .then(function(x){return x.json().then(function(j){return {ok:x.ok,j:j};});})
+      .then(function(r){
+        if(r.ok && r.j.missing && r.j.missing.length===0){ box.style.display='none'; doScan(path,cats,minSev,btn,st); }
+        else { st.textContent=''; showEnginePrompt(path,cats,minSev,(r.ok?r.j:pj),true,btn,st); }
+      })
+      .catch(function(){ st.textContent=''; showEnginePrompt(path,cats,minSev,pj,true,btn,st); });
+  };
+}
+
+function doScan(path,cats,minSev,btn,st){
+  if(!st){ st=document.getElementById('status'); }
+  if(!btn){ btn=document.getElementById('scanBtn'); }
+  var err=document.getElementById('err');
+  btn.disabled=true; st.textContent='Scanning…';
+  fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:path,categories:cats,min_severity:minSev})})
+    .then(function(x){return x.json().then(function(j){return {ok:x.ok,j:j};});})
+    .then(function(r){ btn.disabled=false; st.textContent=''; if(!r.ok){err.textContent=r.j.error||'Scan failed.';return;} refresh(); })
+    .catch(function(){ btn.disabled=false; st.textContent=''; err.textContent='Request failed.'; });
+}
 document.getElementById('path').addEventListener('keydown',function(e){if(e.key==='Enter')scan();});
 refresh();
 </script>
