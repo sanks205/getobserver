@@ -262,6 +262,9 @@ observer analyze-log ./examples/php-demo/logs
 # Launch the local web dashboard (no command line needed after this):
 observer serve            # open http://127.0.0.1:7777 — paste a folder, click Scan
 # Past scans, stack, issue counts, and "new since last scan" appear on one page.
+# Search scans by project name or path, pick a per-page size (10/25/50), and page
+# through history. Each scan row shows a signed "Change" column: +N (orange) new
+# issues since the previous scan, -N (green) better, 0 flat.
 # Open any report and use the browser's Print → Save as PDF.
 
 # Add AI explanations (root cause / impact / fix) of the findings
@@ -346,6 +349,19 @@ The `--ai` flag explains findings. It is **provider-agnostic** and works offline
 # Version / help
 observer version
 observer help
+```
+
+### Scan timeout
+
+Deep scans (PHPStan + Semgrep over thousands of files) run under a single time budget.
+Raise or lower it with `OBSERVER_SCAN_TIMEOUT` — a Go duration string like `15m` or `30m`:
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `OBSERVER_SCAN_TIMEOUT` | Max time for a deep scan before it is stopped (the engine process tree is killed on timeout, so no orphaned processes) | `15m` (hard cap `60m`) |
+
+```bash
+OBSERVER_SCAN_TIMEOUT=30m observer analyze ./my-project --phpstan --semgrep
 ```
 
 ### Example output
