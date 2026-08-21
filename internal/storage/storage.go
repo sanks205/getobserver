@@ -29,6 +29,8 @@ type Record struct {
 	NewSince      int      `json:"new_since"` // new issues vs the previous scan of this path
 	FilesScanned  int      `json:"files_scanned"`
 	DurationMs    int64    `json:"duration_ms"`
+	EngineMode    string   `json:"engine_mode"` // "builtin" or "deep" (engines ran)
+	Engines       []string `json:"engines"`     // names of local engines that ran (empty for builtin)
 	SecurityScore int      `json:"security_score"`
 	SecurityGrade string   `json:"security_grade"`
 	HealthScore   int      `json:"health_score"`
