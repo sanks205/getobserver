@@ -152,6 +152,7 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 	// install them get deeper, type-aware analysis with far fewer false positives.
 	// engineMode records which path the scan took.
 	engineMode := "builtin"
+	var ranEngines []string
 	if analysis != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), scanTimeout())
 		defer cancel()
@@ -173,6 +174,7 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 			}
 			analysis.AddIssues(issues...)
 			engineMode = "deep"
+			ranEngines = append(ranEngines, "Semgrep")
 		}
 
 		// PHPStan — type-aware PHP/Laravel analysis. If the project has no config,
@@ -199,6 +201,7 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 			}
 			analysis.AddIssues(issues...)
 			engineMode = "deep"
+			ranEngines = append(ranEngines, "PHPStan")
 		}
 
 		// Bandit — Python security patterns.
@@ -218,6 +221,7 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 			}
 			analysis.AddIssues(issues...)
 			engineMode = "deep"
+			ranEngines = append(ranEngines, "Bandit")
 		}
 
 		// gosec — Go security analysis.
@@ -237,6 +241,7 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 			}
 			analysis.AddIssues(issues...)
 			engineMode = "deep"
+			ranEngines = append(ranEngines, "GoSec")
 		}
 
 		// ESLint — JavaScript/TypeScript lint + security rules.
@@ -255,6 +260,7 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 			}
 			analysis.AddIssues(issues...)
 			engineMode = "deep"
+			ranEngines = append(ranEngines, "ESLint")
 		}
 	}
 
@@ -283,6 +289,7 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 		Stack:      stackNames(tech),
 		DurationMs: durationMs,
 		EngineMode: engineMode,
+		Engines:   ranEngines,
 	}
 	if analysis != nil {
 		rec.Total = len(analysis.Issues)

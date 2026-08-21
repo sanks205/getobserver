@@ -58,6 +58,7 @@ const dashboardHTML = `<!doctype html>
   .score-A{color:var(--ok);} .score-B{color:#3f9f6b;} .score-C{color:var(--med);} .score-D{color:var(--high);} .score-F{color:var(--crit);}
   .sev{font-weight:700;} .c{color:var(--crit);} .h{color:var(--high);} .m{color:var(--med);} .l{color:var(--low);}
   .pill{display:inline-block;background:color-mix(in srgb,var(--high) 20%,transparent);color:var(--high);border-radius:999px;padding:2px 9px;font-size:.78rem;font-weight:700;}
+  .pill-deep{display:inline-block;background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent);border-radius:999px;padding:2px 9px;font-size:.78rem;font-weight:700;}
   .pill-ok{display:inline-block;background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok);border-radius:999px;padding:2px 9px;font-size:.78rem;font-weight:700;}
   .scanbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
   .scanbar input[type=text]{flex:1;min-width:200px;margin:0;}
@@ -69,6 +70,7 @@ const dashboardHTML = `<!doctype html>
   .pg[disabled]{opacity:.45;cursor:default;}
   .pg-info{color:var(--muted);font-size:.85rem;}
   .empty{color:var(--muted);font-style:italic;}
+  .legend{color:var(--muted);font-size:.8rem;margin:10px 2px 0;line-height:1.5;}
   .trendrow{display:flex;align-items:center;gap:16px;padding:9px 0;border-bottom:1px solid var(--border);}
   .trendrow:last-child{border-bottom:none;}
   .trendrow .tname{width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -144,9 +146,10 @@ const dashboardHTML = `<!doctype html>
       </select>
     </div>
     <table>
-      <thead><tr><th>Project</th><th>When</th><th>Security</th><th>Health</th><th>Issues</th><th>Change</th><th>Time</th><th>Report</th></tr></thead>
-      <tbody id="scans"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody>
+      <thead><tr><th>Project</th><th>When</th><th>Security</th><th>Health</th><th>Issues</th><th>Engines</th><th>Change</th><th>Time</th><th>Report</th></tr></thead>
+      <tbody id="scans"><tr><td colspan="9" class="empty">Loading…</td></tr></tbody>
     </table>
+    <div class="legend"><b>Built-in</b> = Observer's native rules only. <b>Engines</b> = local tools you installed (Semgrep, PHPStan, Bandit, gosec, ESLint) ran too — they surface more, type-aware findings, so issue counts can rise.</div>
     <div id="scanNav" class="scanNav"></div>
   </div>
 </div>
@@ -158,12 +161,13 @@ function fmtIssues(r){var p=[];if(r.critical)p.push('<span class="sev c">'+r.cri
 function scoreCell(v,g){return '<span class="scorepill score-'+esc(g)+'"><i class="gradedot"></i>'+(v||0)+'</span> <span class="muted">('+esc(g||'-')+')</span>';}
 function sparkline(vals){var W=170,H=34;var pts=vals.map(function(v,i){var x=(vals.length<2?0:(i/(vals.length-1))*W);var y=H-(Math.max(0,Math.min(100,v))/100)*H;return x.toFixed(1)+','+y.toFixed(1);}).join(' ');var last=vals[vals.length-1];var color=last>=80?'#2ea043':last>=60?'#d99700':'#e5484d';var area=pts+' '+W+','+H+' 0,'+H;return '<svg width="'+W+'" height="'+H+'" style="background:var(--surface2);border-radius:6px"><polygon points="'+area+'" fill="'+color+'" opacity=".13"/><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2"/></svg>';}
 function renderTrends(recs){var byPath={};recs.forEach(function(r){(byPath[r.path]=byPath[r.path]||[]).push(r);});var rows=[];Object.keys(byPath).forEach(function(p){var list=byPath[p].slice().sort(function(a,b){return (a.created_at||'').localeCompare(b.created_at||'');});if(list.length<2)return;var scores=list.map(function(x){return x.security_score||0;});var last=list[list.length-1];rows.push('<div class="trendrow"><span class="tname" title="'+esc(p)+'">'+esc(last.project)+' <span class="tn">('+list.length+' scans)</span></span>'+sparkline(scores)+'<span class="scorepill score-'+esc(last.security_grade)+'"><i class="gradedot"></i>'+(last.security_score||0)+' ('+esc(last.security_grade||'-')+')</span></div>');});document.getElementById('trends').innerHTML=rows.join('');document.getElementById('trendsPanel').style.display=rows.length?'':'none';}
-function render(recs){var tb=document.getElementById('scans');if(!recs||!recs.length){tb.innerHTML='<tr><td colspan="8" class="empty">No scans yet — run one above.</td></tr>';return;}tb.innerHTML=recs.map(function(r){var when=(r.created_at||'').replace('T',' ').replace(/(\+|Z).*$/,'');var nw=r.new_since>0?'<span class="pill">+'+r.new_since+'</span>':r.new_since<0?'<span class="pill-ok">'+r.new_since+'</span>':'<span class="pill" style="opacity:.55">0</span>';return '<tr>'+
+function render(recs){var tb=document.getElementById('scans');if(!recs||!recs.length){tb.innerHTML='<tr><td colspan="9" class="empty">No scans yet — run one above.</td></tr>';return;}tb.innerHTML=recs.map(function(r){var when=(r.created_at||'').replace('T',' ').replace(/(\+|Z).*$/,'');var nw=r.new_since>0?'<span class="pill">+'+r.new_since+'</span>':r.new_since<0?'<span class="pill-ok">'+r.new_since+'</span>':'<span class="pill" style="opacity:.55">0</span>';return '<tr>'+
   '<td><div class="proj">'+esc(r.project)+'</div><div class="path">'+esc(r.path)+'</div></td>'+
   '<td class="muted">'+esc(when)+'</td>'+
   '<td>'+scoreCell(r.security_score,r.security_grade)+'</td>'+
   '<td>'+scoreCell(r.health_score,r.health_grade)+'</td>'+
   '<td>'+fmtIssues(r)+'</td>'+
+  '<td>'+(r.engines&&r.engines.length?r.engines.map(function(e){return '<span class="pill-deep">'+esc(e)+'</span>';}).join(' '):(r.engine_mode==='deep'?'<span class="pill-deep">Deep</span>':'<span class="muted">Built-in</span>'))+'</td>'+
   '<td>'+nw+'</td>'+
   '<td class="muted">'+fmtDur(r.duration_ms)+'</td>'+
   '<td><a href="/report/'+encodeURIComponent(r.id)+'" target="_blank">Open ↗</a></td>'+
@@ -186,7 +190,7 @@ function applyAndRender(){
 function scanGo(p){SCAN_PAGE=p;applyAndRender();}
 function onScanSearch(){SCAN_Q=document.getElementById('scanSearch').value||'';SCAN_PAGE=1;applyAndRender();}
 function onScanSize(){SCAN_SIZE=parseInt(document.getElementById('scanSize').value,10)||10;SCAN_PAGE=1;applyAndRender();}
-function refresh(){fetch('/api/scans').then(function(x){return x.json();}).then(function(recs){ALL_RECS=recs||[];SCAN_PAGE=1;applyAndRender();renderTrends(recs);}).catch(function(){});}
+function refresh(){fetch('/api/scans').then(function(x){return x.json();}).then(function(recs){ALL_RECS=(recs||[]).slice().sort(function(a,b){return (b.created_at||'').localeCompare(a.created_at||'');});SCAN_PAGE=1;applyAndRender();renderTrends(ALL_RECS);}).catch(function(){});}
 function rememberedChoice(path){try{return localStorage.getItem('observer-choice:'+path);}catch(e){return null;}}
 function rememberChoice(path){try{localStorage.setItem('observer-choice:'+path,'continue');}catch(e){}}
 function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
