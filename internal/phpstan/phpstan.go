@@ -18,7 +18,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
+
+	"github.com/aipda/observer/internal/engineutil"
 )
 
 var (
@@ -76,6 +79,46 @@ func Available(root string) bool {
 	return ok && hasConfig(root)
 }
 
+// BinaryPresent reports whether the PHPStan binary exists (global or vendor/bin),
+// independent of whether a config file is present. The dashboard uses this to
+// decide if PHPStan still needs installing — when the binary is already there,
+// Observer auto-creates phpstan.neon during the scan, so no install prompt is shown.
+func BinaryPresent(root string) bool {
+	_, ok := locate(root)
+	return ok
+}
+
+// ConfigPresent reports whether a phpstan.neon(.dist) exists in root. It lets the
+// dashboard distinguish "installed but unconfigured" (offer AutoConfig) from
+// "installed and ready" (no suggestion needed).
+func ConfigPresent(root string) bool {
+	return hasConfig(root)
+}
+
+// EnsureConfig writes a minimal phpstan.neon when PHPStan is installed but the
+// project has no config yet. This lets Observer run PHPStan out-of-the-box (e.g.
+// for Laravel/Larastan) without the user hand-writing a config. It only writes
+// when the binary is present and no config exists; if a config already exists it
+// is left untouched. Returns nil if nothing needed writing.
+func EnsureConfig(root string) error {
+	if hasConfig(root) {
+		// Already has a config — don't clobber it.
+		return nil
+	}
+	if _, ok := locate(root); !ok {
+		// No binary — can't meaningfully create a config; let Scan report ErrNotAvailable.
+		return ErrNotAvailable
+	}
+	// Prefer Larastan's extension when it's vendored; otherwise a safe default level.
+	level := 5
+	content := "parameters:\n    level: " + strconv.Itoa(level) + "\n"
+	if fileExists(filepath.Join(root, "vendor", "larastan", "larastan", "extension.neon")) {
+		content = "includes:\n    - ./vendor/larastan/larastan/extension.neon\n" + content
+	}
+	cfg := filepath.Join(root, "phpstan.neon")
+	return os.WriteFile(cfg, []byte(content), 0o644)
+}
+
 // Scan runs PHPStan from the project root using its own config and returns parsed
 // findings. Returns ErrNotAvailable / ErrNoConfig when it can't run.
 func Scan(ctx context.Context, root string) ([]Finding, error) {
@@ -86,15 +129,49 @@ func Scan(ctx context.Context, root string) ([]Finding, error) {
 	if !hasConfig(root) {
 		return nil, ErrNoConfig
 	}
-	cmd := exec.CommandContext(ctx, bin, "analyse", "--error-format=json", "--no-progress")
-	cmd.Dir = root // run from project root so PHPStan finds its config + autoload
-	out, err := cmd.Output()
+	// PHPStan needs at least one path to analyse. If the project's config already
+	// declares `paths:` we let PHPStan use it; otherwise we point it at a
+	// conventional source directory (app/src/lib/source) so vendor/ isn't scanned,
+	// falling back to the project root.
+	args := []string{"analyse", "--error-format=json", "--no-progress"}
+	if !configHasPaths(root) {
+		args = append(args, defaultAnalyzePath(root))
+	}
+	out, err := engineutil.Run(ctx, root, bin, args...)
 	// PHPStan exits non-zero when it reports errors — expected. Only fail if we
 	// got no JSON back at all.
 	if len(out) == 0 && err != nil {
 		return nil, err
 	}
 	return Parse(out, root)
+}
+
+// configHasPaths reports whether the project's phpstan config declares analyse
+// paths (in which case we must NOT pass a CLI path, or we'd override them).
+func configHasPaths(root string) bool {
+	for _, f := range []string{"phpstan.neon", "phpstan.neon.dist"} {
+		data, err := os.ReadFile(filepath.Join(root, f))
+		if err != nil {
+			continue
+		}
+		for _, line := range strings.Split(string(data), "\n") {
+			if strings.HasPrefix(strings.TrimSpace(line), "paths:") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// defaultAnalyzePath picks where to point PHPStan when the config has no paths.
+// Prefer a conventional source directory so vendor/ isn't scanned; else the root.
+func defaultAnalyzePath(root string) string {
+	for _, cand := range []string{"app", "src", "lib", "source"} {
+		if fi, err := os.Stat(filepath.Join(root, cand)); err == nil && fi.IsDir() {
+			return filepath.Join(root, cand)
+		}
+	}
+	return root
 }
 
 // --- PHPStan JSON shape (subset) ---
