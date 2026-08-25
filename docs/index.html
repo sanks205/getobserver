@@ -140,9 +140,9 @@
     </div>
   </section>
 
-  <section id="compare">
+    <section id="compare">
     <h2>How Observer compares</h2>
-    <p class="section-lede">Observer isn't trying to replace SonarQube or Sentry — it's a different shape of tool: a zero-setup, offline snapshot that unifies every signal into one report.</p>
+    <p class="section-lede">Observer isn't trying to replace SonarQube or Snyk — it's the only one that runs fully offline. No account, no upload: your code never leaves the machine. One binary unifies code, deps, runtime, and logs into one report.</p>
     <div class="cmpwrap">
       <table class="cmp">
         <thead>
@@ -150,15 +150,17 @@
         </thead>
         <tbody>
           <tr><th>Setup</th><td class="obs">One binary, offline, no account</td><td>Server/CI or cloud account</td><td>Cloud account</td><td>Instrument app + account</td></tr>
+          <tr><th>Code leaves your machine?</th><td class="obs">Never — 100% local</td><td>Cloud tier uploads; self-host stays local</td><td>Yes (cloud)</td><td>Yes (telemetry)</td></tr>
           <tr><th>Covers</th><td class="obs">Code + deps + runtime + logs, in one report</td><td>Code</td><td>Dependencies + code</td><td>Runtime errors</td></tr>
           <tr><th>Static-analysis depth</th><td class="obs">Core rules + optional Semgrep</td><td>Deeper (many languages)</td><td>Good</td><td>—</td></tr>
+          <tr><th>Engine transparency</th><td class="obs">Built-in + Semgrep/PHPStan labeled per finding</td><td>Single engine, no source label</td><td>Single engine</td><td>—</td></tr>
           <tr><th>Air-gapped / no signup</th><td class="obs">✓</td><td>—</td><td>—</td><td>—</td></tr>
           <tr><th>Pricing</th><td class="obs">Free + one-time Pro</td><td>Subscription</td><td>Per-developer subscription</td><td>Usage + per-contributor</td></tr>
           <tr><th>Best for</th><td class="obs">Audits, handovers, SMB, offline</td><td>Continuous team quality</td><td>Dependency-heavy teams</td><td>Live production monitoring</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="cmpnote"><b>Use Observer when</b> you need a one-shot audit, a legacy/client handover, an air-gapped scan, or a unified health snapshot without a server or per-seat pricing. <b>Reach for the others when</b> you need deep continuous static analysis at scale or always-on production monitoring — many teams run both.</p>
+    <p class="cmpnote"><b>Use Observer when</b> you need a one-shot audit, a legacy/client handover, an air-gapped scan, or a unified health snapshot without a server or per-seat pricing — and your code can't leave the building. <b>Reach for the others when</b> you need deep continuous static analysis at scale or always-on production monitoring — many teams run both.</p>
   </section>
 
   <section id="pricing">
