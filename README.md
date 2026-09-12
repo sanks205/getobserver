@@ -9,6 +9,8 @@
 ![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20macOS%20%7C%20linux-lightgrey)
 ![Single binary](https://img.shields.io/badge/install-single%20binary%2C%20no%20deps-success)
 
+> ⭐ If Observer helped you, please star — it helps others find it.
+
 ## ⬇️ Get Observer
 
 Grab the single binary for your OS — no runtime, no dependencies, no account:
