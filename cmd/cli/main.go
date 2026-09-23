@@ -45,7 +45,7 @@ import (
 )
 
 // version is stamped at build time via -ldflags "-X main.version=...".
-var version = "0.6.0"
+var version = "0.7.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -224,9 +224,35 @@ func runAnalyze(args []string) int {
 		}
 	}
 
+	// Dynamic estimate + auto timeout so big repos (like WordPress 4613 files ~7-9m) don't get killed early.
+	// Printed once after we know the file count so the user sees time upfront with buffer.
+	if res != nil && (res.TotalFiles > 0) && (*semgrepFlag || *phpstanFlag || *banditFlag || *gosecFlag || *eslintFlag) {
+		estBuiltin := time.Duration(res.TotalFiles) * 20 * time.Millisecond
+		estSemgrep := time.Duration(0)
+		if *semgrepFlag {
+			estSemgrep = time.Duration(res.TotalFiles) * 100 * time.Millisecond
+		}
+		totalEst := estBuiltin + estSemgrep
+		// Add other engines roughly if enabled
+		if *phpstanFlag {
+			totalEst += time.Duration(res.TotalFiles) * 80 * time.Millisecond
+		}
+		if *banditFlag || *gosecFlag || *eslintFlag {
+			totalEst += time.Duration(res.TotalFiles) * 20 * time.Millisecond
+		}
+		auto := dynamicEngineTimeout(res.TotalFiles, 100*time.Millisecond)
+		if v := os.Getenv("OBSERVER_SCAN_TIMEOUT"); v != "" {
+			if d, err := time.ParseDuration(v); err == nil {
+				auto = d
+			}
+		}
+		fmt.Fprintf(os.Stderr, "Est. %s for %d files (built-in ~%s + Semgrep ~%s) — auto timeout %s (override: OBSERVER_SCAN_TIMEOUT=30m)\n",
+			formatDuration(totalEst), res.TotalFiles, formatDuration(estBuiltin), formatDuration(estSemgrep), formatDuration(auto))
+	}
+
 	// Theme 1 — optional Semgrep engine (opt-in via --semgrep; auto-skips if not installed).
 	if *semgrepFlag && analysis != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), dynamicEngineTimeout(res.TotalFiles, 100*time.Millisecond))
 		findings, err := semgrep.Scan(ctx, target, os.Getenv("SEMGREP_CONFIG"))
 		cancel()
 		switch {
@@ -252,7 +278,7 @@ func runAnalyze(args []string) int {
 	// Theme 1 — optional PHPStan engine (opt-in via --phpstan; uses the project's
 	// own PHPStan + config; auto-skips if not present).
 	if *phpstanFlag && analysis != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), dynamicEngineTimeout(res.TotalFiles, 80*time.Millisecond))
 		findings, err := phpstan.Scan(ctx, target)
 		cancel()
 		switch {
@@ -278,7 +304,7 @@ func runAnalyze(args []string) int {
 
 	// Theme 1 — optional Bandit engine (opt-in via --bandit; Python security; auto-skips if not installed).
 	if *banditFlag && analysis != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), dynamicEngineTimeout(res.TotalFiles, 20*time.Millisecond))
 		findings, err := bandit.Scan(ctx, target)
 		cancel()
 		switch {
@@ -303,7 +329,7 @@ func runAnalyze(args []string) int {
 
 	// Theme 1 — optional gosec engine (opt-in via --gosec; Go security; auto-skips if not installed).
 	if *gosecFlag && analysis != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), dynamicEngineTimeout(res.TotalFiles, 20*time.Millisecond))
 		findings, err := gosec.Scan(ctx, target)
 		cancel()
 		switch {
@@ -328,7 +354,7 @@ func runAnalyze(args []string) int {
 
 	// Theme 1 — optional ESLint engine (opt-in via --eslint; JS/TS code quality; auto-skips if not available).
 	if *eslintFlag && analysis != nil {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), dynamicEngineTimeout(res.TotalFiles, 30*time.Millisecond))
 		findings, err := eslint.Scan(ctx, target)
 		cancel()
 		switch {
@@ -632,6 +658,40 @@ func emailSummary(res *scanner.Result, a *analyzer.Result, aiRep *ai.Report) (su
 	}
 	b.WriteString("<p>The full interactive report is attached.</p>")
 	return subject, b.String()
+}
+
+// dynamicEngineTimeout scales with file count + 50% buffer, min 5m max 60m, so big repos (WordPress 4613 files ~7.7m semgrep) don't get killed early.
+func dynamicEngineTimeout(fileCount int, perFile time.Duration) time.Duration {
+	if fileCount <= 0 {
+		fileCount = 1000
+	}
+	est := time.Duration(fileCount) * perFile
+	if est < 5*time.Minute {
+		est = 5 * time.Minute
+	}
+	est = est + est/2 // +50% buffer
+	if est > 60*time.Minute {
+		est = 60 * time.Minute
+	}
+	// User override wins.
+	if v := os.Getenv("OBSERVER_SCAN_TIMEOUT"); v != "" {
+		if d, err := time.ParseDuration(v); err == nil && d >= time.Minute && d <= 60*time.Minute {
+			return d
+		}
+	}
+	return est
+}
+
+func formatDuration(d time.Duration) string {
+	if d < time.Minute {
+		return fmt.Sprintf("%ds", int(d.Seconds()))
+	}
+	m := int(d.Minutes())
+	s := int(d.Seconds()) % 60
+	if s == 0 {
+		return fmt.Sprintf("%dm", m)
+	}
+	return fmt.Sprintf("%dm%ds", m, s)
 }
 
 func printSummary(res *scanner.Result, tech *detector.TechStack) {
