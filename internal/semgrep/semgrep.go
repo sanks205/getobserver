@@ -15,6 +15,8 @@ import (
 	"errors"
 	"os/exec"
 	"strings"
+
+	"github.com/aipda/observer/internal/engineutil"
 )
 
 // ErrNotAvailable means the semgrep binary was not found on PATH.
@@ -52,8 +54,21 @@ func Scan(ctx context.Context, root, config string) ([]Finding, error) {
 	if config == "" {
 		config = "auto"
 	}
-	cmd := exec.CommandContext(ctx, "semgrep", "--json", "--quiet", "--config", config, root)
-	out, err := cmd.Output()
+	// Standard excludes: same as scanner.IsIgnoredDir + analyzer vendored/minified
+	// so Observer and pure Semgrep count the same source files (excluding vendor).
+	// SonarQube / Snyk / Semgrep all exclude vendor/node_modules/dist/minified — we match that.
+	excludes := []string{
+		"vendor", "node_modules", ".git", "dist", "build", ".venv", "venv",
+		"__pycache__", ".idea", ".vscode", "target", "bin", "obj",
+		"bower_components", "vendors", "third_party", "third-party", "assets",
+		"*.min.js", "*.bundle.js", "*-min.js",
+	}
+	args := []string{"--json", "--quiet", "--config", config}
+	for _, ex := range excludes {
+		args = append(args, "--exclude", ex)
+	}
+	args = append(args, root)
+	out, err := engineutil.Run(ctx, "", "semgrep", args...)
 	// Semgrep exits 1 when it finds something — that's success for us. Only treat
 	// it as an error if we got no parseable JSON back.
 	if len(out) == 0 && err != nil {
