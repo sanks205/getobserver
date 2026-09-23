@@ -9,8 +9,6 @@
 ![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20macOS%20%7C%20linux-lightgrey)
 ![Single binary](https://img.shields.io/badge/install-single%20binary%2C%20no%20deps-success)
 
-> ⭐ If Observer helped you, please star — it helps others find it.
-
 ## ⬇️ Get Observer
 
 Grab the single binary for your OS — no runtime, no dependencies, no account:
@@ -74,24 +72,26 @@ Health** (A–F), and writes a shareable `report.html` you can open or print to 
 
 ## How Observer compares
 
-Observer isn't trying to replace SonarQube or Sentry — it's a different *shape* of
-tool: a zero-setup, offline snapshot that unifies code, dependencies, runtime, and
-logs into one report. The honest picture:
+Observer isn't trying to replace SonarQube or Snyk — it's the only one that runs
+fully offline. No account, no upload: your code never leaves the machine. One
+binary unifies code, dependencies, runtime, and logs into one report. The honest picture:
 
 |  | **Observer** | SonarQube / Semgrep | Snyk | Sentry |
 |---|---|---|---|---|
 | **Setup** | One binary, offline, no account | Server/CI or cloud account | Cloud account | Instrument app + account |
+| **Code leaves your machine?** | Never — 100% local | Cloud tier uploads; self-host stays local | Yes (cloud) | Yes (telemetry) |
 | **Covers** | Code + deps + runtime + logs + **infra/config**, in **one report** | Code | Dependencies + code | Runtime errors |
 | **Static-analysis depth** | Core rules + optional Semgrep | **Deeper** (many languages) | Good | — |
+| **Engine transparency** | Built-in + Semgrep/PHPStan labeled per finding | Single engine, no source label | Single engine | — |
 | **Works air-gapped / no signup** | ✅ (enforceable — `--assert-offline`) | — | — | — |
 | **Pricing** | Free + one-time Pro | Subscription | Per-developer subscription | Usage + per-contributor |
 | **Best for** | Audits, handovers, SMB, offline | Continuous team quality | Dependency-heavy teams | Live production monitoring |
 
 **Use Observer when** you need a one-shot audit, a legacy/client handover, an
 air-gapped scan, or a unified health snapshot without standing up a server or
-paying per seat. **Reach for the others when** you need deep continuous static
-analysis at scale (SonarQube/Semgrep) or always-on production monitoring
-(Sentry/Datadog) — many teams happily run both.
+paying per seat — and your code can't leave the building. **Reach for the others when**
+you need deep continuous static analysis at scale (SonarQube/Semgrep) or always-on
+production monitoring (Sentry/Datadog) — many teams happily run both.
 
 ---
 
