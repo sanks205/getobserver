@@ -28,12 +28,17 @@ jobs:
       - name: Check formatting
         shell: bash
         run: |
-          unformatted="$(gofmt -l .)"
-          if [[ -n "$unformatted" ]]; then
-            echo "The following files need gofmt:"
-            echo "$unformatted"
-            exit 1
-          fi
+          failed=0
+          while IFS= read -r file; do
+            formatted="$(mktemp)"
+            gofmt "$file" > "$formatted"
+            if ! diff --strip-trailing-cr --brief "$file" "$formatted" >/dev/null; then
+              echo "$file needs gofmt"
+              failed=1
+            fi
+            rm -f "$formatted"
+          done < <(git ls-files '*.go')
+          exit "$failed"
 
       - name: Run tests
         run: go test -count=1 ./...
