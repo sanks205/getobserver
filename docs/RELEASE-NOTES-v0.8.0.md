@@ -34,7 +34,7 @@ Organization-ready PDF reporting, premium rules, SBOM generation, audit history,
 
 ## Upgrade
 
-Download the archive for your operating system and architecture from the GitHub release, then verify it with `SHA256SUMS.txt`.
+Download the binary for your operating system and architecture from the GitHub release, then verify it with `SHA256SUMS.txt`.
 
 Existing CLI usage remains compatible. Run the following after upgrading:
 
