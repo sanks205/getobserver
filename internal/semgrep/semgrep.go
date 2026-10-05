@@ -17,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/aipda/observer/internal/engineutil"
+	"github.com/aipda/observer/internal/scanner"
 )
 
 // ErrNotAvailable means the semgrep binary was not found on PATH.
@@ -58,11 +59,12 @@ func Scan(ctx context.Context, root, config string) ([]Finding, error) {
 	// so Observer and pure Semgrep count the same source files (excluding vendor).
 	// SonarQube / Snyk / Semgrep all exclude vendor/node_modules/dist/minified — we match that.
 	excludes := []string{
-		"vendor", "node_modules", ".git", "dist", "build", ".venv", "venv",
+		"vendor", "node_modules", ".git", ".kilo", "dist", "build", ".venv", "venv",
 		"__pycache__", ".idea", ".vscode", "target", "bin", "obj",
 		"bower_components", "vendors", "third_party", "third-party", "assets",
 		"*.min.js", "*.bundle.js", "*-min.js",
 	}
+	excludes = append(excludes, scanner.IgnoredDirs()...)
 	args := []string{"--json", "--quiet", "--config", config}
 	for _, ex := range excludes {
 		args = append(args, "--exclude", ex)
