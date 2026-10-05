@@ -3,7 +3,7 @@
 // The local/desktop tier uses a dependency-free file store: each scan is saved
 // as a metadata JSON file plus the rendered HTML report, under a data
 // directory. This keeps the binary self-contained (no SQLite/CGO, no server).
-// The hosted Cloud tier will swap in PostgreSQL behind the same Store interface.
+// The Store interface keeps persistence local and replaceable without adding a service dependency.
 package storage
 
 import (
