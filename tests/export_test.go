@@ -21,7 +21,7 @@ func exportData(t *testing.T) reporter.Data {
 		analyzer.Issue{RuleID: "DB_RAW_SQL_CONCAT", Severity: analyzer.High, Category: "Database",
 			Title: "SQL concat", File: "m.php", Line: 12, Recommendation: "Use bindings"},
 		analyzer.Issue{RuleID: "SEC_TOKEN", Severity: analyzer.Critical, Category: "Security",
-			Title: "Hardcoded key", File: "c.php", Line: 7, Recommendation: "Rotate"},
+			Title: "Hardcoded key", File: "c.php", Line: 7, Snippet: "API_KEY=OBSERVER_SENTINEL_SECRET_123456789", Recommendation: "Rotate"},
 	)
 	return reporter.Data{Scan: res, Analysis: a}
 }
@@ -58,6 +58,16 @@ func TestGenerateJSON(t *testing.T) {
 	}
 	if !found {
 		t.Error("expected SQL finding to carry CWE-89 + OWASP in JSON")
+	}
+	if strings.Contains(string(b), "OBSERVER_SENTINEL_SECRET") {
+		t.Fatal("secret survived JSON export")
+	}
+	html, err := reporter.RenderHTML(exportData(t))
+	if err != nil {
+		t.Fatalf("render HTML: %v", err)
+	}
+	if strings.Contains(html, "OBSERVER_SENTINEL_SECRET") {
+		t.Fatal("secret survived HTML report")
 	}
 }
 
