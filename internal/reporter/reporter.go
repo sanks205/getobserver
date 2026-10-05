@@ -34,12 +34,13 @@ var reportTemplate string
 // view model (rather than rendering the scanner.Result directly) decouples the
 // presentation layer from internal data structures.
 type HTMLModel struct {
-	ProjectName string
-	RootPath    string
-	GeneratedAt string
-	ScanInfo    string // e.g. "Scanned 1157 files in 0.53s"
-	Language    string
-	Markers     []string
+	ProjectName  string
+	RootPath     string
+	GeneratedAt  string
+	ScanInfo     string // e.g. "Scanned 1157 files in 0.53s"
+	ExcludedDirs string
+	Language     string
+	Markers      []string
 
 	// Phase 13 banners.
 	BaselineApplied    bool
@@ -54,9 +55,9 @@ type HTMLModel struct {
 	DiffScope        string // "" = full scan; else "diff" / "diff-staged" / "diff-base:<ref>"
 	DiffFilesChanged int
 	TotalFiles       int
-	TotalDirs          int
-	Categories         []kv
-	TopExtensions      []kv
+	TotalDirs        int
+	Categories       []kv
+	TopExtensions    []kv
 
 	// Phase 2 technology detection.
 	Frameworks     []techItem
@@ -214,7 +215,8 @@ type Data struct {
 	AI       *ai.Report
 
 	// DurationMs is the wall-clock scan time in milliseconds (0 = not measured).
-	DurationMs int64
+	DurationMs   int64
+	ExcludedDirs []string
 
 	// Phase 13 status banners (set by the CLI).
 	BaselineApplied    bool
@@ -271,6 +273,7 @@ func RenderHTML(d Data) (string, error) {
 		TotalDirs:     res.TotalDirs,
 		Categories:    sortedCategories(res.Categories),
 		TopExtensions: topExtensions(res.FilesByExt, 10),
+		ExcludedDirs:  strings.Join(d.ExcludedDirs, ", "),
 	}
 	if tech != nil {
 		model.Frameworks = toItems(tech.Frameworks)
@@ -396,7 +399,7 @@ func toRuntimeItems(rootAbs string, groups []runtime.Group) []runtimeGroupItem {
 			Count:    g.Count,
 			Location: loc,
 			LastSeen: g.LastSeen,
-			Message:  g.LastMessage,
+			Message:  analyzer.RedactText(g.LastMessage),
 			Link:     link,
 			HasLink:  hasLink,
 		})
@@ -480,9 +483,9 @@ func toLogItems(groups []logger.Group) []logGroupItem {
 			Count:    g.Count,
 			Level:    g.Level,
 			Category: g.Category,
-			Sample:   g.Sample,
+			Sample:   analyzer.RedactText(g.Sample),
 			LastSeen: g.LastSeen,
-			Cause:    g.Cause,
+			Cause:    analyzer.RedactText(g.Cause),
 		})
 	}
 	return out
