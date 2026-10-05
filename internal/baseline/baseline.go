@@ -26,6 +26,7 @@ type file struct {
 // offending content (snippet, or title when there is no snippet, e.g. CVEs).
 // Line numbers are intentionally excluded so edits elsewhere don't churn it.
 func Fingerprint(is analyzer.Issue) string {
+	is = analyzer.SanitizeIssue(is)
 	key := is.Snippet
 	if key == "" {
 		key = is.Title
