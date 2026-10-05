@@ -23,6 +23,9 @@ Then point it at any project:
 
 ```bash
 observer analyze . --out report.html
+
+# Exclude project-specific generated or fixture directories by basename
+observer analyze . --exclude-dir fixtures,generated --out report.html
 ```
 
 You get **one self-contained `report.html`** — grouped findings, a standards-aligned Security Rating (A–E), and a suggested fix for every issue. Fully offline; open it in a browser or print to PDF.
@@ -30,21 +33,20 @@ You get **one self-contained `report.html`** — grouped findings, a standards-a
 ---
 
 > A developer-friendly tool that analyzes an application/codebase and generates a
-> **production health report** — combining static analysis, technology detection,
-> runtime error analysis, log analysis, dependency analysis, infrastructure &
+> **production health report** - combining static analysis, technology detection,
+> runtime error analysis, log analysis, dependency analysis, infrastructure and
 > config checks (Dockerfile / compose / Kubernetes / .env / web-server), and
-> AI-powered explanations.
+> optional AI-powered explanations.
 
 The goal: help developers quickly identify production issues without manually
 searching through huge codebases and server logs.
 
 The CLI binary is named **`observer`**.
 
-> **Status:** Phases 1–13 complete — CLI, technology detection, static analysis,
-> runtime capture, log analysis, AI, HTML report, packaging, local dashboard,
-> dependency CVEs, and CI/team workflow. **Observer Pro** adds paid add-ons
-> (branded PDF, scheduled scans, premium framework rules); a hosted Cloud is
-> future. See [PRODUCT.md](PRODUCT.md).
+> **Status:** The local CLI, technology detection, static analysis, runtime and
+> log analysis, HTML reporting, packaging, dashboard, opt-in dependency CVEs, and
+> CI workflow are implemented. Observer Pro adds local reporting and repeat-audit
+> workflow features; no hosted service is required.
 
 ---
 
@@ -52,46 +54,40 @@ The CLI binary is named **`observer`**.
 
 ![Observer scanning a project and opening the production-health report](docs/observer-demo.gif)
 
-Point it at any codebase and get one self-contained HTML report — no server, no
+Point it at any codebase and get one self-contained HTML report - no server, no
 account, no instrumentation:
 
 ```bash
 observer analyze ./examples/php-demo --ai --out report.html
 ```
 
-Observer detects the stack, flags security / runtime / dependency issues with
+Observer detects the stack, flags security, runtime, and dependency issues with
 severity and suggested fixes, scores the project on **Security** and **Code
-Health** (A–F), and writes a shareable `report.html` you can open or print to PDF.
+Health**, and writes a shareable `report.html` you can open or print to PDF.
 
-> **🎉 Launch offer** — Observer's core is **free & MIT, so start there.** If it earns a place in
-> your workflow, the optional [**Observer Pro**](#observer-pro) add-ons (branded PDF reports,
-> scheduled scans, deeper framework rules) are **25% off** during launch with code **`LAUNCH25`** —
-> one-time purchase, first 25 buyers.
+Observer Community is free and MIT licensed and produces detailed HTML, JSON, CSV, and SARIF outputs. Observer Pro adds an organization-ready PDF with document control, grouped remediation planning, bookmarks, hyperlinks, optional client branding, and repeat-audit workflow features without a hosted dependency.
 
 ---
 
 ## How Observer compares
 
-Observer isn't trying to replace SonarQube or Snyk — it's the only one that runs
-fully offline. No account, no upload: your code never leaves the machine. One
-binary unifies code, dependencies, runtime, and logs into one report. The honest picture:
+Observer is a local audit snapshot, not a replacement for a full semantic SAST
+platform or production monitoring service. It combines lightweight built-in
+heuristics with optional local tools and produces one report without requiring
+an account.
 
-|  | **Observer** | SonarQube / Semgrep | Snyk | Sentry |
+| | **Observer** | **Full SAST platforms** | **Cloud security tools** | **Production monitoring** |
 |---|---|---|---|---|
-| **Setup** | One binary, offline, no account | Server/CI or cloud account | Cloud account | Instrument app + account |
-| **Code leaves your machine?** | Never — 100% local | Cloud tier uploads; self-host stays local | Yes (cloud) | Yes (telemetry) |
-| **Covers** | Code + deps + runtime + logs + **infra/config**, in **one report** | Code | Dependencies + code | Runtime errors |
-| **Static-analysis depth** | Core rules + optional Semgrep | **Deeper** (many languages) | Good | — |
-| **Engine transparency** | Built-in + Semgrep/PHPStan labeled per finding | Single engine, no source label | Single engine | — |
-| **Works air-gapped / no signup** | ✅ (enforceable — `--assert-offline`) | — | — | — |
-| **Pricing** | Free + one-time Pro | Subscription | Per-developer subscription | Usage + per-contributor |
-| **Best for** | Audits, handovers, SMB, offline | Continuous team quality | Dependency-heavy teams | Live production monitoring |
+| **Primary job** | Private audit snapshot and handover report | Deep continuous code analysis | Hosted code/dependency analysis | Live errors and telemetry |
+| **Setup** | One local binary | Local, self-hosted, or cloud setup | Account and cloud workflow | Application instrumentation |
+| **Analysis depth** | Curated heuristics; optional local engines | Deeper language and data-flow analysis | Varies by vendor | Runtime rather than source audit |
+| **Offline use** | Default; enforce with `--assert-offline` | Available in some products/editions | Usually cloud-dependent | Usually cloud-dependent |
+| **Best fit** | Client audits, legacy reviews, handovers, air-gapped work | Large continuous engineering programs | Managed security programs | Operating live applications |
 
-**Use Observer when** you need a one-shot audit, a legacy/client handover, an
-air-gapped scan, or a unified health snapshot without standing up a server or
-paying per seat — and your code can't leave the building. **Reach for the others when**
-you need deep continuous static analysis at scale (SonarQube/Semgrep) or always-on
-production monitoring (Sentry/Datadog) — many teams happily run both.
+Use Observer when privacy, fast setup, and a readable point-in-time report matter.
+Use a deeper SAST platform when you need broad semantic analysis, centralized
+policy management, or large-team governance. The tools can complement each
+other.
 
 ---
 
@@ -113,10 +109,10 @@ observer analyze . --diff-base main --fail-on High
 observer install-hook            # one-time; bypass a commit with `git commit --no-verify`
 ```
 
-Add `--attest attestation.json` to any scan to emit a machine-readable record —
-*"scanned by Observer, 0 High, PASS"* — to attach to a PR or keep for an audit trail.
-It's the same offline binary: your code never leaves your machine, and there's no account.
-*(Observer Pro can cryptographically sign the attestation for tamper-evident evidence.)*
+Add `--attest attestation.json` to emit a machine-readable local scan record for
+a PR or audit trail. It records the tool version, scope, finding counts, and gate
+outcome. Observer Pro can add an HMAC companion file for local workflow integrity;
+this is not a third-party signature or certification.
 
 ---
 
@@ -124,7 +120,7 @@ It's the same offline binary: your code never leaves your machine, and there's n
 
 Observer runs **fully offline by default** — nothing about your code ever leaves your
 machine. There is no account, no telemetry, and no phone-home. The only features that
-touch the network are explicitly opt-in: `--cve` (OSV.dev dependency lookup), `--ai`
+touch the network are explicitly opt-in: `--cve` (OSV.dev dependency lookup), `--semgrep` when using `auto` or registry rules, and `--ai`
 *with* an `OPENAI_API_KEY`, and the `--email` / `--slack` / `--teams` / `--webhook`
 notifiers. Leave them off and the scan is entirely local.
 
@@ -135,11 +131,19 @@ For regulated, air-gapped, or client-confidential work you can make that guarant
 observer analyze ./my-project --assert-offline
 ```
 
-`--assert-offline` refuses to run if any network-requiring flag was passed, and unsets
-`OPENAI_API_KEY` so the AI layer stays on its local heuristic. It prints
-`Offline mode: no network I/O.` so you can evidence it in an audit. Ideal for finance,
+`--assert-offline` refuses network-capable options, requires `SEMGREP_CONFIG` to point to an existing local file or directory when `--semgrep` is used, and unsets
+`OPENAI_API_KEY` so the AI layer stays on its local heuristic.
+
+Inspect the privacy contract and available optional local engines without scanning:
+
+```bash
+observer doctor
+```
+
+During an enforced scan, Observer prints
+`Offline mode: no network I/O.` so the enforced mode is visible in an audit log. Ideal for finance,
 healthcare, government/defense, or auditing a client's code under NDA — the code stays
-put, and you can prove it.
+put.
 
 ---
 
@@ -412,7 +416,7 @@ detected signals, code structure, and file-type breakdown.
 | 12+ | Optional engine wrappers — Semgrep / PHPStan / Bandit / gosec / ESLint ✅ (auto-detected) | ✅ Done |
 | 13 | CI & team workflow (SARIF, quality gate, baseline, GitHub workflow) | ✅ Done |
 | 14 | Changed-code scanning — `--diff` gate + attestation + pre-commit hook (AI-code safety net) | ✅ Done |
-| 15 | Desktop app (Pro) & hosted Cloud (Team), multi-language agents | ⏳ Planned |
+| 15 | Deeper local analyzers and additional runtime agents | Planned |
 
 For the product vision, editions, and positioning see **[PRODUCT.md](PRODUCT.md)**.
 

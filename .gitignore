@@ -1,0 +1,45 @@
+# Binaries
+/observer
+/observer.exe
+*.exe
+*.out
+/bin/
+
+# Generated reports (any HTML at the repo root is a generated report)
+/*.html
+report.html
+*.report.html
+
+# Generated CI/scan artifacts
+*.sarif
+
+# Go
+/vendor/
+*.test
+coverage.out
+
+# Release build output
+/dist/
+
+# Runtime agent output (the committed test fixture under tests/ is kept)
+observer-runtime.jsonl
+
+# Composed email files (dry-run)
+*.eml
+
+# Env / secrets
+.env
+.env.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+# Local diagnostics and release archives
+/*.log
+/*.zip
+/*.pdf
+/*.sig
+/observer.exe~
+/dist-test*/
