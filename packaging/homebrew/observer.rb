@@ -7,22 +7,22 @@ class Observer < Formula
   on_macos do
     on_arm do
       url "https://github.com/sanks205/getobserver/releases/download/v0.8.0/observer_darwin_arm64"
-      sha256 "862f7d88a563e00c1d1556e47f5d424348d2fd45f5ae889e1cc1446c564d247a"
+      sha256 "928d0ebe7f7aac50d60262bc60f7309d03d7c20fb1562b2296dfeccdc3474821"
     end
     on_intel do
       url "https://github.com/sanks205/getobserver/releases/download/v0.8.0/observer_darwin_amd64"
-      sha256 "43ae3dc2eedf093e830adc591faa9a230148a0061d117d54af4bb35a6797644c"
+      sha256 "97b1f832d37b2b8cc8465d8f19c19a0ad7c04fba59a84232f508199e4001049b"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/sanks205/getobserver/releases/download/v0.8.0/observer_linux_arm64"
-      sha256 "01e12d8abe45bbaf8eb9eeba5711d1882b2be2907c2f91ecd77669b4b624966c"
+      sha256 "83596afd4b1b6b7b5209656b31d123fb1d381db6d499621b66c09bc2c568f576"
     end
     on_intel do
       url "https://github.com/sanks205/getobserver/releases/download/v0.8.0/observer_linux_amd64"
-      sha256 "bf96d972820db65701d004c03c5be7791faa4eb7ab098bede95ed5bbc68ee0a8"
+      sha256 "d8445757e4133a1e68790b2cc697647b39ef79986d9546adba34798021665ed4"
     end
   end
 
