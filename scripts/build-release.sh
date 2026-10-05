@@ -7,13 +7,13 @@
 # Usage:  ./scripts/build-release.sh [VERSION]
 set -euo pipefail
 
-VERSION="${1:-0.1.0}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+VERSION="${1:-$(tr -d '\r\n' < "$ROOT/VERSION")}"
 DIST="$ROOT/dist"
 mkdir -p "$DIST"
 
 export CGO_ENABLED=0
-LDFLAGS="-s -w -X main.version=$VERSION"
+LDFLAGS="-s -w -X github.com/aipda/observer/internal/buildinfo.Version=$VERSION"
 
 targets=(
   "windows/amd64/.exe"

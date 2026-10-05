@@ -6,15 +6,16 @@
 #
 # Usage:  pwsh scripts/build-release.ps1 [-Version 1.0.0]
 
-param([string]$Version = "0.1.0")
+param([string]$Version = "")
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $PSScriptRoot
+if (-not $Version) { $Version = (Get-Content (Join-Path $root "VERSION") -Raw).Trim() }
 $dist = Join-Path $root "dist"
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
 
 $env:CGO_ENABLED = "0"                      # fully static, cross-compile-safe
-$ldflags = "-s -w -X main.version=$Version" # strip debug info + stamp version
+$ldflags = "-s -w -X github.com/aipda/observer/internal/buildinfo.Version=$Version" # strip debug info + stamp version
 
 $targets = @(
   @{ os = "windows"; arch = "amd64"; ext = ".exe" },
