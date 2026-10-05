@@ -223,7 +223,7 @@ function showEnginePrompt(path,cats,minSev,pj,rechecked,btn,st){
   var stack=(pj.stack||[]).join(', ');
   var html='<div class="eng-card">';
   html+='<div class="eng-title">Recommended for accurate analysis of this '+(stack||'project')+' project</div>';
-  html+='<div class="eng-sub">Install any to cut false positives. They run 100% locally — nothing leaves your machine. You can scan now with the built-in engine only, or install first for deeper results.</div>';
+  html+='<div class="eng-sub">Install any to cut false positives. They run as local processes. Semgrep registry configs may download rules; use --assert-offline with a local SEMGREP_CONFIG for air-gapped scans. You can scan now with the built-in engine only, or install first for deeper results.</div>';
   html+='<ul class="eng-list">';
   (pj.missing||[]).forEach(function(e){
     html+='<li><b>'+escapeHtml(e.name)+'</b> — '+escapeHtml(e.reason);

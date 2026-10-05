@@ -289,7 +289,7 @@ func (s *Server) runScan(req scanRequest) (storage.Record, error) {
 		Stack:      stackNames(tech),
 		DurationMs: durationMs,
 		EngineMode: engineMode,
-		Engines:   ranEngines,
+		Engines:    ranEngines,
 	}
 	if analysis != nil {
 		rec.Total = len(analysis.Issues)
