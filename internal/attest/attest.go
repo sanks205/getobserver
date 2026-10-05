@@ -1,8 +1,7 @@
-// Package attest writes a small, machine-readable record of a scan — what was
-// scanned, what was found, and whether the quality gate passed. Attach it to a
-// PR or keep it as evidence that a change was checked ("AI wrote it, Observer
-// proves it's safe"). The free build emits a plain JSON attestation; Observer
-// Pro can sign it.
+// Package attest writes a machine-readable local scan record: what was scanned,
+// what was found, and whether the quality gate passed. It can support a review
+// trail, but it is not third-party certification. Pro may add a local HMAC
+// companion file for workflow integrity checks.
 package attest
 
 import (
