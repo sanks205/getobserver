@@ -6,12 +6,12 @@
   "architecture": {
     "64bit": {
       "url": "https://github.com/sanks205/getobserver/releases/download/v0.8.0/observer_windows_amd64.exe",
-      "hash": "6ae2aaf6d69f9d17d92d4da1461251dba3828c5961a1f8d99b392d30fca40125",
+      "hash": "0436a9a39eacb4145fa7d35bdcbece0f32f6361e09cfeeeae77d25e7b3740dfd",
       "bin": [["observer_windows_amd64.exe", "observer"]]
     },
     "arm64": {
       "url": "https://github.com/sanks205/getobserver/releases/download/v0.8.0/observer_windows_arm64.exe",
-      "hash": "1b1f36cff5310c1b796251631cabbbec9dc20d6cc42f7db2c3c7d56f8433cf4b",
+      "hash": "e6c5af2bae67c738d6a46a4ed5e9044896eaf6652cb47bed731bb981e1a2edf5",
       "bin": [["observer_windows_arm64.exe", "observer"]]
     }
   },
