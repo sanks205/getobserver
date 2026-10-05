@@ -142,27 +142,23 @@
 
   <section id="compare">
     <h2>How Observer compares</h2>
-    <p class="section-lede">Observer isn't trying to replace SonarQube or Snyk — it's the only one that runs fully offline. No account, no upload: your code never leaves the machine. One binary unifies code, deps, runtime, and logs into one report.</p>
+    <p class="section-lede">Observer is a private audit snapshot, not a replacement for full semantic SAST or production monitoring. It combines curated local checks and optional local engines in one report.</p>
     <div class="cmpwrap">
       <table class="cmp">
         <thead>
-          <tr><th></th><th class="obs">Observer</th><th>SonarQube / Semgrep</th><th>Snyk</th><th>Sentry</th></tr>
+          <tr><th></th><th class="obs">Observer</th><th>Full SAST</th><th>Cloud security</th><th>Production monitoring</th></tr>
         </thead>
         <tbody>
-          <tr><th>Setup</th><td class="obs">One binary, offline, no account</td><td>Server/CI or cloud account</td><td>Cloud account</td><td>Instrument app + account</td></tr>
-          <tr><th>Code leaves your machine?</th><td class="obs">Never — 100% local</td><td>Cloud tier uploads; self-host stays local</td><td>Yes (cloud)</td><td>Yes (telemetry)</td></tr>
-          <tr><th>Covers</th><td class="obs">Code + deps + runtime + logs, in one report</td><td>Code</td><td>Dependencies + code</td><td>Runtime errors</td></tr>
-          <tr><th>Static-analysis depth</th><td class="obs">Core rules + optional Semgrep</td><td>Deeper (many languages)</td><td>Good</td><td>—</td></tr>
-          <tr><th>Engine transparency</th><td class="obs">Built-in + Semgrep/PHPStan labeled per finding</td><td>Single engine, no source label</td><td>Single engine</td><td>—</td></tr>
-          <tr><th>Air-gapped / no signup</th><td class="obs">✓</td><td>—</td><td>—</td><td>—</td></tr>
-          <tr><th>Pricing</th><td class="obs">Free + one-time Pro</td><td>Subscription</td><td>Per-developer subscription</td><td>Usage + per-contributor</td></tr>
-          <tr><th>Best for</th><td class="obs">Audits, handovers, SMB, offline</td><td>Continuous team quality</td><td>Dependency-heavy teams</td><td>Live production monitoring</td></tr>
+          <tr><th>Primary job</th><td class="obs">Private audit snapshot</td><td>Deep continuous code analysis</td><td>Managed hosted analysis</td><td>Live errors and telemetry</td></tr>
+          <tr><th>Setup</th><td class="obs">One local binary</td><td>Local, server, or cloud setup</td><td>Account and cloud workflow</td><td>Application instrumentation</td></tr>
+          <tr><th>Analysis depth</th><td class="obs">Curated heuristics + optional local engines</td><td>Deeper semantic analysis</td><td>Varies by vendor</td><td>Runtime rather than source audit</td></tr>
+          <tr><th>Offline use</th><td class="obs">Default; enforceable</td><td>Available in some products</td><td>Usually cloud-dependent</td><td>Usually cloud-dependent</td></tr>
+          <tr><th>Best fit</th><td class="obs">Client audits, handovers, air-gapped work</td><td>Large continuous programs</td><td>Managed security programs</td><td>Operating live applications</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="cmpnote"><b>Use Observer when</b> you need a one-shot audit, a legacy/client handover, an air-gapped scan, or a unified health snapshot without a server or per-seat pricing — and your code can't leave the building. <b>Reach for the others when</b> you need deep continuous static analysis at scale or always-on production monitoring — many teams run both.</p>
+    <p class="cmpnote"><b>Use Observer when</b> privacy, fast setup, and a readable point-in-time report matter. <b>Use deeper SAST</b> for broad semantic analysis, centralized policy, or large-team governance. The tools can complement each other.</p>
   </section>
-
   <section id="pricing">
     <h2>Pricing</h2>
     <p class="section-lede">Open-core: the full CLI <em>and</em> the local dashboard are free forever. Pro add-ons are a one-time purchase — buy only what you need.</p>
@@ -179,13 +175,7 @@
         <ul><li><a href="https://observerly1.gumroad.com/l/observer-pdf">Branded PDF reports — $39</a></li><li><a href="https://observerly1.gumroad.com/l/observer-schedule">Scheduled / automatic scans — $29</a></li><li><a href="https://observerly1.gumroad.com/l/observer-rules-php">Premium framework rules — $49</a></li></ul>
         <a class="btn btn-primary" href="https://observerly1.gumroad.com/l/observer-pro">Get All-Access — $89</a>
       </div>
-      <div class="tier">
-        <h3>Cloud / Team</h3><div class="who">Teams &amp; organizations</div>
-        <div class="amt">Subscription <small>future</small></div>
-        <ul><li>Everything in Pro</li><li>Hosted, multi-user</li><li>Team, roles &amp; audit log</li><li>Hosted AI included</li></ul>
-        <a class="btn btn-ghost" href="#">Coming soon</a>
-      </div>
-    </div>
+</div>
   </section>
 
   <footer>
