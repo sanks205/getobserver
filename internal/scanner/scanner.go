@@ -8,17 +8,20 @@
 package scanner
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 )
 
 // ignoredDirs are directories that should never be walked. They contain
 // vendored or generated code that would skew file counts and slow scanning.
 var ignoredDirs = map[string]bool{
 	".git":         true,
+	".kilo":        true, // local AI/worktree metadata can contain duplicate source trees
 	"node_modules": true,
 	"vendor":       true,
 	"dist":         true,
@@ -33,10 +36,50 @@ var ignoredDirs = map[string]bool{
 	"obj":          true,
 }
 
+var ignoredDirsMu sync.RWMutex
+
 // IsIgnoredDir reports whether a directory of the given name should be skipped
 // during traversal (vendored/generated code). Exported so other modules (e.g.
 // the detector) walk the project consistently with the scanner.
-func IsIgnoredDir(name string) bool { return ignoredDirs[name] }
+func IsIgnoredDir(name string) bool {
+	ignoredDirsMu.RLock()
+	defer ignoredDirsMu.RUnlock()
+	return ignoredDirs[strings.ToLower(name)]
+}
+
+// AddIgnoredDirs adds validated directory basenames to the process-wide scan
+// policy. It is intended for CLI startup before scan workers are launched.
+func AddIgnoredDirs(names []string) error {
+	clean := make([]string, 0, len(names))
+	for _, name := range names {
+		name = strings.TrimSpace(name)
+		if name == "" {
+			continue
+		}
+		if name == "." || name == ".." || filepath.Base(name) != name || strings.ContainsAny(name, `/\`) {
+			return fmt.Errorf("invalid excluded directory %q: use a directory name, not a path", name)
+		}
+		clean = append(clean, strings.ToLower(name))
+	}
+	ignoredDirsMu.Lock()
+	defer ignoredDirsMu.Unlock()
+	for _, name := range clean {
+		ignoredDirs[name] = true
+	}
+	return nil
+}
+
+// IgnoredDirs returns the effective directory exclusion names in stable order.
+func IgnoredDirs() []string {
+	ignoredDirsMu.RLock()
+	defer ignoredDirsMu.RUnlock()
+	out := make([]string, 0, len(ignoredDirs))
+	for name := range ignoredDirs {
+		out = append(out, name)
+	}
+	sort.Strings(out)
+	return out
+}
 
 // markerFiles map a well-known dependency manifest to a human label. Their mere
 // presence is a strong technology signal that the Phase 2 detector will expand.
@@ -137,7 +180,7 @@ func Scan(path string) (*Result, error) {
 		name := d.Name()
 
 		if d.IsDir() {
-			if p != abs && ignoredDirs[name] {
+			if p != abs && IsIgnoredDir(name) {
 				return fs.SkipDir
 			}
 			if p != abs {
