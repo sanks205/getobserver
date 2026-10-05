@@ -626,6 +626,7 @@ func CountAtLeast(r *Result, minSeverity Severity) int {
 
 func (r *Result) add(issues ...Issue) {
 	for _, is := range issues {
+		is = SanitizeIssue(is)
 		r.Issues = append(r.Issues, is)
 		r.BySeverity[is.Severity]++
 		r.ByCategory[is.Category]++
