@@ -26,8 +26,10 @@ import (
 	"github.com/aipda/observer/internal/attest"
 	"github.com/aipda/observer/internal/bandit"
 	"github.com/aipda/observer/internal/baseline"
+	"github.com/aipda/observer/internal/buildinfo"
 	"github.com/aipda/observer/internal/deps"
 	"github.com/aipda/observer/internal/detector"
+	"github.com/aipda/observer/internal/doctor"
 	"github.com/aipda/observer/internal/email"
 	"github.com/aipda/observer/internal/eslint"
 	"github.com/aipda/observer/internal/gitdiff"
@@ -44,8 +46,14 @@ import (
 	"github.com/aipda/observer/internal/storage"
 )
 
-// version is stamped at build time via -ldflags "-X main.version=...".
-var version = "0.7.0"
+// version is stamped at build time via -ldflags "-X github.com/aipda/observer/internal/buildinfo.Version=...".
+var version = buildinfo.Version
+
+const (
+	exitOK = iota
+	exitError
+	exitGate
+)
 
 func main() {
 	if len(os.Args) < 2 {
@@ -57,7 +65,7 @@ func main() {
 			os.Exit(runServe(nil, true))
 		}
 		usage()
-		os.Exit(1)
+		os.Exit(exitError)
 	}
 
 	switch os.Args[1] {
@@ -69,6 +77,8 @@ func main() {
 		os.Exit(runServe(os.Args[2:], false))
 	case "install-hook":
 		os.Exit(runInstallHook(os.Args[2:]))
+	case "doctor":
+		os.Exit(runDoctor("Community"))
 	case "version", "-v", "--version":
 		fmt.Printf("observer %s\n", version)
 	case "help", "-h", "--help":
@@ -76,8 +86,13 @@ func main() {
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %q\n\n", os.Args[1])
 		usage()
-		os.Exit(1)
+		os.Exit(exitError)
 	}
+}
+
+func runDoctor(edition string) int {
+	doctor.WriteText(os.Stdout, doctor.Inspect(version, edition))
+	return exitOK
 }
 
 func runAnalyze(args []string) int {
@@ -99,13 +114,14 @@ func runAnalyze(args []string) int {
 	jsonFlag := fs.String("json", "", "also write findings + scores as JSON to this file")
 	csvFlag := fs.String("csv", "", "also write findings as CSV (Excel-compatible) to this file")
 	disableFlag := fs.String("disable", "", "comma-separated rule IDs to ignore (e.g. PERF_SELECT_STAR,PHP_SUPERGLOBAL_INPUT)")
+	excludeDirsFlag := fs.String("exclude-dir", "", "comma-separated directory names to exclude everywhere (e.g. fixtures,generated)")
 	slackFlag := fs.String("slack", "", "post a summary to this Slack incoming-webhook URL (or set SLACK_WEBHOOK)")
 	teamsFlag := fs.String("teams", "", "post a summary to this Microsoft Teams webhook URL (or set TEAMS_WEBHOOK)")
 	webhookFlag := fs.String("webhook", "", "POST the JSON report to this generic webhook URL")
 	failOn := fs.String("fail-on", "", "exit non-zero if any finding is at/above this severity: Low|Medium|High|Critical")
 	baselineFile := fs.String("baseline", "", "suppress findings recorded in this baseline file (report only new issues)")
 	writeBaseline := fs.String("write-baseline", "", "write the current findings to this baseline file and exit-code 0")
-	assertOffline := fs.Bool("assert-offline", false, "guarantee no network I/O: refuse network flags (--cve/--email/--slack/--teams/--webhook) and force AI to the local heuristic")
+	assertOffline := fs.Bool("assert-offline", false, "guarantee no network I/O: refuse network options, require a local Semgrep config, and force AI to the local heuristic")
 	diffFlag := fs.Bool("diff", false, "scan only lines changed in the working tree vs HEAD (review what you or an AI assistant just wrote); run from the repo root")
 	diffStaged := fs.Bool("diff-staged", false, "scan only staged changes (git diff --cached) — ideal for a pre-commit hook")
 	diffBase := fs.String("diff-base", "", "scan only lines changed on the current branch since it diverged from this ref (e.g. main) — PR review")
@@ -119,21 +135,31 @@ func runAnalyze(args []string) int {
 	if len(rest) == 0 {
 		fmt.Fprintln(os.Stderr, "error: missing project path")
 		fmt.Fprintln(os.Stderr, "usage: observer analyze <project-path> [--out report.html]")
-		return 1
+		return exitError
 	}
 	target := rest[0]
 	if len(rest) > 1 {
 		_ = fs.Parse(rest[1:])
 	}
 
+	for _, value := range []struct{ name, severity string }{
+		{"--min-severity", *minSevFlag},
+		{"--fail-on", *failOn},
+	} {
+		if err := validateSeverityFlag(value.name, value.severity); err != nil {
+			fmt.Fprintln(os.Stderr, "error:", err)
+			return exitError
+		}
+	}
+
 	info, err := os.Stat(target)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: cannot access %q: %v\n", target, err)
-		return 1
+		return exitError
 	}
 	if !info.IsDir() {
 		fmt.Fprintf(os.Stderr, "error: %q is not a directory\n", target)
-		return 1
+		return exitError
 	}
 
 	// Air-gapped guarantee: fail fast if any network-requiring option was asked
@@ -144,6 +170,9 @@ func runAnalyze(args []string) int {
 		var netFlags []string
 		if *cveFlag {
 			netFlags = append(netFlags, "--cve")
+		}
+		if *semgrepFlag && semgrepConfigNeedsNetwork(os.Getenv("SEMGREP_CONFIG")) {
+			netFlags = append(netFlags, "--semgrep (set SEMGREP_CONFIG to an existing local file or directory)")
 		}
 		if *emailTo != "" {
 			netFlags = append(netFlags, "--email")
@@ -159,7 +188,7 @@ func runAnalyze(args []string) int {
 		}
 		if len(netFlags) > 0 {
 			fmt.Fprintf(os.Stderr, "error: --assert-offline forbids network operations, but these were requested: %s\n", strings.Join(netFlags, ", "))
-			return 1
+			return exitError
 		}
 		if os.Getenv("OPENAI_API_KEY") != "" {
 			_ = os.Unsetenv("OPENAI_API_KEY") // force the AI layer to the local heuristic
@@ -176,12 +205,23 @@ func runAnalyze(args []string) int {
 		}
 	}
 
+	var customExcludedDirs []string
+	for _, name := range strings.Split(*excludeDirsFlag, ",") {
+		if name = strings.TrimSpace(name); name != "" {
+			customExcludedDirs = append(customExcludedDirs, name)
+		}
+	}
+	if err := scanner.AddIgnoredDirs(customExcludedDirs); err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		return exitError
+	}
+
 	fmt.Printf("Scanning %s ...\n", target)
 	t0 := time.Now()
 	res, err := scanner.Scan(target)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: scan failed: %v\n", err)
-		return 1
+		return exitError
 	}
 	timed("scan", t0)
 
@@ -421,7 +461,7 @@ func runAnalyze(args []string) int {
 		changes, err := gitdiff.Resolve(target, mode, *diffBase)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error: --diff could not read git changes: %v\n", err)
-			return 1
+			return exitError
 		}
 		diffFilesChanged = changes.FileCount()
 		analysis = analysis.Keep(func(is analyzer.Issue) bool { return changes.Contains(is.File, is.Line) })
@@ -521,7 +561,7 @@ func runAnalyze(args []string) int {
 	outPath, _ := filepath.Abs(*out)
 	data := reporter.Data{
 		Scan: res, Tech: tech, Analysis: analysis, Runtime: rtSummary, Logs: logSummary,
-		AI: aiReport, DurationMs: scanMs,
+		AI: aiReport, DurationMs: scanMs, ExcludedDirs: customExcludedDirs,
 		BaselineApplied: baselineApplied, BaselineSuppressed: baselineSuppressed, BaselineNew: baselineNew,
 		GateEnabled: gateEnabled, GateThreshold: *failOn, GateFailCount: gateFailCount,
 		Version: version, DiffScope: diffScope, DiffFilesChanged: diffFilesChanged,
@@ -531,7 +571,7 @@ func runAnalyze(args []string) int {
 	if *out != "" {
 		if err := reporter.GenerateHTML(data, *out); err != nil {
 			fmt.Fprintf(os.Stderr, "error: failed to write report: %v\n", err)
-			return 1
+			return exitError
 		}
 		fmt.Printf("\nReport written to %s\n", outPath)
 	}
@@ -576,7 +616,7 @@ func runAnalyze(args []string) int {
 		} else {
 			fmt.Printf("Baseline written to %s (%d finding(s))\n", *writeBaseline, n)
 		}
-		return 0
+		return exitOK
 	}
 
 	// Phase 8 — email the report (opt-in via --email).
@@ -589,9 +629,9 @@ func runAnalyze(args []string) int {
 	// Phase 13 — CI quality gate (reuses the count computed above).
 	if gateEnabled && gateFailCount > 0 {
 		fmt.Fprintf(os.Stderr, "Quality gate failed: %d finding(s) at or above %s severity\n", gateFailCount, *failOn)
-		return 2
+		return exitGate
 	}
-	return 0
+	return exitOK
 }
 
 // emailReport composes a summary, attaches the HTML report, and sends it (or
@@ -694,6 +734,31 @@ func formatDuration(d time.Duration) string {
 	return fmt.Sprintf("%dm%ds", m, s)
 }
 
+func semgrepConfigNeedsNetwork(config string) bool {
+	config = strings.TrimSpace(config)
+	if config == "" {
+		return true // the Semgrep adapter defaults to "auto", which may fetch registry rules
+	}
+	lower := strings.ToLower(config)
+	if lower == "auto" || strings.HasPrefix(lower, "p/") ||
+		strings.HasPrefix(lower, "r/") || strings.HasPrefix(lower, "http://") ||
+		strings.HasPrefix(lower, "https://") {
+		return true
+	}
+	_, err := os.Stat(config)
+	return err != nil
+}
+func validateSeverityFlag(name, value string) error {
+	if value == "" {
+		return nil
+	}
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "low", "medium", "high", "critical":
+		return nil
+	default:
+		return fmt.Errorf("%s must be Low, Medium, High, or Critical; got %q", name, value)
+	}
+}
 func printSummary(res *scanner.Result, tech *detector.TechStack) {
 	fmt.Printf("\nProject:   %s\n", res.ProjectName)
 	fmt.Printf("Language:  %s\n", res.DominantLang)
@@ -816,7 +881,7 @@ func gatherFindings(a *analyzer.Result, rt *runtime.Summary, logs *logger.Summar
 			}
 			out = append(out, ai.Finding{
 				Source: "runtime", Severity: mapRuntimeSeverity(g.Severity), Category: "Runtime",
-				Title: g.Type, Location: loc, Detail: g.LastMessage, Count: g.Count,
+				Title: g.Type, Location: loc, Detail: analyzer.RedactText(g.LastMessage), Count: g.Count,
 			})
 		}
 	}
@@ -824,7 +889,7 @@ func gatherFindings(a *analyzer.Result, rt *runtime.Summary, logs *logger.Summar
 		for _, g := range logs.Groups {
 			out = append(out, ai.Finding{
 				Source: "log", Severity: mapLogSeverity(g.Level), Category: g.Category,
-				Title: g.Sample, Detail: g.Sample, Cause: g.Cause, Count: g.Count,
+				Title: analyzer.RedactText(g.Sample), Detail: analyzer.RedactText(g.Sample), Cause: analyzer.RedactText(g.Cause), Count: g.Count,
 			})
 		}
 	}
@@ -921,7 +986,7 @@ func runInstallHook(args []string) int {
 	out, err := exec.Command("git", "rev-parse", "--git-path", "hooks").Output()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error: not a git repository — run this from inside your repo")
-		return 1
+		return exitError
 	}
 	hooksDir := strings.TrimSpace(string(out))
 	if hooksDir == "" {
@@ -929,21 +994,21 @@ func runInstallHook(args []string) int {
 	}
 	if err := os.MkdirAll(hooksDir, 0o755); err != nil {
 		fmt.Fprintf(os.Stderr, "error: could not create %s: %v\n", hooksDir, err)
-		return 1
+		return exitError
 	}
 	hookPath := filepath.Join(hooksDir, "pre-commit")
 	if _, err := os.Stat(hookPath); err == nil && !*force {
 		fmt.Fprintf(os.Stderr, "error: %s already exists — re-run with --force to overwrite\n", hookPath)
-		return 1
+		return exitError
 	}
 	if err := os.WriteFile(hookPath, []byte(preCommitHook), 0o755); err != nil {
 		fmt.Fprintf(os.Stderr, "error: could not write hook: %v\n", err)
-		return 1
+		return exitError
 	}
 	fmt.Printf("Installed Observer pre-commit hook at %s\n", hookPath)
 	fmt.Println("It blocks a commit if staged changes introduce a High-severity finding.")
 	fmt.Println("Bypass once with: git commit --no-verify")
-	return 0
+	return exitOK
 }
 
 // runServe implements `observer serve`: start the local web dashboard.
@@ -957,7 +1022,7 @@ func runServe(args []string, openUI bool) int {
 	store, err := storage.New(*dataDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: cannot open data store: %v\n", err)
-		return 1
+		return exitError
 	}
 	srv := server.New(store)
 
@@ -976,9 +1041,9 @@ func runServe(args []string, openUI bool) int {
 
 	if err := http.ListenAndServe(*addr, srv.Routes()); err != nil {
 		fmt.Fprintf(os.Stderr, "error: server stopped: %v\n", err)
-		return 1
+		return exitError
 	}
-	return 0
+	return exitOK
 }
 
 // runAnalyzeLog implements `observer analyze-log <path>`: parse application
@@ -989,23 +1054,23 @@ func runAnalyzeLog(args []string) int {
 	if fs.NArg() < 1 {
 		fmt.Fprintln(os.Stderr, "error: missing log path")
 		fmt.Fprintln(os.Stderr, "usage: observer analyze-log <file-or-directory>")
-		return 1
+		return exitError
 	}
 	target := fs.Arg(0)
 
 	if _, err := os.Stat(target); err != nil {
 		fmt.Fprintf(os.Stderr, "error: cannot access %q: %v\n", target, err)
-		return 1
+		return exitError
 	}
 
 	fmt.Printf("Analyzing logs in %s ...\n", target)
 	summary, err := logger.Analyze(target)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: log analysis failed: %v\n", err)
-		return 1
+		return exitError
 	}
 	printLogs(summary)
-	return 0
+	return exitOK
 }
 
 // printLogs prints the log-analysis summary in the spec's "most common issue"
@@ -1021,10 +1086,10 @@ func printLogs(s *logger.Summary) {
 	}
 
 	top := s.Groups[0]
-	fmt.Printf("\nMost common issue: %s\n", top.Sample)
+	fmt.Printf("\nMost common issue: %s\n", analyzer.RedactText(top.Sample))
 	fmt.Printf("Occurrences:       %d\n", top.Count)
 	if top.Cause != "" {
-		fmt.Printf("Possible cause:    %s\n", top.Cause)
+		fmt.Printf("Possible cause:    %s\n", analyzer.RedactText(top.Cause))
 	}
 
 	if len(s.Groups) > 1 {
@@ -1035,7 +1100,7 @@ func printLogs(s *logger.Summary) {
 				fmt.Printf("  ... and %d more (see HTML report)\n", len(s.Groups)-1-limit)
 				break
 			}
-			fmt.Printf("  %5dx [%s/%s] %s\n", g.Count, g.Level, g.Category, g.Sample)
+			fmt.Printf("  %5dx [%s/%s] %s\n", g.Count, g.Level, g.Category, analyzer.RedactText(g.Sample))
 		}
 	}
 }
@@ -1146,6 +1211,7 @@ Usage:
       --categories <list> only report these categories (comma-separated; default all)
       --min-severity <s>  minimum severity to report: Low|Medium|High|Critical (default all)
       --disable <rules>   comma-separated rule IDs to ignore entirely
+      --exclude-dir <names> comma-separated directory names excluded from every scan phase
       --slack <url>       post a summary to a Slack incoming webhook (or SLACK_WEBHOOK env)
       --teams <url>       post a summary to a Microsoft Teams webhook (or TEAMS_WEBHOOK env)
       --webhook <url>     POST the JSON report to a generic webhook
@@ -1161,7 +1227,7 @@ Usage:
       --fail-on <sev>     exit non-zero if any finding >= severity (CI quality gate)
       --baseline <file>   suppress known findings; report only new issues
       --write-baseline <file>  record current findings as the baseline, then exit
-      --assert-offline    guarantee no network I/O (refuse --cve/--email/--slack/--teams/--webhook; AI stays local)
+      --assert-offline    guarantee no network I/O (network options refused; Semgrep config must be local)
       --diff              scan only lines changed vs HEAD (review what you or an AI just wrote)
       --diff-staged       scan only staged changes (for a pre-commit hook)
       --diff-base <ref>   scan only changes on this branch since it forked from <ref> (PR review)
@@ -1170,6 +1236,7 @@ Usage:
   observer analyze-log <path>               Analyze application logs, print a summary
   observer serve [--addr ...] [--open]      Start the local web dashboard (--open launches the browser)
   observer install-hook [--force]           Install a git pre-commit hook that gates staged changes
+  observer doctor                          Show privacy mode and optional local-engine availability
   observer version                          Print version
   observer help                             Show this help
 
