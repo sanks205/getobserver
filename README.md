@@ -9,6 +9,19 @@
 ![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20macOS%20%7C%20linux-lightgrey)
 ![Single binary](https://img.shields.io/badge/install-single%20binary%2C%20no%20deps-success)
 
+<a
+  href="https://llaunch.dev/products/github-sanks205-getobserver-finds-what-s-wrong-a"
+  target="_blank"
+  rel="noopener"
+>
+  <img
+    src="https://llaunch.dev/badges/llaunch-classic-light.svg"
+    alt="Featured on llaunch"
+    width="114"
+    height="48"
+  />
+</a>
+
 ## ⬇️ Get Observer
 
 Grab the single binary for your OS — no runtime, no dependencies, no account:
