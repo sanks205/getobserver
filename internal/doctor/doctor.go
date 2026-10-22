@@ -30,7 +30,7 @@ func Inspect(version, edition string) Report {
 		OS:              runtime.GOOS,
 		Arch:            runtime.GOARCH,
 		OfflineDefault:  true,
-		NetworkFeatures: []string{"--cve", "--semgrep with auto/registry config", "--ai with OPENAI_API_KEY", "--email", "--slack", "--teams", "--webhook"},
+		NetworkFeatures: []string{"--cve", "--semgrep with auto/registry config", "--email", "--slack", "--teams", "--webhook"},
 	}
 	for _, name := range []string{"git", "semgrep", "bandit", "gosec", "eslint"} {
 		tool := Tool{Name: name, Status: "not found"}
