@@ -1,79 +1,84 @@
 # Using Observer in CI
 
-Observer fits any CI system: it's a single binary that scans your project,
-emits **SARIF** (the standard static-analysis format), and returns a **non-zero
-exit code** when a quality gate trips. Uploading the SARIF to GitHub puts
-findings in the **Security tab** and annotates pull requests inline — so you get
-"PR comments" with no extra tooling.
+Observer is a single binary that emits portable reports and returns a nonzero exit code when an audit fails or cannot complete its required checks.
 
-## The pieces
+## Policy controls
 
 | Flag | Purpose |
 |---|---|
-| `--sarif <file>` | Write findings as SARIF 2.1.0 for code-scanning upload |
-| `--fail-on <sev>` | Exit non-zero if any finding is at/above `Low\|Medium\|High\|Critical` |
-| `--baseline <file>` | Suppress already-known findings — report only **new** issues |
-| `--write-baseline <file>` | Record current findings as the accepted baseline |
-| `--cve` | Include dependency vulnerabilities (OSV.dev) |
-| `--categories` / `--min-severity` | Limit scope |
+| `--sarif <file>` | Write SARIF 2.1.0 for code-scanning upload |
+| `--attest <file>` | Record commit SHA, scope, tool version, engine outcomes, findings, and final status |
+| `--fail-on <sev>` | Fail when a finding reaches `Low`, `Medium`, `High`, or `Critical` |
+| `--require-engine <list>` | Mark the audit incomplete unless every listed engine completes |
+| `--baseline <file>` | Suppress accepted findings and report only new issues |
+| `--assert-offline` | Reject explicit or environment-configured network operations |
 
-Exit codes: `0` = clean / gate passed · `2` = quality gate failed · `1` = usage/IO error.
+Exit codes:
 
-## GitHub Actions (recommended)
+- `0`: audit passed
+- `1`: usage, input, or output error
+- `2`: quality gate failed
+- `3`: audit incomplete because a required engine or mandatory phase did not complete
 
-The repo ships a ready workflow at [.github/workflows/observer.yml](../.github/workflows/observer.yml)
-that builds from source. To scan **your** project without building, download the
-released binary instead:
+## GitHub Actions
+
+The supplied workflows deliberately allow the audit step to finish without immediately stopping the job. They then upload reports with `if: always()` and use a final enforcement step to fail the job when the audit outcome was unsuccessful. Do not remove that final enforcement step.
 
 ```yaml
-name: Observer Scan
-on: [push, pull_request]
-permissions:
-  contents: read
-  security-events: write        # needed to upload SARIF
-jobs:
-  observer:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download Observer
-        run: |
-          curl -sSL -o observer \
-            https://github.com/<your-org>/observer/releases/latest/download/observer_linux_amd64
-          chmod +x observer
-      - name: Scan
-        continue-on-error: true
-        run: ./observer analyze . --sarif observer.sarif --fail-on High --cve
-      - name: Upload SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: observer.sarif
+- name: Run Observer
+  id: observer
+  continue-on-error: true
+  run: >-
+    ./observer analyze .
+    --out observer-report.html
+    --json observer-findings.json
+    --sarif observer.sarif
+    --attest observer-attestation.json
+    --fail-on High
+    --require-engine phpstan,semgrep
+
+- name: Upload Observer reports
+  if: always()
+  uses: actions/upload-artifact@v4
+  with:
+    name: observer-${{ github.sha }}
+    if-no-files-found: warn
+    path: |
+      observer-report.html
+      observer-findings.json
+      observer.sarif
+      observer-attestation.json
+      observer-attestation.json.sig
+
+- name: Enforce Observer result
+  if: always() && steps.observer.outcome == 'failure'
+  run: exit 1
 ```
 
-After this runs, findings appear under **Security → Code scanning alerts**, and
-pull requests get inline annotations automatically.
+Only require engines that the runner installs first. A missing required engine correctly produces `INCOMPLETE`, not PASS.
 
-## Adopting on an existing codebase (baseline)
+## Laravel projects
 
-A mature project has pre-existing findings you don't want to block CI on. Record
-them once as a baseline, commit it, and CI will then only fail on **new** issues:
+For a Laravel repository, PHPStan/Larastan and Semgrep can be required audit engines. Application tests remain a separate CI control:
+
+```yaml
+- name: Laravel tests
+  run: php artisan test
+
+- name: Observer audit
+  id: observer
+  continue-on-error: true
+  run: ./observer analyze . --phpstan --semgrep --require-engine phpstan,semgrep --fail-on High --attest observer-attestation.json --out observer-report.html
+```
+
+Observer Pro may additionally add `--history`, `--sbom`, and `--pdf`. When `--history` is enabled, a history-scan failure makes the audit incomplete and history findings participate in the final gate and attestation.
+
+## Baselines
+
+For an established codebase, create a reviewed baseline once and commit it:
 
 ```bash
-# one-time, locally:
 observer analyze . --write-baseline .observer-baseline.json
-git add .observer-baseline.json && git commit -m "Add Observer baseline"
-```
-```yaml
-      # in CI, report only new issues and gate on them:
-      - run: ./observer analyze . --baseline .observer-baseline.json --sarif observer.sarif --fail-on Medium
 ```
 
-Fingerprints exclude line numbers, so findings that merely shift up/down stay
-recognized — only genuinely new problems surface.
-
-## Other CI systems
-
-The same binary works anywhere (GitLab CI, Jenkins, CircleCI, etc.): download the
-right `observer_<os>_<arch>` asset, run `observer analyze . --fail-on High`, and
-use the exit code to pass/fail the job. Most platforms can ingest SARIF too.
+Then use `--baseline .observer-baseline.json` in CI. Fingerprints exclude line numbers, so moved findings remain recognized while genuinely new findings are gated.
