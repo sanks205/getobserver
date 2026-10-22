@@ -19,6 +19,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/aipda/observer/internal/engineutil"
 )
 
 // ErrNotAvailable means no eslint executable was found (neither in the project's
@@ -79,9 +81,7 @@ func Scan(ctx context.Context, root string) ([]Finding, error) {
 	}
 	// -f json machine output; "." lints the project using its own config.
 	args := append(append([]string{}, pre...), "-f", "json", ".")
-	cmd := exec.CommandContext(ctx, name, args...)
-	cmd.Dir = root
-	out, err := cmd.Output()
+	out, err := engineutil.Run(ctx, root, name, args...)
 	// ESLint exits 1 when it reports lint problems — expected. Only fail if we
 	// got no JSON back at all (e.g. a fatal config error, exit 2, no output).
 	if len(out) == 0 && err != nil {
