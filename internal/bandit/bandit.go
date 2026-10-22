@@ -18,6 +18,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/aipda/observer/internal/engineutil"
 )
 
 // ErrNotAvailable means the bandit binary was not found on PATH.
@@ -54,8 +56,7 @@ func Scan(ctx context.Context, root string) ([]Finding, error) {
 		return nil, ErrNotAvailable
 	}
 	// -r recursive, -f json machine output, -q quiet (no banner on stdout).
-	cmd := exec.CommandContext(ctx, "bandit", "-r", root, "-f", "json", "-q")
-	out, err := cmd.Output()
+	out, err := engineutil.Run(ctx, "", "bandit", "-r", root, "-f", "json", "-q")
 	// Bandit exits 1 when it finds issues — that's success for us. Only treat it
 	// as an error if we got no parseable JSON back.
 	if len(out) == 0 && err != nil {
