@@ -18,6 +18,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -43,7 +44,7 @@ type Finding struct {
 }
 
 const (
-	maxFindings = 1000
+	maxFindings = 10000
 	maxTitle    = 120
 )
 
@@ -200,8 +201,14 @@ func Parse(data []byte, root string) ([]Finding, error) {
 	if err := json.Unmarshal(data, &out); err != nil {
 		return nil, err
 	}
+	paths := make([]string, 0, len(out.Files))
+	for path := range out.Files {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
 	findings := make([]Finding, 0, len(out.Files))
-	for path, fe := range out.Files {
+	for _, path := range paths {
+		fe := out.Files[path]
 		rel := relPath(root, path)
 		for _, m := range fe.Messages {
 			if len(findings) >= maxFindings {
