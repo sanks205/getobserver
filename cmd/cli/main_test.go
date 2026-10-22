@@ -26,8 +26,8 @@ func TestRunAnalyzeRejectsNetworkFlagsInOfflineMode(t *testing.T) {
 }
 
 func TestExitCodesRemainStable(t *testing.T) {
-	if exitOK != 0 || exitError != 1 || exitGate != 2 {
-		t.Fatalf("unexpected exit codes: success=%d error=%d gate=%d", exitOK, exitError, exitGate)
+	if exitOK != 0 || exitError != 1 || exitGate != 2 || exitIncomplete != 3 {
+		t.Fatalf("unexpected exit codes: success=%d error=%d gate=%d incomplete=%d", exitOK, exitError, exitGate, exitIncomplete)
 	}
 }
 
@@ -48,5 +48,30 @@ func TestSemgrepConfigNetworkClassification(t *testing.T) {
 		if !semgrepConfigNeedsNetwork(config) {
 			t.Errorf("expected %q to require network", config)
 		}
+	}
+}
+
+func TestOfflineModeRejectsNotificationEnvironment(t *testing.T) {
+	t.Setenv("SLACK_WEBHOOK", "https://example.invalid/slack")
+	if code := runAnalyze([]string{t.TempDir(), "--assert-offline", "--out", ""}); code != exitError {
+		t.Fatalf("offline environment conflict exit code = %d, want %d", code, exitError)
+	}
+	t.Setenv("SLACK_WEBHOOK", "")
+	t.Setenv("TEAMS_WEBHOOK", "https://example.invalid/teams")
+	if code := runAnalyze([]string{t.TempDir(), "--assert-offline", "--out", ""}); code != exitError {
+		t.Fatalf("offline Teams environment conflict exit code = %d, want %d", code, exitError)
+	}
+}
+
+func TestRequiredEngineUnavailableIsIncomplete(t *testing.T) {
+	t.Setenv("PATH", t.TempDir())
+	if code := runAnalyze([]string{t.TempDir(), "--require-engine", "semgrep", "--out", ""}); code != exitIncomplete {
+		t.Fatalf("required engine exit code = %d, want %d", code, exitIncomplete)
+	}
+}
+
+func TestRejectsUnknownRequiredEngine(t *testing.T) {
+	if code := runAnalyze([]string{t.TempDir(), "--require-engine", "unknown", "--out", ""}); code != exitError {
+		t.Fatalf("unknown required engine exit code = %d, want %d", code, exitError)
 	}
 }

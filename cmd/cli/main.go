@@ -1,11 +1,11 @@
-// Command observer is the CLI for the AI Production Debugging Assistant.
+// Command observer is the CLI for the Observer offline code audit tool.
 //
 // Phase 1 provides a single subcommand:
 //
 //	observer analyze <project-path> [--out report.html]
 //
 // It scans a project directory and generates an HTML project-analysis report.
-// Future phases add `analyze-log`, runtime collection, and AI recommendations,
+// Additional commands provide log analysis, runtime collection, and remediation guidance,
 // all routed through this same command dispatcher.
 package main
 
@@ -24,6 +24,7 @@ import (
 	"github.com/aipda/observer/internal/ai"
 	"github.com/aipda/observer/internal/analyzer"
 	"github.com/aipda/observer/internal/attest"
+	"github.com/aipda/observer/internal/auditrun"
 	"github.com/aipda/observer/internal/bandit"
 	"github.com/aipda/observer/internal/baseline"
 	"github.com/aipda/observer/internal/buildinfo"
@@ -53,6 +54,7 @@ const (
 	exitOK = iota
 	exitError
 	exitGate
+	exitIncomplete
 )
 
 func main() {
@@ -100,7 +102,8 @@ func runAnalyze(args []string) int {
 	out := fs.String("out", "report.html", "output path for the HTML report")
 	runtimePath := fs.String("runtime", "", "path to observer-agent runtime events (JSONL file or directory)")
 	logsPath := fs.String("logs", "", "path to application logs to analyze (file or directory)")
-	useAI := fs.Bool("ai", false, "generate AI explanations of findings (uses OpenAI if OPENAI_API_KEY is set, else a local heuristic)")
+	guidanceFlag := fs.Bool("guidance", false, "add deterministic offline remediation guidance")
+	legacyAIFlag := fs.Bool("ai", false, "deprecated alias for --guidance")
 	emailTo := fs.String("email", "", "email the report to these recipients (comma-separated); SMTP_* env vars configure the server")
 	categoriesFlag := fs.String("categories", "", "only report these categories (comma-separated; default all): "+strings.Join(analyzer.AllCategories, ", "))
 	minSevFlag := fs.String("min-severity", "", "minimum severity to report: Low|Medium|High|Critical (default: all)")
@@ -110,6 +113,7 @@ func runAnalyze(args []string) int {
 	banditFlag := fs.Bool("bandit", false, "also run Bandit if installed, for Python security analysis (auto-skips if absent)")
 	gosecFlag := fs.Bool("gosec", false, "also run gosec if installed, for Go security analysis (auto-skips if absent)")
 	eslintFlag := fs.Bool("eslint", false, "also run ESLint if available, for JS/TS analysis (auto-skips if absent)")
+	requireEngineFlag := fs.String("require-engine", "", "comma-separated engines that must complete: semgrep,phpstan,bandit,gosec,eslint")
 	sarifFlag := fs.String("sarif", "", "also write findings as SARIF to this file (for GitHub code scanning / CI)")
 	jsonFlag := fs.String("json", "", "also write findings + scores as JSON to this file")
 	csvFlag := fs.String("csv", "", "also write findings as CSV (Excel-compatible) to this file")
@@ -121,8 +125,8 @@ func runAnalyze(args []string) int {
 	failOn := fs.String("fail-on", "", "exit non-zero if any finding is at/above this severity: Low|Medium|High|Critical")
 	baselineFile := fs.String("baseline", "", "suppress findings recorded in this baseline file (report only new issues)")
 	writeBaseline := fs.String("write-baseline", "", "write the current findings to this baseline file and exit-code 0")
-	assertOffline := fs.Bool("assert-offline", false, "guarantee no network I/O: refuse network options, require a local Semgrep config, and force AI to the local heuristic")
-	diffFlag := fs.Bool("diff", false, "scan only lines changed in the working tree vs HEAD (review what you or an AI assistant just wrote); run from the repo root")
+	assertOffline := fs.Bool("assert-offline", false, "guarantee no network I/O: refuse network options, require a local Semgrep config, and keep all analysis local")
+	diffFlag := fs.Bool("diff", false, "scan only lines changed in the working tree vs HEAD (review recently changed code); run from the repo root")
 	diffStaged := fs.Bool("diff-staged", false, "scan only staged changes (git diff --cached) — ideal for a pre-commit hook")
 	diffBase := fs.String("diff-base", "", "scan only lines changed on the current branch since it diverged from this ref (e.g. main) — PR review")
 	attestFile := fs.String("attest", "", "write a scan attestation (JSON: tool, version, scope, findings, gate result) to this file — evidence a change was checked")
@@ -141,6 +145,31 @@ func runAnalyze(args []string) int {
 	if len(rest) > 1 {
 		_ = fs.Parse(rest[1:])
 	}
+	if err := ensureOutputParents([]string{*out, *sarifFlag, *jsonFlag, *csvFlag, *attestFile, *writeBaseline}...); err != nil {
+		fmt.Fprintf(os.Stderr, "error: cannot prepare report directory: %v\n", err)
+		return exitError
+	}
+
+	requiredEngines, err := auditrun.ParseRequired(*requireEngineFlag)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		return exitError
+	}
+	for _, name := range requiredEngines.Names() {
+		switch name {
+		case "semgrep":
+			*semgrepFlag = true
+		case "phpstan":
+			*phpstanFlag = true
+		case "bandit":
+			*banditFlag = true
+		case "gosec":
+			*gosecFlag = true
+		case "eslint":
+			*eslintFlag = true
+		}
+	}
+	engineTracker := auditrun.New(requiredEngines)
 
 	for _, value := range []struct{ name, severity string }{
 		{"--min-severity", *minSevFlag},
@@ -163,7 +192,7 @@ func runAnalyze(args []string) int {
 	}
 
 	// Air-gapped guarantee: fail fast if any network-requiring option was asked
-	// for, and force the AI layer to its local (offline) heuristic. Observer is
+	// for. Remediation guidance is deterministic and local. Observer is
 	// already offline by default — this flag makes that contract enforceable for
 	// regulated / air-gapped environments.
 	if *assertOffline {
@@ -177,11 +206,11 @@ func runAnalyze(args []string) int {
 		if *emailTo != "" {
 			netFlags = append(netFlags, "--email")
 		}
-		if *slackFlag != "" {
-			netFlags = append(netFlags, "--slack")
+		if *slackFlag != "" || os.Getenv("SLACK_WEBHOOK") != "" {
+			netFlags = append(netFlags, "--slack/SLACK_WEBHOOK")
 		}
-		if *teamsFlag != "" {
-			netFlags = append(netFlags, "--teams")
+		if *teamsFlag != "" || os.Getenv("TEAMS_WEBHOOK") != "" {
+			netFlags = append(netFlags, "--teams/TEAMS_WEBHOOK")
 		}
 		if *webhookFlag != "" {
 			netFlags = append(netFlags, "--webhook")
@@ -189,10 +218,6 @@ func runAnalyze(args []string) int {
 		if len(netFlags) > 0 {
 			fmt.Fprintf(os.Stderr, "error: --assert-offline forbids network operations, but these were requested: %s\n", strings.Join(netFlags, ", "))
 			return exitError
-		}
-		if os.Getenv("OPENAI_API_KEY") != "" {
-			_ = os.Unsetenv("OPENAI_API_KEY") // force the AI layer to the local heuristic
-			fmt.Println("Offline mode: ignoring OPENAI_API_KEY — AI will use the local heuristic.")
 		}
 		fmt.Println("Offline mode: no network I/O.")
 	}
@@ -239,8 +264,11 @@ func runAnalyze(args []string) int {
 	t2 := time.Now()
 	analysis, err := analyzer.Analyze(target)
 	if err != nil {
+		engineTracker.RecordRequired("builtin", "error", err.Error())
 		fmt.Fprintf(os.Stderr, "warning: static analysis failed: %v\n", err)
 		analysis = nil
+	} else {
+		engineTracker.RecordRequired("builtin", "completed", fmt.Sprintf("%d finding(s)", len(analysis.Issues)))
 	}
 	timed("analyze", t2)
 
@@ -248,8 +276,10 @@ func runAnalyze(args []string) int {
 	// merged into the Dependencies category so filters and the report cover them.
 	if *cveFlag && analysis != nil {
 		if rep, err := deps.Scan(target, deps.NewClient()); err != nil {
+			engineTracker.RecordRequired("osv", "error", err.Error())
 			fmt.Fprintf(os.Stderr, "warning: CVE scan failed: %v\n", err)
 		} else {
+			engineTracker.RecordRequired("osv", "completed", fmt.Sprintf("%d dependencies checked", rep.DepsScanned))
 			var issues []analyzer.Issue
 			for _, v := range rep.Vulns {
 				issues = append(issues, analyzer.Issue{
@@ -297,10 +327,13 @@ func runAnalyze(args []string) int {
 		cancel()
 		switch {
 		case errors.Is(err, semgrep.ErrNotAvailable):
+			engineTracker.Record("semgrep", "skipped", err.Error())
 			fmt.Fprintln(os.Stderr, "note: --semgrep set but semgrep is not installed; skipping (see https://semgrep.dev)")
 		case err != nil:
+			engineTracker.Record("semgrep", "error", err.Error())
 			fmt.Fprintf(os.Stderr, "warning: semgrep run failed: %v\n", err)
 		default:
+			engineTracker.Record("semgrep", "completed", fmt.Sprintf("%d finding(s)", len(findings)))
 			var issues []analyzer.Issue
 			for _, f := range findings {
 				issues = append(issues, analyzer.Issue{
@@ -323,12 +356,16 @@ func runAnalyze(args []string) int {
 		cancel()
 		switch {
 		case errors.Is(err, phpstan.ErrNotAvailable):
+			engineTracker.Record("phpstan", "skipped", err.Error())
 			fmt.Fprintln(os.Stderr, "note: --phpstan set but PHPStan isn't installed in the project (vendor/bin/phpstan); skipping (see https://phpstan.org)")
 		case errors.Is(err, phpstan.ErrNoConfig):
+			engineTracker.Record("phpstan", "skipped", err.Error())
 			fmt.Fprintln(os.Stderr, "note: --phpstan set but no phpstan.neon(.dist) config found in the project; skipping")
 		case err != nil:
+			engineTracker.Record("phpstan", "error", err.Error())
 			fmt.Fprintf(os.Stderr, "warning: phpstan run failed: %v\n", err)
 		default:
+			engineTracker.Record("phpstan", "completed", fmt.Sprintf("%d finding(s)", len(findings)))
 			var issues []analyzer.Issue
 			for _, f := range findings {
 				issues = append(issues, analyzer.Issue{
@@ -349,10 +386,13 @@ func runAnalyze(args []string) int {
 		cancel()
 		switch {
 		case errors.Is(err, bandit.ErrNotAvailable):
+			engineTracker.Record("bandit", "skipped", err.Error())
 			fmt.Fprintln(os.Stderr, "note: --bandit set but Bandit isn't installed; skipping (pip install bandit)")
 		case err != nil:
+			engineTracker.Record("bandit", "error", err.Error())
 			fmt.Fprintf(os.Stderr, "warning: bandit run failed: %v\n", err)
 		default:
+			engineTracker.Record("bandit", "completed", fmt.Sprintf("%d finding(s)", len(findings)))
 			var issues []analyzer.Issue
 			for _, f := range findings {
 				issues = append(issues, analyzer.Issue{
@@ -374,10 +414,13 @@ func runAnalyze(args []string) int {
 		cancel()
 		switch {
 		case errors.Is(err, gosec.ErrNotAvailable):
+			engineTracker.Record("gosec", "skipped", err.Error())
 			fmt.Fprintln(os.Stderr, "note: --gosec set but gosec isn't installed; skipping (https://github.com/securego/gosec)")
 		case err != nil:
+			engineTracker.Record("gosec", "error", err.Error())
 			fmt.Fprintf(os.Stderr, "warning: gosec run failed: %v\n", err)
 		default:
+			engineTracker.Record("gosec", "completed", fmt.Sprintf("%d finding(s)", len(findings)))
 			var issues []analyzer.Issue
 			for _, f := range findings {
 				issues = append(issues, analyzer.Issue{
@@ -399,10 +442,13 @@ func runAnalyze(args []string) int {
 		cancel()
 		switch {
 		case errors.Is(err, eslint.ErrNotAvailable):
+			engineTracker.Record("eslint", "skipped", err.Error())
 			fmt.Fprintln(os.Stderr, "note: --eslint set but ESLint isn't available; skipping (npm install eslint)")
 		case err != nil:
+			engineTracker.Record("eslint", "error", err.Error())
 			fmt.Fprintf(os.Stderr, "warning: eslint run failed: %v\n", err)
 		default:
+			engineTracker.Record("eslint", "completed", fmt.Sprintf("%d finding(s)", len(findings)))
 			var issues []analyzer.Issue
 			for _, f := range findings {
 				issues = append(issues, analyzer.Issue{
@@ -483,12 +529,48 @@ func runAnalyze(args []string) int {
 		}
 	}
 
+	// Runtime-event input is mandatory when explicitly enabled.
+	var rtSummary *runtime.Summary
+	if *runtimePath != "" {
+		events, err := runtime.Load(*runtimePath)
+		if err != nil {
+			engineTracker.RecordRequired("runtime", "error", err.Error())
+			fmt.Fprintf(os.Stderr, "warning: could not load runtime events: %v\n", err)
+		} else {
+			engineTracker.RecordRequired("runtime", "completed", fmt.Sprintf("%d event(s)", len(events)))
+			rtSummary = runtime.Summarize(events)
+		}
+	}
+
+	// Log analysis is mandatory when explicitly enabled.
+	var logSummary *logger.Summary
+	if *logsPath != "" {
+		logSummary, err = logger.Analyze(*logsPath)
+		if err != nil {
+			engineTracker.RecordRequired("logs", "error", err.Error())
+			fmt.Fprintf(os.Stderr, "warning: could not analyze logs: %v\n", err)
+			logSummary = nil
+		} else {
+			engineTracker.RecordRequired("logs", "completed", fmt.Sprintf("%d error(s)", logSummary.TotalErrors))
+		}
+	}
 	// Phase 13 — compute the quality-gate result once (reused for the report
 	// banner and the exit code).
+	scanIncomplete := engineTracker.Incomplete()
 	gateEnabled := *failOn != ""
 	gateFailCount := 0
 	if gateEnabled && analysis != nil {
 		gateFailCount = analyzer.CountAtLeast(analysis, analyzer.ParseSeverity(*failOn))
+	}
+	gateStatus := "pass"
+	if scanIncomplete {
+		gateStatus = "incomplete"
+	} else if gateEnabled && gateFailCount > 0 {
+		gateStatus = "fail"
+	}
+	repoMeta, metaErr := gitdiff.Metadata(target)
+	if metaErr != nil {
+		fmt.Fprintf(os.Stderr, "note: Git provenance unavailable: %v\n", metaErr)
 	}
 	scanMs := time.Since(t0).Milliseconds()
 
@@ -510,13 +592,14 @@ func runAnalyze(args []string) int {
 		}
 		absTarget, _ := filepath.Abs(target)
 		att := attest.Attestation{
-			Tool: "observer", Version: version,
-			GeneratedAt: time.Now().UTC().Format(time.RFC3339),
-			Scope:       scope, Target: absTarget, FilesChanged: diffFilesChanged,
+			Tool: "observer", Version: version, GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+			Status: gateStatus, Scope: scope, Target: absTarget, FilesChanged: diffFilesChanged,
+			CommitSHA: repoMeta.CommitSHA, Branch: repoMeta.Branch, RepositoryDirty: repoMeta.Dirty,
+			OfflineAsserted: *assertOffline, Engines: engineTracker.Outcomes(),
 			Findings: findings, Total: total,
 		}
 		if gateEnabled {
-			att.Gate = &attest.Gate{Threshold: *failOn, FailCount: gateFailCount, Passed: gateFailCount == 0}
+			att.Gate = &attest.Gate{Threshold: *failOn, FailCount: gateFailCount, Status: gateStatus, Passed: gateStatus == "pass", Complete: !scanIncomplete}
 		}
 		if err := attest.Write(*attestFile, att); err != nil {
 			fmt.Fprintf(os.Stderr, "warning: could not write attestation: %v\n", err)
@@ -525,31 +608,10 @@ func runAnalyze(args []string) int {
 		}
 	}
 
-	// Phase 4 — runtime errors captured by observer-agent (opt-in via --runtime).
-	var rtSummary *runtime.Summary
-	if *runtimePath != "" {
-		events, err := runtime.Load(*runtimePath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "warning: could not load runtime events: %v\n", err)
-		} else {
-			rtSummary = runtime.Summarize(events)
-		}
-	}
-
-	// Phase 5 — application log analysis (opt-in via --logs).
-	var logSummary *logger.Summary
-	if *logsPath != "" {
-		logSummary, err = logger.Analyze(*logsPath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "warning: could not analyze logs: %v\n", err)
-			logSummary = nil
-		}
-	}
-
-	// Phase 6 — AI explanation of the collected findings (opt-in via --ai).
+	// Phase 6 - deterministic remediation guidance (opt-in via --guidance).
 	var aiReport *ai.Report
-	if *useAI {
-		aiReport = runAI(res, tech, analysis, rtSummary, logSummary)
+	if *guidanceFlag || *legacyAIFlag {
+		aiReport = runGuidance(res, tech, analysis, rtSummary, logSummary)
 	}
 
 	printSummary(res, tech)
@@ -627,6 +689,10 @@ func runAnalyze(args []string) int {
 	}
 
 	// Phase 13 — CI quality gate (reuses the count computed above).
+	if scanIncomplete {
+		fmt.Fprintln(os.Stderr, "Audit incomplete: one or more required engines did not complete")
+		return exitIncomplete
+	}
 	if gateEnabled && gateFailCount > 0 {
 		fmt.Fprintf(os.Stderr, "Quality gate failed: %d finding(s) at or above %s severity\n", gateFailCount, *failOn)
 		return exitGate
@@ -795,7 +861,9 @@ func printIssues(a *analyzer.Result) {
 	}
 	secScore, secGrade := analyzer.SecurityScore(a)
 	hScore, hGrade := analyzer.HealthScore(a)
-	fmt.Printf("\nSecurity score: %d/100 (%s)   Code health: %d/100 (%s)\n", secScore, secGrade, hScore, hGrade)
+	builtInScore, builtInGrade := analyzer.BuiltInHealthScore(a)
+	fmt.Printf("\nSecurity score: %d/100 (%s)   Code health: %d/100 (%s, all engines)\n", secScore, secGrade, hScore, hGrade)
+	fmt.Printf("Observer built-in health: %d/100 (%s)   External health findings: %d   Scoring model: v%s\n", builtInScore, builtInGrade, analyzer.ExternalHealthFindings(a), analyzer.ScoringModelVersion)
 	mins := analyzer.RemediationMinutes(a)
 	fmt.Printf("Static analysis: %d issue(s) in %d source file(s)   Est. fix effort: ~%dh %dm\n",
 		len(a.Issues), a.FilesScanned, mins/60, mins%60)
@@ -817,16 +885,13 @@ func printIssues(a *analyzer.Result) {
 	}
 }
 
-// maxAIFindings caps how many findings are sent to the AI layer, keeping the
-// prompt small. Findings are pre-sorted by severity so the most important ones
+// maxAIFindings caps how many findings are included in guidance, keeping the
+// output focused. Findings are pre-sorted by severity so the most important ones
 // are kept.
 const maxAIFindings = 40
 
-// runAI adapts findings from every source into ai.Finding, selects a provider
-// (OpenAI when OPENAI_API_KEY is set, otherwise the local heuristic), and
-// returns an explanation report. It always returns a usable report: on any
-// provider error it falls back to the local mode.
-func runAI(res *scanner.Result, tech *detector.TechStack, a *analyzer.Result,
+// runGuidance adapts findings from every source into deterministic local remediation guidance.
+func runGuidance(res *scanner.Result, tech *detector.TechStack, a *analyzer.Result,
 	rt *runtime.Summary, logs *logger.Summary) *ai.Report {
 
 	in := ai.Input{
@@ -835,21 +900,7 @@ func runAI(res *scanner.Result, tech *detector.TechStack, a *analyzer.Result,
 		Findings:    gatherFindings(a, rt, logs),
 	}
 
-	var provider ai.Provider
-	if key := os.Getenv("OPENAI_API_KEY"); key != "" && os.Getenv("OBSERVER_AI_PROVIDER") != "local" {
-		provider = ai.NewOpenAI(key, os.Getenv("OPENAI_MODEL"), os.Getenv("OPENAI_BASE_URL"))
-	}
-
-	explainer := &ai.Explainer{Provider: provider}
-	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
-	defer cancel()
-
-	rep, err := explainer.Explain(ctx, in)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "warning: AI provider failed (%v); using local heuristic\n", err)
-		return ai.LocalReport(in)
-	}
-	return rep
+	return ai.LocalReport(in)
 }
 
 // gatherFindings normalizes findings from each source into ai.Finding.
@@ -941,15 +992,15 @@ func mapLogSeverity(level string) string {
 	return "Low"
 }
 
-// printAI prints a brief AI summary and the suggested fix priority.
+// printAI prints deterministic remediation guidance using the legacy report model.
 func printAI(rep *ai.Report) {
 	if rep == nil {
 		return
 	}
-	fmt.Printf("\nAI analysis (%s):\n", rep.Provider)
+	fmt.Printf("\nRemediation guidance (%s):\n", rep.Provider)
 	fmt.Printf("  %s\n", rep.Summary)
 	if len(rep.Priorities) > 0 {
-		fmt.Println("  Suggested fix priority:")
+		fmt.Println("  Suggested remediation priority:")
 		for i, p := range rep.Priorities {
 			fmt.Printf("    %d. %s\n", i+1, p)
 		}
@@ -1199,14 +1250,14 @@ func printFindings(label string, findings []detector.Finding) {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `observer %s — AI Production Debugging Assistant
+	fmt.Fprintf(os.Stderr, `observer %s — Offline Code Audit Tool
 
 Usage:
   observer analyze <project-path> [flags]   Scan a project, emit an HTML report
       --out <file>        output path for the HTML report (default report.html)
       --runtime <path>    include observer-agent runtime events (JSONL file or dir)
       --logs <path>       include application log analysis (file or dir)
-      --ai                add AI explanations (OpenAI if OPENAI_API_KEY set, else local heuristic)
+      --guidance          add deterministic offline remediation guidance
       --email <to>        email the report (comma-separated); configure via SMTP_* env vars
       --categories <list> only report these categories (comma-separated; default all)
       --min-severity <s>  minimum severity to report: Low|Medium|High|Critical (default all)
@@ -1221,6 +1272,7 @@ Usage:
       --bandit            also run Bandit if installed (Python security analysis)
       --gosec             also run gosec if installed (Go security analysis)
       --eslint            also run ESLint if available (JS/TS code-quality analysis)
+      --require-engine <list>  fail incomplete unless these engines complete
       --sarif <file>      also write findings as SARIF (GitHub code scanning / CI)
       --json <file>       also write findings + scores as JSON
       --csv <file>        also write findings as CSV (opens in Excel)
@@ -1244,8 +1296,23 @@ Usage:
 
 Examples:
   observer analyze ./examples/php-demo --out report.html
-  observer analyze . --diff --fail-on High           # gate what changed (AI safety net)
+  observer analyze . --diff --fail-on High           # gate changed code
   observer analyze . --diff-staged --attest a.json    # pre-commit: scan staged code + proof
   observer analyze-log ./application/logs
 `, version)
+}
+func ensureOutputParents(paths ...string) error {
+	for _, path := range paths {
+		if strings.TrimSpace(path) == "" {
+			continue
+		}
+		dir := filepath.Dir(path)
+		if dir == "." || dir == "" {
+			continue
+		}
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("%s: %w", dir, err)
+		}
+	}
+	return nil
 }
