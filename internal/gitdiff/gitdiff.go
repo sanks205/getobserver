@@ -1,5 +1,5 @@
 // Package gitdiff resolves which lines changed in a git working tree, so a scan
-// can be scoped to "only what changed" — for example, reviewing exactly what you
+// can be scoped to "only what changed" ??? for example, reviewing exactly what you
 // (or an AI assistant) just wrote, rather than re-scanning the whole project.
 //
 // It shells out to the `git` binary (stdlib os/exec only, no cgo, no git library)
@@ -107,8 +107,8 @@ func Resolve(root string, mode Mode, base string) (*Changes, error) {
 	c := &Changes{files: map[string]*lineSet{}}
 	parseUnifiedDiff(out, c)
 
-	// Working-tree mode also folds in brand-new (untracked) files — exactly the
-	// files an AI assistant tends to create — treating every line as changed.
+	// Working-tree mode also folds in brand-new (untracked) files ??? exactly the
+	// files an AI assistant tends to create ??? treating every line as changed.
 	if mode == WorkingTree {
 		if ut, err := run(root, "ls-files", "--others", "--exclude-standard"); err == nil {
 			for _, f := range strings.Split(strings.TrimSpace(ut), "\n") {
@@ -122,7 +122,7 @@ func Resolve(root string, mode Mode, base string) (*Changes, error) {
 }
 
 // hunkRe captures the new-file side of a unified-diff hunk header:
-// "@@ -old[,n] +start[,count] @@". Group 1 = start, group 2 = count (may be empty → 1).
+// "@@ -old[,n] +start[,count] @@". Group 1 = start, group 2 = count (may be empty ??? 1).
 var hunkRe = regexp.MustCompile(`^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@`)
 
 func parseUnifiedDiff(diff string, c *Changes) {
@@ -169,4 +169,32 @@ func run(root string, args ...string) (string, error) {
 		return "", fmt.Errorf("git %s: %w: %s", strings.Join(args, " "), err, strings.TrimSpace(stderr.String()))
 	}
 	return stdout.String(), nil
+}
+
+// RepositoryMetadata identifies the exact Git state audited.
+type RepositoryMetadata struct {
+	CommitSHA string
+	Branch    string
+	Dirty     bool
+}
+
+// Metadata returns the current commit, branch, and working-tree state.
+func Metadata(root string) (RepositoryMetadata, error) {
+	sha, err := run(root, "rev-parse", "HEAD")
+	if err != nil {
+		return RepositoryMetadata{}, err
+	}
+	branch, err := run(root, "branch", "--show-current")
+	if err != nil {
+		return RepositoryMetadata{}, err
+	}
+	status, err := run(root, "status", "--porcelain", "--untracked-files=normal")
+	if err != nil {
+		return RepositoryMetadata{}, err
+	}
+	return RepositoryMetadata{
+		CommitSHA: strings.TrimSpace(sha),
+		Branch:    strings.TrimSpace(branch),
+		Dirty:     strings.TrimSpace(status) != "",
+	}, nil
 }
