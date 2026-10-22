@@ -12,12 +12,14 @@ import (
 
 // jsonReport is the machine-readable export shape.
 type jsonReport struct {
-	Project     string         `json:"project"`
-	GeneratedAt string         `json:"generated_at"`
-	Security    scoreJSON      `json:"security_score"`
-	CodeHealth  scoreJSON      `json:"code_health_score"`
-	Summary     map[string]int `json:"summary"`
-	Findings    []jsonFinding  `json:"findings"`
+	Project       string         `json:"project"`
+	GeneratedAt   string         `json:"generated_at"`
+	Security      scoreJSON      `json:"security_score"`
+	CodeHealth    scoreJSON      `json:"code_health_score"`
+	BuiltInHealth scoreJSON      `json:"observer_builtin_health_score"`
+	ScoringModel  string         `json:"scoring_model"`
+	Summary       map[string]int `json:"summary"`
+	Findings      []jsonFinding  `json:"findings"`
 }
 
 type scoreJSON struct {
@@ -49,8 +51,11 @@ func buildJSON(d Data) jsonReport {
 	if d.Analysis != nil {
 		secV, secG := analyzer.SecurityScore(d.Analysis)
 		hV, hG := analyzer.HealthScore(d.Analysis)
+		bV, bG := analyzer.BuiltInHealthScore(d.Analysis)
 		rep.Security = scoreJSON{secV, secG}
 		rep.CodeHealth = scoreJSON{hV, hG}
+		rep.BuiltInHealth = scoreJSON{bV, bG}
+		rep.ScoringModel = analyzer.ScoringModelVersion
 		rep.Summary["total"] = len(d.Analysis.Issues)
 		rep.Summary["critical"] = d.Analysis.BySeverity[analyzer.Critical]
 		rep.Summary["high"] = d.Analysis.BySeverity[analyzer.High]

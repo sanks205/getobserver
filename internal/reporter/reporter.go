@@ -3,7 +3,7 @@
 // Phase 1 supports a self-contained HTML report. The template is embedded into
 // the binary so the `observer` executable stays a single portable file with no
 // runtime asset dependencies. Later phases add the richer multi-section report
-// (executive summary, security findings, AI recommendations) described in
+// (executive summary, security findings, remediation guidance) described in
 // Phase 7.
 package reporter
 
@@ -73,6 +73,10 @@ type HTMLModel struct {
 	SecurityRatingBasis string // the worst severity behind the rating (e.g. "High")
 	HealthScore         int
 	HealthGrade         string
+	BuiltInHealthScore  int
+	BuiltInHealthGrade  string
+	ExternalHealthCount int
+	ScoringModel        string
 	RemediationEffort   string
 	IssueSummary        []sevCount
 	Issues              []issueItem
@@ -143,7 +147,7 @@ type issueItem struct {
 	OWASPLink      template.URL // link to the OWASP Top 10 category
 	Link           template.URL // vscode:// deep link to the source location
 	HasLink        bool
-	FixExample     string // generic before→after fix, shown for every finding (offline, no --ai needed)
+	FixExample     string // generic before→after fix, shown for every finding (offline, no --guidance needed)
 }
 
 // maxReportIssues caps how many findings are rendered into the (client-side
@@ -289,6 +293,9 @@ func RenderHTML(d Data) (string, error) {
 		model.SecScore, model.SecGrade = analyzer.SecurityScore(analysis)
 		model.SecurityRating, model.SecurityRatingBasis = analyzer.SecurityRating(analysis)
 		model.HealthScore, model.HealthGrade = analyzer.HealthScore(analysis)
+		model.BuiltInHealthScore, model.BuiltInHealthGrade = analyzer.BuiltInHealthScore(analysis)
+		model.ExternalHealthCount = analyzer.ExternalHealthFindings(analysis)
+		model.ScoringModel = analyzer.ScoringModelVersion
 		model.RemediationEffort = formatEffort(analyzer.RemediationMinutes(analysis))
 		model.TotalIssues = len(analysis.Issues)
 		model.IssueSummary = issueSummary(analysis.BySeverity)
