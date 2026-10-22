@@ -44,7 +44,8 @@ var ignoredDirsMu sync.RWMutex
 func IsIgnoredDir(name string) bool {
 	ignoredDirsMu.RLock()
 	defer ignoredDirsMu.RUnlock()
-	return ignoredDirs[strings.ToLower(name)]
+	lower := strings.ToLower(name)
+	return ignoredDirs[lower] || strings.HasSuffix(lower, "-venv")
 }
 
 // AddIgnoredDirs adds validated directory basenames to the process-wide scan

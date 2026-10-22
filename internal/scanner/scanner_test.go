@@ -32,6 +32,12 @@ func TestScanIgnoresKiloWorktrees(t *testing.T) {
 	}
 }
 
+func TestVirtualEnvSuffixIsIgnored(t *testing.T) {
+	if !IsIgnoredDir("xbrl-pilot-venv") {
+		t.Fatal("directories ending in -venv must be ignored")
+	}
+}
+
 func TestAddIgnoredDirs(t *testing.T) {
 	if err := AddIgnoredDirs([]string{"generated-audit-fixture"}); err != nil {
 		t.Fatal(err)
