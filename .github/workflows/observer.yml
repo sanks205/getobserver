@@ -1,12 +1,4 @@
-# Observer security & health scan.
-#
-# Builds Observer from source, scans the repository, writes SARIF, and uploads
-# it to GitHub code scanning — which surfaces findings in the Security tab AND
-# annotates pull requests inline (no extra PR-comment tooling needed).
-#
-# This file also serves as a copy-paste template. To scan YOUR project without
-# building from source, see docs/CI.md (download the released binary instead).
-
+# Observer security and health scan. Reports are preserved even when the final gate fails.
 name: Observer Scan
 
 on:
@@ -16,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  security-events: write   # required to upload SARIF
+  security-events: write
 
 jobs:
   observer:
@@ -31,15 +23,38 @@ jobs:
       - name: Build Observer
         run: go build -o observer ./cmd/cli
 
-      - name: Scan
-        # --fail-on trips the quality gate; continue-on-error lets the SARIF
-        # upload run even when the gate fails, so findings still reach the
-        # Security tab / PR. Drop continue-on-error to hard-fail the build.
+      - name: Run audit
+        id: audit
         continue-on-error: true
-        run: ./observer analyze . --sarif observer.sarif --fail-on High
+        run: >-
+          ./observer analyze .
+          --out observer-report.html
+          --json observer-findings.json
+          --sarif observer.sarif
+          --attest observer-attestation.json
+          --fail-on High
+
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observer-audit-${{ github.sha }}
+          if-no-files-found: warn
+          path: |
+            observer-report.html
+            observer-findings.json
+            observer.sarif
+            observer-attestation.json
+            observer-attestation.json.sig
 
       - name: Upload SARIF
-        if: always()
+        if: always() && hashFiles('observer.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: observer.sarif
+
+      - name: Enforce audit result
+        if: always() && steps.audit.outcome == 'failure'
+        run: |
+          echo "Observer audit failed or was incomplete. Reports were uploaded above."
+          exit 1

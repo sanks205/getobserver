@@ -1,0 +1,66 @@
+# Observer PR summary. The audit result is enforced after reports and comments are preserved.
+name: Observer PR Comment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  pr-comment:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Build Observer
+        run: go build -o observer ./cmd/cli
+
+      - name: Scan with attestation
+        id: audit
+        continue-on-error: true
+        run: ./observer analyze . --out observer-report.html --attest observer-attestation.json --fail-on High --json observer-findings.json
+
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observer-pr-audit-${{ github.sha }}
+          if-no-files-found: warn
+          path: |
+            observer-report.html
+            observer-findings.json
+            observer-attestation.json
+            observer-attestation.json.sig
+
+      - name: Post PR comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let summary = 'Observer audit did not produce an attestation';
+            let badge = '';
+            try {
+              const att = JSON.parse(fs.readFileSync('observer-attestation.json', 'utf8'));
+              const f = att.findings || {};
+              const total = att.total_findings || 0;
+              const status = (att.status || 'unknown').toUpperCase();
+              summary = `Observer: ${total} issue(s) - High ${f.High || 0}, Medium ${f.Medium || 0}, Low ${f.Low || 0} - ${status}`;
+              if (fs.existsSync('observer-attestation.json.sig')) badge = ' - Signed (Pro)';
+            } catch (e) {}
+            const body = `### Observer Production Health Report\n${summary}${badge}\n\nThe complete report and attestation are available in the workflow artifacts.`;
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body});
+
+      - name: Enforce audit result
+        if: always() && steps.audit.outcome == 'failure'
+        run: |
+          echo "Observer audit failed or was incomplete. Reports and PR summary were preserved."
+          exit 1
