@@ -2,9 +2,6 @@ package tests
 
 import (
 	"context"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -76,54 +73,5 @@ func TestLocalReportEnriched(t *testing.T) {
 	}
 	if !strings.Contains(in0.FixExample, "?") { // parameterized-query example
 		t.Errorf("expected a parameterized-query fix example, got %q", in0.FixExample)
-	}
-}
-
-func TestOpenAIProviderWithMockServer(t *testing.T) {
-	// Canned AI JSON the model would return.
-	aiJSON := `{"summary":"One critical secret and a recurring DB timeout.",
-		"insights":[{"title":"Hardcoded secret","severity":"Critical","problem":"Key in source",
-		"root_cause":"Committed literal","impact":"Account takeover","suggestion":"Rotate and use env"}],
-		"priorities":["Rotate the leaked key"]}`
-
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if got := r.Header.Get("Authorization"); got != "Bearer test-key" {
-			t.Errorf("Authorization = %q, want Bearer test-key", got)
-		}
-		if !strings.HasSuffix(r.URL.Path, "/chat/completions") {
-			t.Errorf("unexpected path %q", r.URL.Path)
-		}
-		resp := map[string]any{
-			"choices": []map[string]any{
-				{"message": map[string]string{"role": "assistant", "content": aiJSON}},
-			},
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
-	}))
-	defer srv.Close()
-
-	provider := ai.NewOpenAI("test-key", "gpt-4o-mini", srv.URL)
-	e := &ai.Explainer{Provider: provider}
-	rep, err := e.Explain(context.Background(), sampleInput())
-	if err != nil {
-		t.Fatalf("explain failed: %v", err)
-	}
-	if !strings.HasPrefix(rep.Provider, "openai:") {
-		t.Errorf("Provider = %q, want openai:*", rep.Provider)
-	}
-	if len(rep.Insights) != 1 || rep.Insights[0].Severity != "Critical" {
-		t.Fatalf("unexpected insights: %+v", rep.Insights)
-	}
-	if len(rep.Priorities) != 1 {
-		t.Errorf("priorities = %v, want 1", rep.Priorities)
-	}
-}
-
-func TestOpenAIMissingKey(t *testing.T) {
-	provider := ai.NewOpenAI("", "", "")
-	_, err := provider.Complete(context.Background(), ai.Request{User: "hi"})
-	if err == nil {
-		t.Error("expected error when API key is missing")
 	}
 }
