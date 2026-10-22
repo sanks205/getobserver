@@ -45,6 +45,9 @@
     nav.toc a{display:flex;justify-content:space-between;gap:8px;color:var(--text);text-decoration:none;padding:7px 10px;border-radius:8px;}
     nav.toc a:hover{background:var(--surface2);color:var(--accent);}
     nav.toc .count{color:var(--muted);font-variant-numeric:tabular-nums;}
+    nav.toc .finding-nav{align-items:flex-start;}
+    nav.toc .finding-counts{color:var(--muted);font-size:.72rem;line-height:1.35;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+    nav.toc .finding-counts strong{color:var(--text);font-weight:700;}
     main{padding:24px 30px 80px;min-width:0;}
     .appbar{display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;}
     .brand{display:flex;align-items:center;gap:10px;color:var(--text);}
@@ -190,10 +193,10 @@
     <a href="#summary">Executive Summary</a>
     <a href="#tech">Technology Stack</a>
     <a href="#priorities">Fix These First <span class="count">{{len .TopPriorities}}</span></a>
-    <a href="#findings">All Findings <span class="count">{{.TotalIssues}}</span></a>
+    <a class="finding-nav" href="#findings"><span>Findings</span><span class="finding-counts"><strong>{{.TotalIssues}}</strong> occurrences<br><strong>{{len .IssueGroups}}</strong> issue types</span></a>
     {{if .HasRuntime}}<a href="#runtime">Runtime Errors <span class="count">{{.TotalRuntimeEvents}}</span></a>{{end}}
     {{if .HasLogs}}<a href="#logs">Log Analysis <span class="count">{{.TotalLogErrors}}</span></a>{{end}}
-    {{if .HasAI}}<a href="#ai">AI Recommendations</a>{{end}}
+    {{if .HasAI}}<a href="#ai">Remediation Guidance</a>{{end}}
     {{if .HasCompliance}}<a href="#compliance">Compliance &amp; Standards</a>{{end}}
     <a href="#structure">Project Structure</a>
   </nav>
@@ -237,7 +240,7 @@
     <h2 id="summary">Executive Summary</h2>
     {{if .HasAI}}
     <div class="card" style="margin-bottom:10px">{{.AISummary}}</div>
-    <p class="muted">AI provider: <code>{{.AIProvider}}</code> — explanations are grounded in the detected findings.</p>
+    <p class="muted">Guidance mode: <code>{{.AIProvider}}</code> — explanations are grounded in the detected findings.</p>
     {{end}}
     <div class="hero">
       <div class="hero-left">
@@ -263,7 +266,11 @@
         </div>
         <div class="gaugewrap">
           <div class="gauge score-{{.HealthGrade}}" style="--v:{{.HealthScore}}"><div class="gauge-inner"><span class="num">{{.HealthScore}}</span><span class="grade">{{.HealthGrade}}</span></div></div>
-          <div class="gaugelbl">Code Health</div>
+          <div class="gaugelbl">Code Health · All Engines</div>
+        </div>
+        <div class="gaugewrap">
+          <div class="gauge score-{{.BuiltInHealthGrade}}" style="--v:{{.BuiltInHealthScore}}"><div class="gauge-inner"><span class="num">{{.BuiltInHealthScore}}</span><span class="grade">{{.BuiltInHealthGrade}}</span></div></div>
+          <div class="gaugelbl">Observer Built-in</div>
         </div>
       </div>
     </div>
@@ -272,7 +279,7 @@
       <strong>How scoring works:</strong> severity, CWE and OWASP tags follow industry standards (CVSS-aligned).
       The <strong>Security rating (A–E)</strong> is standards-style — it reflects the single most severe security
       issue present (E = Critical … A = none), the same model tools like SonarQube use. The <strong>0–100 scores</strong>
-      are Observer's own density-based health index (severity-weighted findings per file), so they also reflect volume.
+      use scoring model v{{.ScoringModel}} over first-party files. Code Health includes all enabled engines; Observer Built-in isolates native rules. Optional engines contributed {{.ExternalHealthCount}} health finding(s).
     </p>
 
     <h2 id="tech">Technology Stack</h2>
@@ -297,18 +304,18 @@
     <p class="empty">No Critical or High severity issues detected — a good sign.</p>
     {{end}}
 
-    <h2 id="findings">All Findings</h2>
+    <h2 id="findings">Findings: {{.TotalIssues}} Occurrences, {{len .IssueGroups}} Issue Types</h2>
     <p class="muted">
-      {{.TotalIssues}} occurrence(s) across {{.FilesScanned}} scanned file(s), grouped into {{len .IssueGroups}} issue type(s), highest severity first.
-      Expand a row to see every location (clickable — opens in VS Code) and the suggested fix. Findings are heuristic — confirm before acting.
+      <strong>{{.TotalIssues}} finding occurrences</strong> across {{.FilesScanned}} scanned file(s). They are consolidated into <strong>{{len .IssueGroups}} unique issue types</strong> below; the count on each row shows its occurrences.
+      Expand a row to see every location (clickable — opens in VS Code) and the possible remediation. Findings and guidance are rule-based — confirm before acting.
     </p>
     {{if .IssueGroups}}
     <div class="controls">
-      <button data-sevfilter="all" class="active">All</button>
-      <button data-sevfilter="Critical">Critical</button>
-      <button data-sevfilter="High">High</button>
-      <button data-sevfilter="Medium">Medium</button>
-      <button data-sevfilter="Low">Low</button>
+      <button data-sevfilter="all" class="active">All types</button>
+      <button data-sevfilter="Critical">Critical types</button>
+      <button data-sevfilter="High">High types</button>
+      <button data-sevfilter="Medium">Medium types</button>
+      <button data-sevfilter="Low">Low types</button>
       <select id="catFilter">
         <option value="all">All categories</option>
         {{range .FindingCategories}}<option value="{{.}}">{{.}}</option>{{end}}
@@ -391,7 +398,7 @@
     {{end}}
 
     {{if .HasAI}}
-    <h2 id="ai">AI Recommendations</h2>
+    <h2 id="ai">Remediation Guidance</h2>
     {{if .AIInsights}}
     {{range .AIInsights}}
     <div class="card aicard">
@@ -405,11 +412,11 @@
       {{if .RootCause}}<div class="airow"><span class="ailbl">Root cause</span><span class="muted">{{.RootCause}}</span></div>{{end}}
       {{if .Impact}}<div class="airow"><span class="ailbl">Impact</span><span class="muted">{{.Impact}}</span></div>{{end}}
       {{if .Exploit}}<div class="airow"><span class="ailbl">Exploitability</span><span class="muted">{{.Exploit}}</span></div>{{end}}
-      {{if .Suggestion}}<div class="airow"><span class="ailbl">Fix</span><span>{{.Suggestion}}</span></div>{{end}}
+      {{if .Suggestion}}<div class="airow"><span class="ailbl">Possible fix</span><span>{{.Suggestion}}</span></div>{{end}}
       {{if .FixExample}}<div class="airow"><span class="ailbl">Example</span><pre class="fixex">{{.FixExample}}</pre></div>{{end}}
     </div>
     {{end}}
-    {{else}}<p class="empty">No AI insights generated.</p>{{end}}
+    {{else}}<p class="empty">No remediation guidance generated.</p>{{end}}
 
     <h2 id="priority">Suggested Fix Priority</h2>
     {{if .AIPriorities}}
@@ -476,7 +483,7 @@
     </div>
 
     <footer>
-      Generated by <strong>Observer</strong> — AI Production Debugging Assistant.
+      Generated by <strong>Observer</strong> — Offline Code Audit Tool.
       Findings are heuristic; confirm before acting. Location links use the <code>vscode://</code> scheme and require VS Code.
     </footer>
   </main>
@@ -489,7 +496,7 @@
   var state = { sev: 'all', cat: 'all', q: '' };
   var matchEl = document.getElementById('matchCount');
 
-  // Label each filter with how many issue types it covers, e.g. "High (2)".
+  // Filter counts are issue types, not finding occurrences.
   (function labelCounts() {
     var sev = { all: rows.length, Critical: 0, High: 0, Medium: 0, Low: 0 }, cat = {};
     rows.forEach(function (r) {
