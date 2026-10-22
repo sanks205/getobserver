@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -381,13 +382,6 @@ func detectSecret(c lineCtx) []Issue {
 			continue
 		}
 		if t.re.MatchString(c.line) {
-			// The generic PEM "PRIVATE KEY" header is far more often placeholder or
-			// example text in UI templates and tests than a committed key. Skip it in
-			// those contexts; provider-specific keys (AWS/Stripe/Google/GitHub) still
-			// fire everywhere.
-			if t.gate == "private key" && nonSecretContext(c.rel) {
-				continue
-			}
 			tokenMatched = true
 			issues = append(issues, Issue{
 				RuleID: "SEC_TOKEN", Severity: t.severity, Category: "Security", Title: t.title,
@@ -399,17 +393,14 @@ func detectSecret(c lineCtx) []Issue {
 	}
 
 	// Skip the generic credential rule when a specific token already matched the
-	// same line (avoid double-reporting), or when the file is a context where
-	// credential-like literals are expected and benign (translation tables, tests,
-	// seeders/factories, example config). The precise high-entropy token rules
-	// above still run everywhere. Cheap gate first.
-	if tokenMatched || nonSecretContext(c.rel) || !anyContains(c.lower, "password", "passwd", "pwd", "secret", "key", "token") {
+	// same line, to avoid reporting the same literal twice. Cheap gate first.
+	if tokenMatched || !anyContains(c.lower, "password", "passwd", "pwd", "secret", "key", "token") {
 		return issues
 	}
 	if m := credentialAssign.FindStringSubmatch(c.line); m != nil {
 		if !isPlaceholder(m[2]) {
 			issues = append(issues, Issue{
-				RuleID: "SEC_HARDCODED_CREDENTIAL", Severity: High, Category: "Security",
+				RuleID: "SEC_HARDCODED_CREDENTIAL", Severity: credentialSeverity(c.rel), Category: "Security",
 				Title: "Hardcoded credential", File: c.rel, Line: c.lineNo, Snippet: snippet(c.line),
 				Explanation:    "A password/secret/API key is hardcoded as a literal value, exposing it to anyone reading the code.",
 				Recommendation: "Move the value to an environment variable or secrets manager and reference it at runtime.",
@@ -421,60 +412,30 @@ func detectSecret(c lineCtx) []Issue {
 
 // isPlaceholder reports whether a literal looks like a non-secret (empty,
 // example value, env reference, or template variable).
+func credentialSeverity(rel string) Severity {
+	p := "/" + strings.TrimPrefix(filepath.ToSlash(strings.ToLower(rel)), "/")
+	if strings.Contains(p, "/tests/") || strings.Contains(p, "/test/") || strings.Contains(p, "/fixtures/") {
+		return Low
+	}
+	if strings.Contains(p, "/database/seeders/") || strings.Contains(p, "/demo/") || strings.Contains(p, "/examples/") {
+		return Medium
+	}
+	return High
+}
+
 func isPlaceholder(v string) bool {
 	t := strings.ToLower(strings.TrimSpace(v))
 	if t == "" || len(t) < 4 {
 		return true
 	}
-	// Real secrets never contain whitespace — a value with spaces is prose (a UI
-	// label, translation string, or validation message), not a credential. This
-	// alone rejects the bulk of translation-file false positives.
-	if strings.ContainsAny(t, " \t\n") {
-		return true
-	}
 	if strings.HasPrefix(t, "$") { // interpolated variable, not a literal secret
 		return true
 	}
-	// Common non-secret literals: field labels, test fixtures, seed defaults.
-	switch t {
-	case "password", "passwd", "secret", "token", "test", "admin", "demo", "user",
-		"root", "pass", "string", "value", "none", "email", "name", "required", "confirmed":
-		return true
-	}
-	for _, p := range []string{"env(", "getenv", "process.env", "your", "example", "changeme",
-		"placeholder", "xxxx", "<", "{{", "%s", "null", "todo", "secret_key_here", "*****", ":attribute"} {
+	for _, p := range []string{"env(", "getenv", "process.env", "your", "example", "changeme", "encrypted", "hashed",
+		"placeholder", "xxxx", "<", "{{", "%s", "null", "todo", "secret_key_here", "*****"} {
 		if strings.Contains(t, p) {
 			return true
 		}
-	}
-	return false
-}
-
-// nonSecretContext reports whether rel is a location where credential-like
-// literals are expected and benign — translation string tables, tests,
-// seeders/factories, and example/dist config. The generic credential heuristic
-// is skipped there; the precise high-entropy token rules still run everywhere.
-func nonSecretContext(rel string) bool {
-	p := strings.ToLower(strings.ReplaceAll(rel, "\\", "/"))
-	switch {
-	case strings.HasPrefix(p, "lang/") || strings.Contains(p, "/lang/") ||
-		strings.Contains(p, "/translations/") || strings.Contains(p, "/locale/") || strings.Contains(p, "/locales/"):
-		return true
-	case strings.HasPrefix(p, "tests/") || strings.Contains(p, "/tests/") ||
-		strings.HasPrefix(p, "test/") || strings.Contains(p, "/test/") ||
-		strings.HasSuffix(p, "_test.go") || strings.HasSuffix(p, ".test.js") ||
-		strings.HasSuffix(p, ".test.ts") || strings.HasSuffix(p, ".spec.js") || strings.HasSuffix(p, ".spec.ts"):
-		return true
-	case strings.Contains(p, "/seeders/") || strings.Contains(p, "/seeds/") || strings.Contains(p, "/factories/"):
-		return true
-	case strings.HasSuffix(p, ".example") || strings.HasSuffix(p, ".dist") ||
-		strings.Contains(p, ".example.") || strings.HasSuffix(p, ".sample"):
-		return true
-	case strings.HasSuffix(p, ".blade.php") || strings.HasSuffix(p, ".twig") ||
-		strings.HasSuffix(p, ".vue") || strings.HasSuffix(p, ".html") || strings.HasSuffix(p, ".htm"):
-		// UI templates: credential/private-key literals here are placeholder/label
-		// text, not committed secrets. (XSS and other template rules still run.)
-		return true
 	}
 	return false
 }
@@ -589,15 +550,24 @@ func detectEmptyCatch(rel, ext string, lines []string, mask []bool) []Issue {
 	return issues
 }
 
-// bodyIsEmpty reports whether the lines starting at index `from` contain only
-// blank/comment lines before the closing brace.
+// bodyIsEmpty reports an undocumented empty block. An explanatory comment is
+// intentional handling, while blank blocks and TODO-only comments remain findings.
 func bodyIsEmpty(lines []string, from int) bool {
+	documented := false
 	for j := from; j < len(lines); j++ {
 		t := strings.TrimSpace(lines[j])
-		if t == "" || isComment(t) {
+		if t == "" {
 			continue
 		}
-		return t == "}"
+		if isComment(t) {
+			comment := strings.Trim(strings.TrimSpace(t), "/*# ")
+			lower := strings.ToLower(comment)
+			if len(comment) >= 12 && !strings.HasPrefix(lower, "todo") && !strings.HasPrefix(lower, "fixme") && !strings.HasPrefix(lower, "issue") {
+				documented = true
+			}
+			continue
+		}
+		return t == "}" && !documented
 	}
 	return false
 }

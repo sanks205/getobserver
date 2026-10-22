@@ -14,6 +14,7 @@ package analyzer
 import (
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -223,7 +224,7 @@ func scanInfra(root string) ([]Issue, int) {
 		}
 		if d.IsDir() {
 			name := strings.ToLower(d.Name())
-			if p != root && (scanner.IsIgnoredDir(d.Name()) || vendoredDirs[name] || isFrameworkCore(p, name)) {
+			if p != root && (scanner.IsIgnoredDir(d.Name()) || vendoredDirs[name] || isFrameworkCore(p, name) || isGeneratedProjectDir(root, p)) {
 				return fs.SkipDir
 			}
 			return nil
@@ -260,10 +261,18 @@ func scanInfra(root string) ([]Issue, int) {
 				if ru.id == "ENV_SECRET_COMMITTED" && isPlaceholderValue(raw) {
 					continue
 				}
+				id, severity := ru.id, ru.severity
+				title, explanation, recommendation := ru.title, ru.explanation, ru.recommendation
+				if ru.id == "ENV_SECRET_COMMITTED" && !isGitTracked(root, rel) {
+					id, severity = "ENV_SECRET_LOCAL", Medium
+					title = "Env file: local secret present"
+					explanation = "A local .env contains a credential-like value, but Git does not report the file as tracked. This may be expected for local development."
+					recommendation = "Keep the file ignored, restrict local access, and confirm the value was never committed to Git history."
+				}
 				issues = append(issues, Issue{
-					RuleID: ru.id, Severity: ru.severity, Category: infraCategory,
-					Title: ru.title, File: rel, Line: i + 1, Snippet: infraSnippet(trimmed),
-					Explanation: ru.explanation, Recommendation: ru.recommendation,
+					RuleID: id, Severity: severity, Category: infraCategory,
+					Title: title, File: rel, Line: i + 1, Snippet: infraSnippet(trimmed),
+					Explanation: explanation, Recommendation: recommendation,
 					CWE: ru.cwe, OWASP: ru.owasp,
 				})
 			}
@@ -314,6 +323,11 @@ func infraGated(lowLine string, gates []string) bool {
 // isPlaceholderValue reports whether an assignment's value is an obvious
 // placeholder (env var reference, empty, or a template token), so we don't flag
 // a .env.example-style line as a committed secret.
+func isGitTracked(root, rel string) bool {
+	cmd := exec.Command("git", "-C", root, "ls-files", "--error-unmatch", "--", filepath.FromSlash(rel))
+	return cmd.Run() == nil
+}
+
 func isPlaceholderValue(line string) bool {
 	i := strings.IndexByte(line, '=')
 	if i < 0 {

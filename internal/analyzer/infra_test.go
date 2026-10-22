@@ -42,7 +42,7 @@ func TestScanInfra(t *testing.T) {
 	wantPresent := []string{
 		"DOCKER_LATEST_TAG", "DOCKER_USER_ROOT", "DOCKER_SECRET_ENV", "DOCKER_ADD_REMOTE", "DOCKER_CURL_PIPE_SH",
 		"COMPOSE_PRIVILEGED", "COMPOSE_HOST_NETWORK", "COMPOSE_DB_PORT_EXPOSED",
-		"ENV_APP_DEBUG", "ENV_SECRET_COMMITTED",
+		"ENV_APP_DEBUG", "ENV_SECRET_LOCAL",
 		"K8S_LATEST_IMAGE", "K8S_PRIVILEGED", "K8S_HOSTPATH",
 		"NGINX_AUTOINDEX", "WEB_SERVER_TOKENS", "WEB_OLD_TLS",
 	}
@@ -61,7 +61,7 @@ func TestScanInfra(t *testing.T) {
 		t.Errorf("DOCKER_LATEST_TAG fired %d times, want exactly 1", got["DOCKER_LATEST_TAG"])
 	}
 	// .env.example is a template and must not produce a committed-secret finding.
-	if got["ENV_SECRET_COMMITTED"] != 1 {
-		t.Errorf("ENV_SECRET_COMMITTED fired %d times, want exactly 1 (.env.example must be ignored)", got["ENV_SECRET_COMMITTED"])
+	if got["ENV_SECRET_LOCAL"] != 1 {
+		t.Errorf("ENV_SECRET_LOCAL fired %d times, want exactly 1 (.env.example must be ignored)", got["ENV_SECRET_LOCAL"])
 	}
 }

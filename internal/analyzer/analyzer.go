@@ -197,6 +197,46 @@ func HealthScore(r *Result) (int, string) {
 	return Score(r.Keep(func(is Issue) bool { return !securityCategories[is.Category] }))
 }
 
+// ScoringModelVersion identifies the corrected first-party scope model. Reports
+// can use it to avoid comparing scores produced under incompatible policies.
+const ScoringModelVersion = "2"
+
+// BuiltInHealthScore isolates Observer's own code-health rules. Overall
+// HealthScore still includes every enabled engine, such as PHPStan and ESLint.
+func BuiltInHealthScore(r *Result) (int, string) {
+	if r == nil {
+		return 100, "A"
+	}
+	return Score(r.Keep(func(is Issue) bool {
+		return !securityCategories[is.Category] && !isExternalEngineIssue(is)
+	}))
+}
+
+// ExternalHealthFindings returns the number of code-health findings contributed
+// by optional engines, making their effect on the overall score transparent.
+func ExternalHealthFindings(r *Result) int {
+	if r == nil {
+		return 0
+	}
+	n := 0
+	for _, is := range r.Issues {
+		if !securityCategories[is.Category] && isExternalEngineIssue(is) {
+			n++
+		}
+	}
+	return n
+}
+
+func isExternalEngineIssue(is Issue) bool {
+	id := strings.ToUpper(is.RuleID)
+	for _, prefix := range []string{"PHPSTAN:", "SEMGREP:", "BANDIT:", "GOSEC:", "ESLINT:"} {
+		if strings.HasPrefix(id, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 func grade(score int) string {
 	switch {
 	case score >= 90:
@@ -347,6 +387,17 @@ var vendoredDirs = map[string]bool{
 // minifiedFile matches bundled/minified JavaScript that should not be analyzed.
 var minifiedFile = regexp.MustCompile(`(?i)(\.min\.js|\.bundle\.js|-min\.js)$`)
 
+// isGeneratedProjectDir excludes framework runtime output while retaining source directories with common names.
+func isGeneratedProjectDir(root, path string) bool {
+	rel, err := filepath.Rel(root, path)
+	if err != nil {
+		return false
+	}
+	rel = filepath.ToSlash(strings.ToLower(rel))
+	return rel == "bootstrap/cache" || strings.HasPrefix(rel, "bootstrap/cache/") ||
+		rel == "storage/framework" || strings.HasPrefix(rel, "storage/framework/")
+}
+
 // isFrameworkCore reports whether a directory is a vendored framework core that
 // should be skipped. Currently it recognizes CodeIgniter's "system" directory
 // (identified by core/CodeIgniter.php) so we analyze the user's application
@@ -443,7 +494,7 @@ func collectJobs(abs string) ([]job, error) {
 		}
 		if d.IsDir() {
 			name := strings.ToLower(d.Name())
-			if p != abs && (scanner.IsIgnoredDir(d.Name()) || vendoredDirs[name] || isFrameworkCore(p, name)) {
+			if p != abs && (scanner.IsIgnoredDir(d.Name()) || vendoredDirs[name] || isFrameworkCore(p, name) || isGeneratedProjectDir(abs, p)) {
 				return fs.SkipDir
 			}
 			return nil
