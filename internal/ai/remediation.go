@@ -131,7 +131,7 @@ var remByCategory = map[string]remediation{
 
 // GenericFix returns the built-in, offline before→after remediation example for
 // a finding's CWE (falling back to its category). It lets the report show a
-// suggested fix for every finding even without --ai; returns "" when there is no
+// suggested fix for every finding even without --guidance; returns "" when there is no
 // specific guidance for that class. The guidance is generic (about the issue
 // class, not the user's code), so it never fabricates specifics.
 func GenericFix(cwe, category string) string {

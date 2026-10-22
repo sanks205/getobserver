@@ -5,8 +5,7 @@
 // packages. Callers adapt their findings into ai.Finding, so AI logic never
 // leaks into the diagnostic core.
 //
-// The LLM is abstracted behind the Provider interface so OpenAI (today) and
-// other providers (later) are interchangeable. When no provider is configured
+// The legacy Provider interface remains internal for compatibility; no remote provider is shipped. When no provider is configured
 // the Explainer falls back to a deterministic local mode that only restates the
 // findings — which enforces the core rule: the AI explains findings, it never
 // invents issues or solutions that the findings do not support.
