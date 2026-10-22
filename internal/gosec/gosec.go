@@ -16,6 +16,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/aipda/observer/internal/engineutil"
 )
 
 // ErrNotAvailable means the gosec binary was not found on PATH.
@@ -53,9 +55,7 @@ func Scan(ctx context.Context, root string) ([]Finding, error) {
 	}
 	// -fmt=json machine output, -quiet suppresses the progress log; ./... scans
 	// all packages in the module rooted at cmd.Dir.
-	cmd := exec.CommandContext(ctx, "gosec", "-fmt=json", "-quiet", "./...")
-	cmd.Dir = root
-	out, err := cmd.Output()
+	out, err := engineutil.Run(ctx, root, "gosec", "-fmt=json", "-quiet", "./...")
 	// gosec exits non-zero when it finds issues — expected. Only fail if we got
 	// no JSON back at all.
 	if len(out) == 0 && err != nil {
