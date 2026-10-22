@@ -1,9 +1,8 @@
 # Observer
 
-**Finds what's wrong — and shows you the fix.**
+**Audit code, dependencies, and configuration locally. Find important issues and understand how to fix them.**
 
-*Code, dependencies, config, and infra — one scan, one report. Offline, single binary, no account.*
-
+Useful for legacy code reviews, application handovers, local security triage, and everyday development. Observer Community is MIT-licensed, runs on Windows, macOS, and Linux, and requires no account or hosted service.
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Go](https://img.shields.io/badge/Go-1.26%2B-00ADD8?logo=go&logoColor=white)
 ![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20macOS%20%7C%20linux-lightgrey)
@@ -49,7 +48,7 @@ You get **one self-contained `report.html`** — grouped findings, a standards-a
 > **production health report** - combining static analysis, technology detection,
 > runtime error analysis, log analysis, dependency analysis, infrastructure and
 > config checks (Dockerfile / compose / Kubernetes / .env / web-server), and
-> optional AI-powered explanations.
+> optional deterministic remediation guidance.
 
 The goal: help developers quickly identify production issues without manually
 searching through huge codebases and server logs.
@@ -71,7 +70,7 @@ Point it at any codebase and get one self-contained HTML report - no server, no
 account, no instrumentation:
 
 ```bash
-observer analyze ./examples/php-demo --ai --out report.html
+observer analyze ./examples/php-demo --guidance --out report.html
 ```
 
 Observer detects the stack, flags security, runtime, and dependency issues with
@@ -104,15 +103,15 @@ other.
 
 ---
 
-## Gate AI-generated code
+## Gate changed code
 
-AI writes a lot of code now — and it ships the exact issues Observer already catches
+Code changes can introduce the exact issues Observer already catches
 (hardcoded secrets, injection, weak crypto, risky deps) at a higher rate than hand-written
 code. Observer is an **offline safety net for those changes**: instead of re-scanning the
 whole project, scan only what changed.
 
 ```bash
-# Scan only what you (or your AI assistant) just changed, vs the last commit
+# Scan only what you just changed, vs the last commit
 observer analyze . --diff
 
 # PR review — only the lines this branch added since it forked from main
@@ -123,8 +122,8 @@ observer install-hook            # one-time; bypass a commit with `git commit --
 ```
 
 Add `--attest attestation.json` to emit a machine-readable local scan record for
-a PR or audit trail. It records the tool version, scope, finding counts, and gate
-outcome. Observer Pro can add an HMAC companion file for local workflow integrity;
+a PR or audit trail. It records the tool version, exact Git commit, branch and dirty
+state, scan scope, enabled-engine outcomes, finding counts, and final status. Observer Pro can add an HMAC companion file for local workflow integrity;
 this is not a third-party signature or certification.
 
 ---
@@ -133,8 +132,7 @@ this is not a third-party signature or certification.
 
 Observer runs **fully offline by default** — nothing about your code ever leaves your
 machine. There is no account, no telemetry, and no phone-home. The only features that
-touch the network are explicitly opt-in: `--cve` (OSV.dev dependency lookup), `--semgrep` when using `auto` or registry rules, and `--ai`
-*with* an `OPENAI_API_KEY`, and the `--email` / `--slack` / `--teams` / `--webhook`
+touch the network are explicitly opt-in: `--cve` (OSV.dev dependency lookup), `--semgrep` when using `auto` or registry rules, and the `--email` / `--slack` / `--teams` / `--webhook`
 notifiers. Leave them off and the scan is entirely local.
 
 For regulated, air-gapped, or client-confidential work you can make that guarantee
@@ -145,7 +143,7 @@ observer analyze ./my-project --assert-offline
 ```
 
 `--assert-offline` refuses network-capable options, requires `SEMGREP_CONFIG` to point to an existing local file or directory when `--semgrep` is used, and unsets
-`OPENAI_API_KEY` so the AI layer stays on its local heuristic.
+all remediation guidance remains deterministic and local.
 
 Inspect the privacy contract and available optional local engines without scanning:
 
@@ -177,7 +175,7 @@ interface (CLI today; API and an enterprise agent later) reuses.
   │  Modules                                      │
   │  technology detector · static scanner         │
   │  runtime analyzer · log analyzer              │
-  │  dependency analyzer · AI analyzer            │
+  │  dependency analyzer · remediation guidance            │
   │  report generator                             │
   └─────────────────────────────────────────────┘
 ```
@@ -194,7 +192,7 @@ ai-production-debugging-assistant/
 │   ├── logger/         # Phase 5 — log analysis
 │   ├── reporter/       # Phase 7 — HTML report generation
 │   ├── runtime/        # Phase 4 — ingest observer-agent runtime events
-│   ├── ai/             # Phase 6 — provider-agnostic AI abstraction
+│   ├── ai/             # Phase 6 - deterministic remediation model (legacy package name)
 │   └── storage/        # PostgreSQL persistence (SaaS/enterprise)
 ├── observer-agent/     # Phase 4 — drop-in PHP runtime error collector
 ├── api/                # HTTP API (Gin/Fiber) — later phase
@@ -286,8 +284,8 @@ observer serve            # open http://127.0.0.1:7777 — paste a folder, click
 # issues since the previous scan, -N (green) better, 0 flat.
 # Open any report and use the browser's Print → Save as PDF.
 
-# Add AI explanations (root cause / impact / fix) of the findings
-observer analyze ./examples/php-demo --ai
+# Add deterministic remediation guidance
+observer analyze ./examples/php-demo --guidance
 
 # Choose what to report: only some categories, and/or a minimum severity
 observer analyze ./examples/php-demo --categories "Security,Database" --min-severity High
@@ -296,7 +294,7 @@ observer analyze ./examples/php-demo --categories "Security,Database" --min-seve
 observer analyze ./my-project --cve
 
 # Air-gapped / regulated: guarantee NO network I/O — refuses --cve/--email/--slack/
-# --teams/--webhook and forces AI to the local heuristic. Prints "Offline mode: no network I/O."
+# --teams/--webhook and keeps deterministic guidance local. Prints "Offline mode: no network I/O."
 observer analyze ./my-project --assert-offline
 
 # Deeper, multi-language detection if you have Semgrep installed (auto-skips if not)
@@ -304,6 +302,9 @@ observer analyze ./my-project --semgrep
 
 # Auto-detect and fold in other engines you already have (each auto-skips if absent):
 observer analyze ./my-project --phpstan --bandit --gosec --eslint
+
+# CI policy: these engines must complete; unavailable/failed means INCOMPLETE (exit 3)
+observer analyze ./my-project --require-engine phpstan,semgrep --fail-on High
 
 # CI: emit SARIF and fail the build on High+ findings (see docs/CI.md)
 observer analyze . --sarif observer.sarif --fail-on High
@@ -349,26 +350,9 @@ OBSERVER_SMTP_DRYRUN=1 SMTP_FROM=observer@example.com \
 # -> writes report.html.eml next to the report
 ```
 
-### AI configuration
+### Remediation guidance
 
-The `--ai` flag explains findings. It is **provider-agnostic** and works offline:
-
-- **No key set** → a local heuristic that only restates the findings (never invents).
-- **`OPENAI_API_KEY` set** → uses OpenAI; falls back to local on any error.
-
-| Variable | Purpose | Default |
-|---|---|---|
-| `OPENAI_API_KEY` | Enable the OpenAI provider | _(unset → local mode)_ |
-| `OPENAI_MODEL` | Model id | `gpt-4o-mini` |
-| `OPENAI_BASE_URL` | Override API endpoint (for proxies/testing) | OpenAI |
-| `OBSERVER_AI_PROVIDER` | Set to `local` to force offline mode even with a key | _(auto)_ |
-
-```bash
-
-# Version / help
-observer version
-observer help
-```
+Use --guidance to add deterministic, rule-based explanations, prioritization, and possible remediation patterns. It runs locally, uses no API key, and requires developer review. The former --ai flag remains a deprecated local-only alias for compatibility.
 
 ### Scan timeout
 
@@ -419,7 +403,7 @@ detected signals, code structure, and file-type breakdown.
 | 3 | Static code analysis (security & perf issues) | ✅ Done |
 | 4 | Runtime error collection (`observer-agent`) | ✅ Done |
 | 5 | Log analyzer (`observer analyze-log`) | ✅ Done |
-| 6 | AI analysis module (OpenAI + pluggable providers) | ✅ Done |
+| 6 | Deterministic remediation guidance | Done |
 | 7 | Professional multi-section HTML report | ✅ Done |
 | 8 | Email reporting (SMTP) | ✅ Done |
 | 9 | Packaging & distribution — cross-platform single-binary builds | ✅ Done |
@@ -435,20 +419,32 @@ For the product vision, editions, and positioning see **[PRODUCT.md](PRODUCT.md)
 
 ---
 
-## Observer Pro
+## Community and Pro
 
-The CLI and local dashboard are **free forever**. **Observer Pro** adds optional paid
-features — one-time purchase, activated with a license key, fully offline after activation:
+**Community: find and fix problems in your own code.**
 
-- **Branded PDF reports** — client-ready PDF with your logo &amp; brand — [$39](https://observerly1.gumroad.com/l/observer-pdf)
-- **Scheduled / automatic scans** — re-scan on a schedule, alert on new issues — [$29](https://observerly1.gumroad.com/l/observer-schedule)
-- **Premium rule packs** — deeper framework security rules: Laravel · CodeIgniter · WordPress · Symfony · Django · Rails · Spring · Express — [$49](https://observerly1.gumroad.com/l/observer-rules-php)
+**Pro: perform deeper professional audits, automate repeat assessments, and create client-ready deliverables.**
 
-Or get everything in the **[All-Access bundle — $89](https://observerly1.gumroad.com/l/observer-pro)**.
-Activate with `observer pro activate <key>`.
+| Capability | Community | Pro |
+|---|:---:|:---:|
+| Local scans, core rules, remediation, dashboard | Yes | Yes |
+| HTML, JSON, CSV, SARIF, CI, gates, baselines, changed-code scans | Yes | Yes |
+| Local heuristic or bring-your-own-key AI | Yes | Yes |
+| Premium framework-specific rules | - | Premium Rules |
+| Organization-ready PDF with document control, navigation, remediation plan, and branding | - | Professional PDF |
+| Integrated recurring scans and dashboard scheduling | - | Scheduled Scans |
 
-> **🎉 Launch offer — 25% off** with code **`LAUNCH25`** at checkout (one-time, first 25 buyers).
-> No pressure: run the free tool first, and if it earns a spot in your workflow, the discount's here when you want it.
+**Recommended for professional use:** [Observer Pro All-Access Bundle - $89](https://observerly1.gumroad.com/l/observer-pro)
+
+Individual add-ons:
+
+- [Premium Framework Rule Packs - $49](https://observerly1.gumroad.com/l/observer-rules-php)
+- [Professional PDF Reports - $39](https://observerly1.gumroad.com/l/observer-pdf)
+- [Scheduled Scans - $29](https://observerly1.gumroad.com/l/observer-schedule)
+
+Community automation through CI, cron, or Task Scheduler remains supported. Community HTML can be printed to PDF; the paid PDF feature provides the richer professional assessment document. See the [verified edition matrix](docs/FREE-VS-PRO.md).
+
+Pro activation requires a purchased key. Gumroad keys are verified once online and then cached for offline use. Observer does not claim certification, guaranteed security, or replacement of full semantic SAST.
 
 ---
 

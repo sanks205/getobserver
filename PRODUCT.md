@@ -1,9 +1,9 @@
 # Observer — Product Overview
 
-> **AI Production Debugging Assistant.**
+> **Offline code auditing with deterministic remediation guidance.**
 > Point it at a codebase and get a production-health report in one command — combining
 > technology detection, static analysis, runtime error capture, log analysis, and
-> AI-powered explanations. Zero setup. Offline. One portable binary.
+> rule-based remediation guidance. Zero setup. Offline. One portable binary.
 
 **One-liner:** *What Sentry, CodeGuru, and SonarQube give you after weeks of setup, Observer gives you in one command — offline, no account, no instrumentation.*
 
@@ -51,7 +51,7 @@ Observer is a ~5 MB Go binary that runs anywhere and produces one **Production H
 | **Static analysis** | Flags security, configuration, performance, and error-handling issues with severity, location, and fix |
 | **Runtime errors** | A drop-in agent captures live exceptions (type, file, line, trace, URL, user) and groups them |
 | **Log analysis** | Mines existing logs for error frequency, repeated failures, and likely causes |
-| **AI explanation** | Explains and prioritizes findings (root cause → impact → fix), grounded in the findings — never invented |
+| **Remediation guidance** | Explains and prioritizes findings (root cause → impact → fix), derived from matched rules and requiring developer review |
 
 Output: an interactive HTML report with an executive summary, the eight standard sections, severity/category **filters**, full-text search, and **clickable locations that open the source file in VS Code at the exact line**.
 
@@ -67,7 +67,7 @@ a separate product (à-la-carte paid features — see §8).
 | 3 | Static code analysis (security, config, perf, error-handling) | ✅ |
 | 4 | Runtime error collection (`observer-agent` for PHP) | ✅ |
 | 5 | Log analyzer (`observer analyze-log`) | ✅ |
-| 6 | AI analysis (OpenAI + local heuristic, provider-agnostic) | ✅ |
+| 6 | Deterministic local remediation guidance | ✅ |
 | 7 | Professional multi-section report (filters, search, deep links) | ✅ |
 | 8 | Email reporting (SMTP) | ✅ |
 | 9 | Packaging & distribution — cross-platform single-binary builds | ✅ |
@@ -79,8 +79,8 @@ a separate product (à-la-carte paid features — see §8).
 **Proven characteristics:**
 - **Fast** — a 17,000-file / 290 MB project analyzes in ~2 seconds (parallel workers + substring pre-gating).
 - **Low-noise** — vendored code, framework cores, and minified bundles are skipped; block-comment-aware; multi-signal gating keeps false positives down.
-- **Offline & dependency-free** — single binary, no server, no account; AI works in a local heuristic mode with no API key.
-- **Honest** — findings are framed as *possible* issues; the AI explains, it does not invent.
+- **Offline & dependency-free** — single binary, no server, no account; guidance is deterministic, local, and requires no API key.
+- **Honest** — findings are framed as *possible* issues; guidance is rule-based and requires developer review.
 
 ### Language & capability coverage
 
@@ -117,14 +117,14 @@ PHPStan, ESLint…) that deepen static analysis without becoming a requirement.
    ┌──────────────────────────────────────────────┐
    │  scanner · detector · analyzer                 │
    │  runtime (agent ingest) · logger (logs)        │
-   │  ai (provider-agnostic) · reporter             │
+   │  ai (legacy package name; deterministic guidance) · reporter             │
    │  storage (SQLite / PostgreSQL)                 │
    └──────────────────────────────────────────────┘
 ```
 
 - **Language:** Go (cross-platform, single executable, fast).
 - **Decoupled modules:** each concern is its own package; the AI layer imports none of the others (it defines its own `Finding` type), so AI logic never leaks into the core.
-- **Provider-agnostic AI:** a one-method `Provider` interface; OpenAI today, others by adding a sibling file.
+- **Deterministic remediation:** a one-method `Provider` interface; No external provider or API key is used.
 - **Reserved for growth:** `api/`, `web-report/`, and `internal/storage/` are scaffolded for the dashboard and cloud tiers.
 
 ## 6. Competitive landscape & positioning
@@ -132,10 +132,10 @@ PHPStan, ESLint…) that deepen static analysis without becoming a requirement.
 | Camp | Examples | What they miss vs Observer |
 |---|---|---|
 | Deep static / SAST | SonarQube, Snyk, Semgrep | Code only — no runtime, no logs, needs CI/server |
-| Observability + AI | Sentry (Seer), Datadog (Bits AI) | Hosted, must instrument, ongoing cost; light static |
+| Observability platforms | Sentry (Seer), Datadog (Bits AI) | Hosted, must instrument, ongoing cost; light static |
 | AI SRE agents | Rootly, Cleric, Resolve.ai | Platforms/agents, not a folder-scanning CLI |
 
-**No single product matches Observer's packaging:** one-shot, offline, single binary, unifying code + runtime + logs + AI. The trade-off is depth — the giants are far deeper and continuous; Observer is a fast, dependency-free **snapshot**. Observer is best positioned as the **zero-setup first-look / triage tool** for the segments the giants underserve (see §7).
+**No single product matches Observer's packaging:** one-shot, offline, single binary, unifying code + runtime + logs + remediation guidance. The trade-off is depth — the giants are far deeper and continuous; Observer is a fast, dependency-free **snapshot**. Observer is best positioned as the **zero-setup first-look / triage tool** for the segments the giants underserve (see §7).
 
 > Observer does **not** try to replace SonarQube/Sentry. A team can run both: the giants for deep continuous coverage, Observer for instant offline triage.
 
@@ -147,30 +147,26 @@ PHPStan, ESLint…) that deepen static analysis without becoming a requirement.
 - **Incident triage** — a fast "what's broken across code + logs + runtime" before deeper tools.
 - **Pre-handover / due-diligence** — a one-command health snapshot of an unfamiliar project.
 
-## 8. Editions & pricing
+## 8. Editions and pricing
 
-Open-core value ladder (pricing illustrative, to be validated):
+The current open-core product ladder is verified against the source and published products:
 
-| Tier | Audience | Includes | Pricing model |
-|---|---|---|---|
-| **Community** (OSS, free) | Individuals, OSS, evaluation | Full CLI + HTML report, all core rules, **local dashboard** (`observer serve`) with multi-project history & trends, dependency CVE scan, SARIF/CI + GitHub Action, **bring-your-own** AI key | Free |
-| **Pro** (add-ons) | Freelancers, agencies, SMB | À-la-carte, one-time license keys: **Branded PDF reports**, **Scheduled / automatic scans**, **Premium framework rule packs** (Laravel, CodeIgniter, WordPress, Symfony, Django, Rails, Spring, Express) — or an all-access bundle | **One-time, per feature** (illustrative: $29–$49 each, $89 bundle) |
+| Tier | Audience | Includes | Price |
+|---|---|---|---:|
+| **Community** (MIT, free) | Individuals, OSS maintainers, teams evaluating or reviewing code | Local CLI and dashboard, core rules, HTML/JSON/CSV/SARIF, history and deltas, dependency checks, CI, gates, baselines, changed-code scans, offline controls, deterministic remediation guidance | Free |
+| **Pro All-Access** (recommended) | Consultants, agencies, repeat auditors | All three current paid entitlements plus the complete professional workflow | **$89 once** |
+| **Professional PDF** | Client-facing assessors | Structured PDF, document control, executive summary, navigation, remediation plan, local branding | **$39 once** |
+| **Scheduled Scans** | Teams performing repeat local reviews | Integrated CLI/dashboard scheduling and retained repeat-scan workflow | **$29 once** |
+| **Premium Rules** | Auditors needing deeper framework-specific heuristics | Tested rule packs for Laravel, CodeIgniter, WordPress, Symfony, Django, Rails, Spring, and Express | **$49 once** |
 
-**Why this shape:** one-time à-la-carte licenses fit an offline tool — customers buy only what they need, with no recurring cost to them or ongoing infra cost to us, and activation works offline after a one-time check. The free OSS CLI is the adoption funnel and credibility engine.
+The All-Access Bundle is the primary professional offer: https://observerly1.gumroad.com/l/observer-pro. Individual products remain available. Community stays useful without artificial scan limits or mandatory accounts. See [the canonical edition matrix](docs/FREE-VS-PRO.md) and [verified feature audit](docs/EDITION-FEATURE-AUDIT.md).
 
 ## 9. Roadmap
 
 **Shipped:** Phases 1–13 (see §4), plus the **Observer Pro** tier.
 
-**Near term (OSS completion):**
-- **Phase 8** — Email reporting (SMTP via env).
-- **Phase 9** - Packaging and distribution: cross-platform single-binary builds, checksums, and package manifests.
-- **Phase 10** — GitHub-quality polish (docs, screenshots, contributing).
-
-**Product evolution:**
-- **Phase 11 — `observer serve`**: local web dashboard. Pick a folder → scan → results on one page; multi-project; history & "what's new since last scan"; PDF export. *Foundation of the Pro tier; satisfies the "single page + no command prompt" goals.*
-- **Phase 12 — Dependency security & (optional) engine wrappers**: ✅ dependency CVE scanning via OSV.dev (PHP/npm/PyPI/Go — no extra software, opt-in network). Planned: *optional, auto-detected* wrappers for PHPStan/Psalm, Semgrep, ESLint, gosec, Bandit that enrich results only if those tools are present — never required, preserving the zero-dependency promise. *Closes the accuracy gap with Sonar/Snyk/CodeGuru.*
-- **Phase 13 — CI & team workflow**: ✅ SARIF output (GitHub code scanning + automatic PR annotations), quality gate (`--fail-on`), baseline/suppression ("report only new issues"), and a ready GitHub Actions workflow + [CI guide](docs/CI.md).
+**Current product evolution:**
+- **Phase 11 - local dashboard:** shipped in Community with local multi-project history, deltas, and browser-printable HTML. Pro adds the organization-ready PDF and integrated scheduler.\n- **Phase 12 - dependencies and optional engines:** shipped OSV lookup plus optional Semgrep, PHPStan, ESLint, gosec, and Bandit adapters. Tools remain optional and locally controlled.\n- **Phase 13 — CI & team workflow**: ✅ SARIF output (GitHub code scanning + automatic PR annotations), quality gate (`--fail-on`), baseline/suppression ("report only new issues"), and a ready GitHub Actions workflow + [CI guide](docs/CI.md).
 - **Phase 13.5 — Scores & standards mapping**: ✅ two density-based 0–100 grades — a **Security score** and a **Code Health score** (Sonar-style separation) — shown in the report, dashboard, and CLI and recomputed for the selected scan scope; plus **CWE + OWASP Top 10 tags** on findings (report + SARIF) for security/compliance credibility.
 - **Phase 14 — Changed-code scanning (AI-code safety net)**: ✅ `--diff` / `--diff-base` / `--diff-staged` scope a scan to only the lines that changed, so you can gate what you or an AI assistant just wrote; a per-change quality gate (`--fail-on`), a JSON **attestation** (`--attest`, "this change was checked" — Pro can add a local HMAC companion), and a one-command **pre-commit hook** (`observer install-hook`). Positioning: *"AI writes it. Audit changed code locally before it ships — offline, no account."*
 - **Observer Pro — ✅ shipped (separate product)**: à-la-carte, license-gated features — Branded PDF reports, scheduled / automatic scans, and premium framework rule packs (Laravel, CodeIgniter, WordPress, Symfony, Django, Rails, Spring, Express) — delivered as a closed build and activated with a license key (instant Gumroad key, or offline signed key for air-gapped use). The local dashboard itself stays free.
@@ -181,17 +177,17 @@ Open-core value ladder (pricing illustrative, to be validated):
 A first-class goal is **broad language/platform coverage to match what competitors cover** — not PHP-only. The path:
 
 - **Today:** PHP deepest; basic technology signals for Node, Python, Java, Go, Ruby.
-- **Phase 12:** wrap best-in-class multi-language engines (Semgrep across many languages; PHPStan/Psalm, ESLint/TypeScript, Bandit, gosec, etc.) — instant broad, accurate static coverage.
-- **Phase 14:** multi-language runtime agents (Node, Python, Java) alongside the PHP agent.
+- **Today:** optional Semgrep, PHPStan, ESLint, Bandit, and gosec adapters extend the built-in heuristic coverage when installed.
+- **Future:** evaluate additional runtime agents for Node, Python, and Java; these are not currently shipped.
 - **Ongoing:** expand the detector and log-format parsers so every supported stack gets first-class treatment.
 
-The diagnostic core, report, and AI layer are already language-agnostic — only the per-language *inputs* (rules, agents, log formats) need to grow.
+The diagnostic core, report, and remediation layer are already language-agnostic — only the per-language *inputs* (rules, agents, log formats) need to grow.
 
 ## 10. Differentiators / moat
 
-1. **Unified multi-signal report** (code + runtime + logs + AI) in one artifact — unmatched packaging.
+1. **Unified multi-signal report** (code + runtime + logs + optional remediation guidance) in one local artifact.
 2. **Zero setup, offline, single binary** — runs where SaaS tools can't.
-3. **AI synthesis across signals**, grounded and honest.
+3. **Rule-based synthesis across signals**, grounded and honest.
 4. **Open-core trust** — free CLI drives adoption; depth via wrapped best-in-class engines rather than reinventing them.
 5. **Underserved-segment focus** — agencies, SMBs, air-gapped, due-diligence — where the giants are too heavy or too costly.
 
