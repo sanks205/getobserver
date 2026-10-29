@@ -69,6 +69,9 @@ func TestGenerateJSON(t *testing.T) {
 	if strings.Contains(html, "OBSERVER_SENTINEL_SECRET") {
 		t.Fatal("secret survived HTML report")
 	}
+	if !strings.Contains(html, "Observer Community Edition") {
+		t.Fatal("Community HTML report is missing its edition watermark")
+	}
 }
 
 func TestGenerateCSV(t *testing.T) {
