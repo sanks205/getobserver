@@ -442,7 +442,7 @@ Individual add-ons:
 - [Professional PDF Reports - $39](https://observerly1.gumroad.com/l/observer-pdf)
 - [Scheduled Scans - $29](https://observerly1.gumroad.com/l/observer-schedule)
 
-Community automation through CI, cron, or Task Scheduler remains supported. Community HTML can be printed to PDF; the paid PDF feature provides the richer professional assessment document. See the [verified edition matrix](docs/FREE-VS-PRO.md).
+Community automation through CI, cron, or Task Scheduler remains supported. Community HTML can be printed to PDF with an Observer Community Edition watermark; the paid PDF feature provides the clean, brandable, organization-ready professional assessment document. See the [verified edition matrix](docs/FREE-VS-PRO.md).
 
 Pro activation requires a purchased key. Gumroad keys are verified once online and then cached for offline use. Observer does not claim certification, guaranteed security, or replacement of full semantic SAST.
 
