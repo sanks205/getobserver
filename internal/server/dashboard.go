@@ -90,6 +90,78 @@ const dashboardHTML = `<!doctype html>
   .eng-actions button{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:9px 16px;cursor:pointer;font-family:inherit;font-size:.9rem;}
   .eng-actions button:hover{border-color:var(--accent);color:var(--accent);}
   .eng-actions #engContinue{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700;}
+  /* Workspace layout adapted from MIT-licensed Sentinel dashboard patterns. */
+  body{background:var(--bg);font-size:14px;}
+  .app-shell{min-height:100vh;display:grid;grid-template-columns:224px minmax(0,1fr);}
+  .side-rail{position:sticky;top:0;height:100vh;border-right:1px solid var(--border);background:var(--surface);padding:18px 14px;display:flex;flex-direction:column;gap:22px;z-index:20;}
+  .side-brand{display:flex;align-items:center;gap:10px;padding:4px 8px;color:var(--text);font-weight:750;font-size:1rem;}
+  .side-brand svg{color:var(--accent);flex:none;}
+  .side-brand small{display:block;color:var(--muted);font-size:.68rem;font-weight:500;margin-top:1px;}
+  .side-nav{display:grid;gap:4px;}
+  .side-label{padding:8px 10px 5px;color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:0;font-weight:700;}
+  .side-nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;color:var(--muted);font-size:.86rem;font-weight:600;text-decoration:none;}
+  .side-nav a:hover,.side-nav a:focus-visible{background:var(--surface2);color:var(--text);text-decoration:none;outline:none;}
+  .side-nav a.active{background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--accent);}
+  .side-foot{margin-top:auto;border-top:1px solid var(--border);padding:14px 9px 2px;color:var(--muted);font-size:.72rem;line-height:1.5;}
+  .workspace{min-width:0;}
+  .wrap{max-width:1480px;margin:0 auto;padding:0 28px 56px;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(310px,.75fr);gap:16px;}
+  .appbar{grid-column:1/-1;position:sticky;top:0;z-index:15;margin:0 -28px;padding:14px 28px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+  .brand{font-size:.9rem;color:var(--muted);font-weight:600;}
+  .themebtn{width:42px;height:38px;padding:0;border-radius:6px;font-size:.68rem;display:grid;place-items:center;}
+  .lead{grid-column:1/-1;margin:10px 0 2px;font-size:.86rem;}
+  .panel{margin:0;border-radius:8px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.12);}
+  #scanPanel{grid-column:1/2;grid-row:3/span 2;}
+  #schedPanel,#trendsPanel{grid-column:2/3;}
+  #scansPanel{grid-column:1/-1;}
+  #proPanel{grid-column:1/-1;}
+  .panel h3{font-size:.92rem;margin-bottom:14px;}
+  .fld,.opts .lbl,.scanbar .lbl{letter-spacing:0;font-size:.68rem;font-weight:700;}
+  input[type=text]{border-radius:6px;background:var(--surface2);padding:10px 12px;}
+  button,button.primary,.pg,.themebtn,select{border-radius:6px;}
+  button.primary{padding:10px 18px;}
+  .opts{gap:7px;margin-top:14px;}
+  .chk{border-radius:6px;padding:6px 9px;background:transparent;font-size:.8rem;}
+  .chk:hover{background:var(--surface2);border-color:var(--accent);}
+  .table-wrap{width:100%;overflow:auto;border:1px solid var(--border);border-radius:7px;}
+  table{min-width:980px;}
+  th{background:var(--surface2);font-size:.65rem;letter-spacing:0;white-space:nowrap;}
+  th,td{padding:10px 11px;}
+  tbody tr:last-child td{border-bottom:0;}
+  .scorepill{font-family:var(--mono);}
+  .trendrow{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name score" "chart chart";gap:7px 12px;width:100%;min-width:0;}
+  .trendrow .tname{grid-area:name;width:auto;min-width:0;}
+  .trendrow>.scorepill{grid-area:score;align-self:start;}
+  .trendrow svg{grid-area:chart;display:block;width:100%;height:38px;min-width:0;background:var(--surface2);border-radius:6px;}
+  .trend-empty{grid-area:chart;display:grid;place-items:center;width:100%;min-height:38px;text-align:center;font-style:italic;}
+  .eng-card{border-radius:7px;}
+  .fchip,.pill,.pill-ok,.pill-deep,.trig{border-radius:5px;}
+  @media(max-width:1040px){
+    .app-shell{grid-template-columns:72px minmax(0,1fr);}
+    .side-brand span,.side-nav span,.side-label,.side-foot{display:none;}
+    .side-brand{justify-content:center;padding:4px 0;}
+    .side-nav a{justify-content:center;font-size:0;padding:11px;}
+    .side-nav a::before{content:attr(data-short);font-size:.7rem;}
+    .wrap{grid-template-columns:1fr;}
+    #scanPanel,#schedPanel,#trendsPanel,#scansPanel,#proPanel{grid-column:1;grid-row:auto;}
+  }
+  @media(max-width:680px){
+    html,body{max-width:100%;overflow-x:hidden;}
+    .app-shell{display:block;width:100%;min-width:0;}
+    .workspace,.wrap,.panel{width:100%;min-width:0;}
+    .side-rail{position:static;height:auto;width:100%;max-width:100vw;border-right:0;border-bottom:1px solid var(--border);padding:10px 14px;display:flex;flex-direction:row;align-items:center;overflow-x:auto;overflow-y:hidden;}
+    .side-brand{margin-right:8px;}
+    .side-brand span{display:block;white-space:nowrap;}
+    .side-nav{display:flex;min-width:0;}
+    .side-nav a{font-size:.76rem;white-space:nowrap;padding:8px 10px;}
+    .side-nav a::before{display:none;}
+    .side-nav span{display:inline;}
+    .wrap{padding:0 14px 36px;}
+    .appbar{margin:0 -14px;padding:10px 14px;}
+    .panel{padding:14px;overflow:hidden;}
+    .row{align-items:stretch;}
+    input[type=text]{min-width:100%;width:100%;}
+    .trendrow{grid-template-columns:minmax(0,1fr) auto;gap:7px 10px;}
+  }
 </style>
 <script>
   (function(){try{var t=localStorage.getItem("observer-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
@@ -97,6 +169,19 @@ const dashboardHTML = `<!doctype html>
 </script>
 </head>
 <body>
+<div class="app-shell">
+<aside class="side-rail" aria-label="Workspace navigation">
+  <div class="side-brand"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg><span>Observer<small>Community workspace</small></span></div>
+  <nav class="side-nav">
+    <div class="side-label">Workspace</div>
+    <a class="active" href="#scanPanel" data-short="Scan"><span>New audit</span></a>
+    <a href="#trendsPanel" data-short="Trend"><span>Score trends</span></a>
+    <a href="#scansPanel" data-short="Runs"><span>Audit history</span></a>
+
+  </nav>
+  <div class="side-foot">Local-first code assurance<br>Source stays on this machine</div>
+</aside>
+<main class="workspace">
 <div class="wrap">
   <div class="appbar">
     <div class="brand"><svg width="22" height="22" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".45"/><circle cx="10" cy="10" r="3.3" fill="currentColor"/></svg> Observer</div>
@@ -104,7 +189,7 @@ const dashboardHTML = `<!doctype html>
   </div>
   <div class="lead">Scan a project folder and track its security &amp; code-health over time. Past scans are kept below.</div>
 
-  <div class="panel">
+  <div class="panel" id="scanPanel">
     <label class="fld" for="path">Project folder (absolute path)</label>
     <div class="row">
       <input id="path" type="text" placeholder="e.g. C:\laragon\www\ci3-fire-admin  or  /var/www/app">
@@ -136,7 +221,7 @@ const dashboardHTML = `<!doctype html>
     <div id="trends"></div>
   </div>
 
-  <div class="panel">
+  <div class="panel" id="scansPanel">
     <h3>Scans</h3>
     <div class="scanbar">
       <input id="scanSearch" type="text" placeholder="Search by project name or path…" oninput="onScanSearch()">
@@ -145,13 +230,17 @@ const dashboardHTML = `<!doctype html>
         <option>10</option><option>25</option><option>50</option><option>100</option>
       </select>
     </div>
+    <div class="table-wrap">
     <table>
       <thead><tr><th>Project</th><th>When</th><th>Security</th><th>Health</th><th>Issues</th><th>Engines</th><th>Change</th><th>Time</th><th>Report</th></tr></thead>
       <tbody id="scans"><tr><td colspan="9" class="empty">Loading…</td></tr></tbody>
     </table>
+    </div>
     <div class="legend"><b>Built-in</b> = Observer's native rules only. <b>Engines</b> = local tools you installed (Semgrep, PHPStan, Bandit, gosec, ESLint) ran too — they surface more, type-aware findings, so issue counts can rise.</div>
     <div id="scanNav" class="scanNav"></div>
   </div>
+</div>
+</main>
 </div>
 
 <script>
@@ -159,7 +248,7 @@ function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;'
 function fmtDur(ms){if(!ms&&ms!==0)return '';return ms>=1000?(ms/1000).toFixed(2)+'s':ms+'ms';}
 function fmtIssues(r){var p=[];if(r.critical)p.push('<span class="sev c">'+r.critical+' crit</span>');if(r.high)p.push('<span class="sev h">'+r.high+' high</span>');if(r.medium)p.push('<span class="sev m">'+r.medium+' med</span>');if(r.low)p.push('<span class="sev l">'+r.low+' low</span>');return (r.total||0)+(p.length?' <span class="muted">('+p.join(', ')+')</span>':'');}
 function scoreCell(v,g){return '<span class="scorepill score-'+esc(g)+'"><i class="gradedot"></i>'+(v||0)+'</span> <span class="muted">('+esc(g||'-')+')</span>';}
-function sparkline(vals){var W=170,H=34;var pts=vals.map(function(v,i){var x=(vals.length<2?0:(i/(vals.length-1))*W);var y=H-(Math.max(0,Math.min(100,v))/100)*H;return x.toFixed(1)+','+y.toFixed(1);}).join(' ');var last=vals[vals.length-1];var color=last>=80?'#2ea043':last>=60?'#d99700':'#e5484d';var area=pts+' '+W+','+H+' 0,'+H;return '<svg width="'+W+'" height="'+H+'" style="background:var(--surface2);border-radius:6px"><polygon points="'+area+'" fill="'+color+'" opacity=".13"/><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2"/></svg>';}
+function sparkline(vals){var W=170,H=34;var pts=vals.map(function(v,i){var x=(vals.length<2?0:(i/(vals.length-1))*W);var y=H-(Math.max(0,Math.min(100,v))/100)*H;return x.toFixed(1)+','+y.toFixed(1);}).join(' ');var last=vals[vals.length-1];var color=last>=80?'#2ea043':last>=60?'#d99700':'#e5484d';var area=pts+' '+W+','+H+' 0,'+H;return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="Security score history"><polygon points="'+area+'" fill="'+color+'" opacity=".13"/><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';}
 function renderTrends(recs){var byPath={};recs.forEach(function(r){(byPath[r.path]=byPath[r.path]||[]).push(r);});var rows=[];Object.keys(byPath).forEach(function(p){var list=byPath[p].slice().sort(function(a,b){return (a.created_at||'').localeCompare(b.created_at||'');});if(list.length<2)return;var scores=list.map(function(x){return x.security_score||0;});var last=list[list.length-1];rows.push('<div class="trendrow"><span class="tname" title="'+esc(p)+'">'+esc(last.project)+' <span class="tn">('+list.length+' scans)</span></span>'+sparkline(scores)+'<span class="scorepill score-'+esc(last.security_grade)+'"><i class="gradedot"></i>'+(last.security_score||0)+' ('+esc(last.security_grade||'-')+')</span></div>');});document.getElementById('trends').innerHTML=rows.join('');document.getElementById('trendsPanel').style.display=rows.length?'':'none';}
 function render(recs){var tb=document.getElementById('scans');if(!recs||!recs.length){tb.innerHTML='<tr><td colspan="9" class="empty">No scans yet — run one above.</td></tr>';return;}tb.innerHTML=recs.map(function(r){var when=(r.created_at||'').replace('T',' ').replace(/(\+|Z).*$/,'');var nw=r.new_since>0?'<span class="pill">+'+r.new_since+'</span>':r.new_since<0?'<span class="pill-ok">'+r.new_since+'</span>':'<span class="pill" style="opacity:.55">0</span>';return '<tr>'+
   '<td><div class="proj">'+esc(r.project)+'</div><div class="path">'+esc(r.path)+'</div></td>'+
