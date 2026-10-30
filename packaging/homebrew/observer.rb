@@ -1,28 +1,28 @@
 class Observer < Formula
   desc "Offline CLI that scans a codebase for security, runtime & production-health issues - one HTML report, single binary, no setup."
   homepage "https://github.com/sanks205/getobserver"
-  version "0.8.1"
+  version "0.8.2"
   license "MIT"
 
   on_macos do
     on_arm do
-      url "https://github.com/sanks205/getobserver/releases/download/v0.8.1/observer_darwin_arm64"
-      sha256 "41991bbba615ba9318c143f0c0047e76515fc62deedf4d0ee76c4396c834cba7"
+      url "https://github.com/sanks205/getobserver/releases/download/v0.8.2/observer_darwin_arm64"
+      sha256 "0716865ea63bf6a610b01582410a5ac59688d6ce8588a2351612d9f890e0b01a"
     end
     on_intel do
-      url "https://github.com/sanks205/getobserver/releases/download/v0.8.1/observer_darwin_amd64"
-      sha256 "8a27906e797c322b639c3b6490ea69f5ef29897def4e2ae3ec50be27ec7be6f4"
+      url "https://github.com/sanks205/getobserver/releases/download/v0.8.2/observer_darwin_amd64"
+      sha256 "429635d2fcbf8c15772add018aebc4b48314bb143eb3306ea06810a82b2c936c"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/sanks205/getobserver/releases/download/v0.8.1/observer_linux_arm64"
-      sha256 "6cdf7db047bb138e28cc1e0a96acba56c4e153f45ab415530fa819df71179d18"
+      url "https://github.com/sanks205/getobserver/releases/download/v0.8.2/observer_linux_arm64"
+      sha256 "6732f5a9549ab5080382d15cfdb8c160b139648e56e46727406db366210bed92"
     end
     on_intel do
-      url "https://github.com/sanks205/getobserver/releases/download/v0.8.1/observer_linux_amd64"
-      sha256 "e7c63ef048c3c7c64ff11a5f1e16214a67e50a3be44c5c9e3d5ea1fd1b41bb6d"
+      url "https://github.com/sanks205/getobserver/releases/download/v0.8.2/observer_linux_amd64"
+      sha256 "ae89d751dce7f808a855f5a4a6c6418c3ef15851fcd844d76d6c74dbd55e7bab"
     end
   end
 
