@@ -1,5 +1,7 @@
 # Observer v0.8.1
 
+> Historical release notes. The current offer is [Observer Pro, one annual all-access subscription at $89/year](https://observerly1.gumroad.com/l/observer-pro-offline-code-audit). Legacy compatibility references below describe earlier implementations, not additional products currently for sale.
+
 Released: 23 October 2026
 
 Observer v0.8.1 improves edition clarity, restores scanner updates that were missing from the public repository, and corrects paid-entitlement handling in Observer Pro. No existing Community capability has been moved behind a paywall.
@@ -19,9 +21,9 @@ Observer v0.8.1 improves edition clarity, restores scanner updates that were mis
 
 ## Pro
 
-- Made the All-Access Bundle the primary general upgrade path while retaining the individual Professional PDF, Scheduled Scans, and Premium Rules products.
-- Centralized the published Gumroad product URLs and added regression coverage for product-to-entitlement mappings.
-- Corrected Git-history analysis and CycloneDX SBOM access for customers with any active paid entitlement, including Scheduled Scans-only licenses.
+- Updated the earlier purchase routing and retained compatibility with existing licenses.
+- Centralized the then-current purchase routing and added regression coverage for legacy entitlement mappings.
+- Corrected Git-history analysis and CycloneDX SBOM access for eligible legacy customers.
 - Added tests for malformed signed licenses, cached entitlement recognition, and tampered license-cache rejection.
 - Improved activation, privacy, package, and local-attestation documentation.
 - Finalized gates and attestations only after all enabled finding scans, including Pro Git-history scanning.

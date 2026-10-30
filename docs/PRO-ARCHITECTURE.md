@@ -1,35 +1,43 @@
-# Pro Architecture and Entitlement Boundaries
+# Community and Pro Architecture Boundaries
 
 ## Repository separation
 
-Community is the public MIT repository. Pro is a private repository containing a synchronized copy of shared engine files plus private packages: `internal/license`, `internal/prorules`, `internal/propdf`, `internal/schedule`, `internal/history`, and `internal/sbom`. `scripts/community-paths.txt` and `scripts/sync-community.ps1` define and check the shared boundary. There are no edition build tags.
+Community is the public MIT repository. Pro is distributed separately from a private repository containing shared engine code and private licensing, premium-rule, PDF, scheduling, history-review, and SBOM packages.
 
-## Entitlements
+Pro source, signing secrets, license generators, customer activation data, and private product identifiers must not enter Community uploads.
 
-| Stable ID | Product | Primary gates |
-|---|---|---|
-| `branded-pdf` | Professional PDF | `--pdf`, report metadata/branding, HMAC attestation companion |
-| `scheduled-scans` | Scheduled Scans | `observer schedule`, dashboard scheduler |
-| `premium-rules` | Premium Rules | automatic `internal/prorules` augmentation |
+## Current commercial model
 
-The All-Access product grants all three. History and SBOM are bundle-level conveniences intentionally available with any active paid entitlement; they are not separate issued feature IDs.
+Observer Pro is **one annual all-access subscription at $89/year**. The subscription covers all current Pro capabilities; internal feature gates do not represent separately purchasable products.
 
-## Activation
+[Get Observer Pro](https://observerly1.gumroad.com/l/observer-pro-offline-code-audit)
 
-Gumroad keys are checked once against known product IDs, then cached locally for offline use. Seller-issued signed keys use Ed25519 and verify offline with an embedded public key. Existing feature IDs and legacy key storage must remain stable. Invalid or modified records fail closed.
+The private Pro implementation must route current purchase actions to this destination. Updating Community does not itself change a previously distributed Pro binary.
+
+## Feature boundaries
+
+Community retains local scans, core rules, rule-based guidance, local dashboard history and deltas, exports, CI, baselines, changed-code scans, and external automation.
+
+Pro adds premium framework rules, professional PDF reporting, integrated recurring scans, Git-history secret review, CycloneDX SBOM export, and a local HMAC attestation companion.
+
+See the [edition comparison](FREE-VS-PRO.md).
+
+## Activation and lifecycle
+
+The v0.8.2 Pro release documentation describes annual activation, machine-bound verification, local expiry checking, and renewal handling. Initial activation requires an online check; cached activation must not be described as perpetual subscription access.
+
+Pro lifecycle behavior belongs to the private repository and requires separate implementation validation. This Community documentation update does not claim to have completed that private implementation audit.
+
+## Legacy compatibility
+
+Stable internal feature identifiers and legacy-license readers may remain for compatibility with existing purchases. They are not a public sales catalog.
+
+Do not remove prior customers' purchased rights, change signing formats, or invalidate cached records as a side effect of updating sales copy.
 
 ## Security boundaries
 
-- The Ed25519 private signing key must never enter either repository or customer package.
-- The public verification key is safe to distribute.
-- Cached Gumroad integrity and HMAC attestation use a client-side symmetric value. This deters casual editing but cannot be represented as a secret unavailable to a determined binary owner.
-- Pro source, key generator, product IDs, and implementation details stay out of public Community releases.
-- No entitlement check may exist only in JavaScript; server/CLI execution paths enforce gates.
-
-## Upgrade links
-
-Product URLs are centralized in `internal/license`. `BuyURL` intentionally targets the $89 All-Access Bundle; individual URLs remain available for accurate product-specific documentation.
-
-## Compatibility policy
-
-Do not rename stable feature IDs, rotate signing formats, invalidate cached Gumroad entries, or remove legacy-key reading without a migration plan and regression fixtures. Expanding access to correct a documented entitlement is compatible; restricting an issued entitlement is high risk and requires approval.
+- Private signing material must never be distributed.
+- Public verification keys can be distributed where required.
+- Feature access must be enforced in execution paths, not only in browser controls.
+- A client-side HMAC companion is local tamper evidence, not independent identity or certification.
+- Core offline scanning and online license lifecycle requirements must be explained separately.

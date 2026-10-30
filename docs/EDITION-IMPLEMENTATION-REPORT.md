@@ -1,34 +1,33 @@
-# Edition Restructuring Implementation Report
+# Historical Edition Implementation Report
 
-## Scope
+> Historical record of the 2026-10-17 edition audit. Its commercial model has been superseded. The current offer is [Observer Pro, one annual all-access subscription at $89/year](https://observerly1.gumroad.com/l/observer-pro-offline-code-audit). Use the [edition comparison](FREE-VS-PRO.md) for current capabilities.
 
-This phase performs the source-led edition audit and compatible first changes. It does not move Community functionality, alter prices, change license formats, or implement proposed major Pro features.
+## Original scope
 
-## Implemented
+The earlier phase audited edition boundaries and made compatibility-focused implementation changes. It did not move Community functionality into Pro or change existing purchased rights.
 
-- Added a verified Community/Pro feature inventory and canonical matrix.
-- Documented private-repository separation, entitlement IDs, activation behavior, and security limitations.
-- Centralized all four published Gumroad URLs in the private licensing package; the bundle is the default upgrade destination.
-- Added `license.HasAny()` for features intentionally included with every paid purchase.
-- Corrected history/SBOM gating so a Scheduled-Scans-only customer is treated as a paid Pro customer.
-- Added tests for Gumroad product mappings, primary/product URLs, and malformed signed-key rejection.
-- Drafted accurate Gumroad copy without changing live listings or prices.
-- Added comparison-validation and future-feature evaluation documents.
+## Recorded implementation work
 
-## Deferred or approval-gated
+- Added a Community/Pro feature inventory and edition matrix.
+- Documented private-repository separation and licensing security boundaries.
+- Centralized purchase routing in the private licensing package.
+- Added a shared paid-access check for Git-history review and SBOM.
+- Corrected inconsistent access for legacy customers.
+- Added legacy product-mapping and malformed-key regression coverage.
+- Prepared the sales documentation appropriate to that earlier phase.
+- Added comparison-evidence requirements and future-feature evaluations.
 
-- No existing entitlement, activation protocol, feature ID, or signing format changed.
-- No post-scan promotional CLI output was added.
-- No major dashboard redesign or new paid feature was implemented.
-- Full cached-license compatibility fixtures require isolated-store test seams and remain pending.
-- The SonarQube comparison remains unverified until source evidence is supplied.
+## Compatibility and security findings
 
-## Known risks
+- Existing activation records, signing formats, and purchased rights require compatibility review before changes.
+- Local HMAC integrity does not establish independent identity because symmetric material ships in the client.
+- Public/private repository separation requires explicit release checks.
+- Legacy entitlement identifiers are implementation compatibility details, not a current purchase catalog.
 
-- Local HMAC integrity is not an independent cryptographic identity because its symmetric material ships in the Pro binary.
-- Repository separation is procedural and must be checked before every release.
-- History and SBOM are “any paid purchase” benefits rather than first-class entitlements; changing that later would require compatibility review.
+## Historical verification record
 
-## Verification
+The prior report recorded Community and Pro tests, vet, targeted licensing/reporting checks, shared-file synchronization, Markdown-link checks, and purchase-link reachability on 2026-10-17.
 
-Completed on 2026-10-17: Community and Pro `go test ./...`, `go vet ./...`, and `git diff --check`; targeted license, premium-rule, PDF, and history tests (schedule/SBOM currently compile without dedicated tests); 63-file Community synchronization; 14-file local Markdown-link validation; and HTTP 200 checks for all four Gumroad product pages. Remaining smoke, artifact, and compatibility checks stay open in `docs/RELEASE-READINESS-CHECKLIST.md`.
+Those results are historical evidence only. They do not validate the current annual licensing implementation, this documentation update, or a later binary release.
+
+Use the [release readiness checklist](RELEASE-READINESS-CHECKLIST.md) for current work.
