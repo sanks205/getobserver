@@ -1,47 +1,42 @@
-# Draft Gumroad Product Copy
+# Observer Pro Product Copy
 
-Prices and links are unchanged. These drafts require owner review before updating live listings.
+Current offer: one annual all-access subscription at **$89/year**.
 
-## Observer Pro All-Access Bundle - $89
+Product URL: https://observerly1.gumroad.com/l/observer-pro-offline-code-audit
 
-**For consultants, agencies, and teams that perform repeat code assessments or deliver reports to clients.**
+## Observer Pro: Offline Code Audit
 
-Observer Pro runs locally and combines all current professional workflow features: deeper framework rule packs, organization-ready PDF reports, and integrated scheduled scans. It also includes local Git-history secret review and CycloneDX SBOM generation.
+Audit client and legacy codebases locally, review findings, and prepare professional deliverables.
 
-Included: all three current entitlements, offline use after activation, client/report metadata, branding, structured PDF navigation and remediation planning, recurring local scans, dashboard history, and premium framework checks.
+Observer Pro combines premium framework-specific rules, professional PDF reporting, and integrated scheduled scans in one annual subscription. It also includes Git-history secret review, CycloneDX SBOM export, and local HMAC attestation companions.
 
-Not included: a hosted dashboard, team accounts, telemetry, full semantic/data-flow SAST, certification, or a guarantee that an application is secure.
+## Included capabilities
 
-Activation: Gumroad keys require one online verification and then work offline. Contact support for separately issued air-gapped activation where applicable.
+- Local audit workflow with deterministic, rule-based remediation guidance.
+- Premium framework-specific heuristic checks.
+- Professional PDF reports with document control, navigation, grouped remediation planning, and optional branding.
+- Integrated recurring scans and dashboard scheduling.
+- Git-history secret review and CycloneDX SBOM export.
+- Local tamper-evident HMAC companions for scan attestations.
 
-Community remains fully useful for local scans, HTML/JSON/CSV/SARIF, dashboard history, CI, baselines, changed-code review, gates, and deterministic remediation guidance.
+There are no separate add-on purchases in the current offer.
 
-https://observerly1.gumroad.com/l/observer-pro
+## Activation and renewal
 
-## Premium Framework Rule Packs - $49
+Initial activation requires an online license check. Annual licensing includes machine binding, local expiry verification, and renewal handling. Cached activation is not perpetual subscription access.
 
-For developers and auditors who need additional heuristic checks tailored to Laravel, CodeIgniter, WordPress, Symfony, Django, Rails, Spring, and Express. The shipped pack currently contains 24 identifiable rules with CWE/OWASP metadata and tested representative fixtures.
+Use the product checkout and supplied Pro activation instructions for the applicable computer, activation, and renewal terms. Existing legacy purchases retain their compatibility requirements.
 
-This adds framework-specific review candidates; it does not replace manual review or semantic SAST and does not claim that more findings mean better accuracy. Core security rules and framework detection remain free.
+## Privacy
 
-https://observerly1.gumroad.com/l/observer-rules-php
+Project scanning and remediation guidance run locally by default. Optional OSV dependency lookup, remote Semgrep rules, report delivery, and license lifecycle operations can use the network.
 
-## Professional PDF Reports - $39
+Dependency lookups share dependency metadata. Email and webhooks can share project details with the configured recipients. Review reports before sharing.
 
-For professionals who must deliver a structured assessment rather than a browser printout. Includes document control, executive summary, scope and methodology, grouped findings, remediation roadmap, bookmarks, hyperlinks, supported standards references, page numbering, optional organization/client metadata, and local logo/branding.
+## Community and limitations
 
-Community already provides a detailed HTML report that can be printed to PDF. This product is for the richer professional document workflow, not merely the PDF extension.
+Community remains free and MIT-licensed, including the local dashboard, exports, CI, baselines, changed-code scans, and external automation through cron or Task Scheduler.
 
-https://observerly1.gumroad.com/l/observer-pdf
+Observer uses heuristics and optional analysis engines. False positives and missed issues are possible. Findings and remediation need engineering review. Observer does not certify compliance, guarantee security, or replace full semantic analysis.
 
-## Scheduled Scans - $29
-
-For teams that want Observer to re-scan tracked local projects on a fixed interval and retain results in the dashboard workflow. The CLI scheduler can notify Slack, Teams, or a generic webhook when new issues appear.
-
-Community users may automate the free CLI with GitHub Actions, cron, or Windows Task Scheduler. This product sells the integrated local scheduling experience, not exclusive automation rights.
-
-https://observerly1.gumroad.com/l/observer-schedule
-
-## Shared disclosure
-
-Observer is a local-first heuristic audit tool. Optional CVE, registry-based Semgrep, webhook/email, and Gumroad activation may use the network when explicitly configured. Findings require engineering review; Observer does not certify compliance or guarantee security.
+See the [edition comparison](../FREE-VS-PRO.md).
