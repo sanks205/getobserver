@@ -11,8 +11,8 @@ Useful for legacy code reviews, application handovers, local security triage, an
 <a
   href="https://llaunch.dev/products/github-sanks205-getobserver-finds-what-s-wrong-a"
   target="_blank"
-  rel="noopener"
->
+  rel="noopener">
+
   <img
     src="https://llaunch.dev/badges/llaunch-classic-light.svg"
     alt="Featured on llaunch"
