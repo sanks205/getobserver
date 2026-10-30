@@ -1,6 +1,8 @@
 # Observer
 
-**Audit code, dependencies, and configuration locally. Find important issues and understand how to fix them.**
+**Audit a client or legacy codebase locally and generate a shareable report in one command.**
+
+**Current release: v0.8.2**
 
 Useful for legacy code reviews, application handovers, local security triage, and everyday development. Observer Community is MIT-licensed, runs on Windows, macOS, and Linux, and requires no account or hosted service.
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
@@ -8,30 +10,48 @@ Useful for legacy code reviews, application handovers, local security triage, an
 ![Platforms](https://img.shields.io/badge/platform-windows%20%7C%20macOS%20%7C%20linux-lightgrey)
 ![Single binary](https://img.shields.io/badge/install-single%20binary%2C%20no%20deps-success)
 
-<a
-  href="https://llaunch.dev/products/github-sanks205-getobserver-finds-what-s-wrong-a"
-  target="_blank"
-  rel="noopener">
-
-  <img
-    src="https://llaunch.dev/badges/llaunch-classic-light.svg"
-    alt="Featured on llaunch"
-    width="114"
-    height="48"
-  />
-</a>
-
 ## ⬇️ Get Observer
 
-Grab the single binary for your OS — no runtime, no dependencies, no account:
+Grab the single binary for your OS. Core scanning requires no additional runtime or account; optional analysis engines are installed separately:
 
 | Windows | macOS (Apple Silicon) | macOS (Intel) | Linux |
 |:---:|:---:|:---:|:---:|
-| [**Download**](https://github.com/sanks205/getobserver/releases/latest/download/observer_windows_amd64.exe) | [**Download**](https://github.com/sanks205/getobserver/releases/latest/download/observer_darwin_arm64) | [**Download**](https://github.com/sanks205/getobserver/releases/latest/download/observer_darwin_amd64) | [**Download**](https://github.com/sanks205/getobserver/releases/latest/download/observer_linux_amd64) |
+| [**Download**](https://github.com/sanks205/getobserver/releases/download/v0.8.2/observer_windows_amd64.exe) | [**Download**](https://github.com/sanks205/getobserver/releases/download/v0.8.2/observer_darwin_arm64) | [**Download**](https://github.com/sanks205/getobserver/releases/download/v0.8.2/observer_darwin_amd64) | [**Download**](https://github.com/sanks205/getobserver/releases/download/v0.8.2/observer_linux_amd64) |
 
-<sub>Prefer a package manager? Scoop · Homebrew · `go install` — see [Installation](#installation). On macOS/Linux: `chmod +x observer_*`.</sub>
+Verify the binary before running it, then follow [Installation](#installation).
 
-Then point it at any project:
+
+### Verify your download before running it
+
+Binaries are currently **unsigned**. Download [SHA256SUMS.txt for v0.8.2](https://github.com/sanks205/getobserver/releases/download/v0.8.2/SHA256SUMS.txt) and compare the entry for your exact filename with the checksum calculated locally. Always use the checksum file from the same release as your binary.
+
+**Windows (PowerShell):**
+
+~~~powershell
+Get-FileHash -Algorithm SHA256 -LiteralPath .\observer_windows_amd64.exe
+~~~
+
+**macOS:**
+
+~~~bash
+# Apple Silicon; substitute observer_darwin_amd64 on Intel
+shasum -a 256 observer_darwin_arm64
+~~~
+
+**Linux:**
+
+~~~bash
+# Substitute observer_linux_arm64 on ARM64
+sha256sum observer_linux_amd64
+~~~
+
+If the values differ, do not run the binary. A matching checksum verifies consistency with the published checksum; it does not replace code signing or notarization.
+
+On Windows, run the downloaded binary as `.\observer_windows_amd64.exe`.
+On macOS/Linux, make the downloaded binary executable with `chmod +x` and run it using its relative or absolute path.
+For the examples below, rename it to `observer` (`observer.exe` on Windows) and put it on your `PATH`, or substitute its actual path.
+
+Then point it at a project:
 
 ```bash
 observer analyze . --out report.html
@@ -40,7 +60,7 @@ observer analyze . --out report.html
 observer analyze . --exclude-dir fixtures,generated --out report.html
 ```
 
-You get **one self-contained `report.html`** — grouped findings, a standards-aligned Security Rating (A–E), and a suggested fix for every issue. Fully offline; open it in a browser or print to PDF.
+You get **one self-contained `report.html`** — grouped findings, heuristic Security and Code Health scores, and remediation recommendations for review. Fully offline; open it in a browser or print to PDF.
 
 ---
 
@@ -81,6 +101,30 @@ Observer Community is free and MIT licensed and produces detailed HTML, JSON, CS
 
 ---
 
+
+## Coverage and limitations
+
+| Input | Coverage |
+|---|---|
+| Source code | Built-in heuristic rules; depth varies by language and framework |
+| PHP | Code and configuration checks, Composer manifests, PHP runtime agent, and optional PHPStan |
+| JavaScript / TypeScript | Code heuristics, npm manifests, and optional ESLint |
+| Python | Code heuristics, supported dependency manifests, and optional Bandit |
+| Go | Code heuristics, Go modules, and optional gosec |
+| Other languages | Technology detection and applicable generic checks; optional Semgrep rules can extend coverage |
+| Infrastructure | Dockerfile, Compose, Kubernetes, environment, and web-server configuration checks |
+| Logs and runtime events | Supplied application logs and events captured by the PHP agent |
+
+Technology detection does not imply full security coverage. Optional tools must be installed separately, and Semgrep coverage depends on the selected rules.
+
+Security and Code Health scores are heuristic summaries. Findings can carry CWE and OWASP Top 10 (2021) tags where mapped; the scores are not certification or a guarantee of standards compliance.
+
+False positives and missed issues are possible. A clean report does not prove that an application is secure. Review findings and test remediation changes. Observer complements code review, testing, and deeper semantic analysis.
+
+No reproducible detection benchmark or false-positive rate is claimed here. See the [comparison evidence requirements](docs/marketing/COMPARISON-VALIDATION.md).
+
+---
+
 ## How Observer compares
 
 Observer is a local audit snapshot, not a replacement for a full semantic SAST
@@ -105,10 +149,7 @@ other.
 
 ## Gate changed code
 
-Code changes can introduce the exact issues Observer already catches
-(hardcoded secrets, injection, weak crypto, risky deps) at a higher rate than hand-written
-code. Observer is an **offline safety net for those changes**: instead of re-scanning the
-whole project, scan only what changed.
+Scan changed lines to review new findings before merging or committing code. Observer can compare against HEAD, a base branch, or staged changes.
 
 ```bash
 # Scan only what you just changed, vs the last commit
@@ -130,10 +171,9 @@ this is not a third-party signature or certification.
 
 ## Privacy & air-gapped use
 
-Observer runs **fully offline by default** — nothing about your code ever leaves your
-machine. There is no account, no telemetry, and no phone-home. The only features that
+Observer scans locally and is **offline by default**. There is no account, no telemetry, and no phone-home. The only features that
 touch the network are explicitly opt-in: `--cve` (OSV.dev dependency lookup), `--semgrep` when using `auto` or registry rules, and the `--email` / `--slack` / `--teams` / `--webhook`
-notifiers. Leave them off and the scan is entirely local.
+notifiers. Leave them off and the scan is entirely local. Dependency lookups disclose dependency information to OSV.dev; notifications and emailed reports can disclose project details to their configured recipients. Review reports before sharing them.
 
 For regulated, air-gapped, or client-confidential work you can make that guarantee
 **enforceable**:
@@ -142,8 +182,7 @@ For regulated, air-gapped, or client-confidential work you can make that guarant
 observer analyze ./my-project --assert-offline
 ```
 
-`--assert-offline` refuses network-capable options, requires `SEMGREP_CONFIG` to point to an existing local file or directory when `--semgrep` is used, and unsets
-all remediation guidance remains deterministic and local.
+--assert-offline rejects network-capable options. When using --semgrep, it requires SEMGREP_CONFIG to point to an existing local file or directory. All remediation guidance remains deterministic and local.
 
 Inspect the privacy contract and available optional local engines without scanning:
 
@@ -158,61 +197,11 @@ put.
 
 ---
 
-## Architecture
-
-The product is built around a single **Diagnostic Core Engine** that every
-interface (CLI today; API and an enterprise agent later) reuses.
-
-```
-        Interfaces
-   CLI  ·  API  ·  Enterprise agent
-                |
-                v
-      Diagnostic Core Engine
-                |
-                v
-  ┌─────────────────────────────────────────────┐
-  │  Modules                                      │
-  │  technology detector · static scanner         │
-  │  runtime analyzer · log analyzer              │
-  │  dependency analyzer · remediation guidance            │
-  │  report generator                             │
-  └─────────────────────────────────────────────┘
-```
-
-### Repository layout
-
-```
-ai-production-debugging-assistant/
-├── cmd/cli/            # `observer` CLI entry point
-├── internal/
-│   ├── scanner/        # Phase 1 — folder scan, file counts, categories
-│   ├── detector/       # Phase 2 — language/framework/db/infra detection
-│   ├── analyzer/       # Phase 3 — static code analysis
-│   ├── logger/         # Phase 5 — log analysis
-│   ├── reporter/       # Phase 7 — HTML report generation
-│   ├── runtime/        # Phase 4 — ingest observer-agent runtime events
-│   ├── ai/             # Phase 6 - deterministic remediation model (legacy package name)
-│   └── storage/        # PostgreSQL persistence (SaaS/enterprise)
-├── observer-agent/     # Phase 4 — drop-in PHP runtime error collector
-├── api/                # HTTP API (Gin/Fiber) — later phase
-├── web-report/         # static report assets / future React dashboard
-├── docker/             # Dockerfile + compose assets
-├── docs/               # documentation
-├── examples/           # demo projects with intentional issues
-│   └── php-demo/
-├── tests/              # integration tests
-└── README.md
-```
-
----
-
 ## Installation
 
 ### Download a prebuilt binary (recommended)
 
-Observer ships as a **single self-contained executable** — no runtime, no
-dependencies, nothing installed on your system. Download the binary for your OS
+Observer ships as a **single self-contained executable** — no additional runtime for core scanning. Optional analysis engines are installed separately. Download the binary for your OS
 from the [Releases](https://github.com/sanks205/getobserver/releases) page and run it:
 
 | OS | File |
@@ -224,24 +213,11 @@ from the [Releases](https://github.com/sanks205/getobserver/releases) page and r
 
 On macOS/Linux, make it executable: `chmod +x observer_*` (optionally rename to `observer`).
 
-Binaries are currently **unsigned** — verify your download against `SHA256SUMS.txt` on the
-[release](https://github.com/sanks205/getobserver/releases). (Signed/notarized builds are on the roadmap.)
+Follow the [checksum verification instructions](#verify-your-download-before-running-it) before running a downloaded binary.
 
-### Install via a package manager
+### Package-manager definitions
 
-**Windows — [Scoop](https://scoop.sh):**
-
-```powershell
-scoop install https://raw.githubusercontent.com/sanks205/getobserver/main/packaging/scoop/observer.json
-```
-
-**macOS / Linux — [Homebrew](https://brew.sh):**
-
-```bash
-brew install https://raw.githubusercontent.com/sanks205/getobserver/main/packaging/homebrew/observer.rb
-```
-
-Both install the `observer` command onto your PATH and verify the download's SHA-256.
+The repository includes [Scoop](packaging/scoop/observer.json) and [Homebrew](packaging/homebrew/observer.rb) definitions with release-specific SHA-256 checksums. These files do not establish a dedicated public tap or bucket. The verified binary download above is the recommended installation route.
 
 ### Build from source
 
@@ -253,7 +229,7 @@ cd getobserver
 go build -o observer ./cmd/cli
 ```
 
-On Windows the output is `observer.exe`. To cross-compile release binaries for all
+On Windows, build explicitly with `go build -o observer.exe ./cmd/cli`. To cross-compile release binaries for all
 platforms: `pwsh scripts/build-release.ps1` (or `./scripts/build-release.sh`).
 
 ---
@@ -319,7 +295,7 @@ observer analyze . --slack "$SLACK_WEBHOOK"   # or --teams <url> / --webhook <ur
 observer analyze . --write-baseline .observer-baseline.json
 observer analyze . --baseline .observer-baseline.json --fail-on Medium
 
-# Scan only what changed (AI safety net) — vs HEAD, a base branch, or staged changes
+# Scan only what changed — vs HEAD, a base branch, or staged changes
 observer analyze . --diff --fail-on High
 observer analyze . --diff-base main --fail-on High
 observer analyze . --diff-staged --out "" --attest attestation.json
@@ -331,7 +307,7 @@ observer install-hook
 observer analyze ./examples/php-demo --email "dev@example.com,lead@example.com"
 ```
 
-### Email configuration (Phase 8)
+### Email configuration
 
 `--email` attaches the HTML report and sends a summary via SMTP. Configure with env vars:
 
@@ -352,7 +328,7 @@ OBSERVER_SMTP_DRYRUN=1 SMTP_FROM=observer@example.com \
 
 ### Remediation guidance
 
-Use --guidance to add deterministic, rule-based explanations, prioritization, and possible remediation patterns. It runs locally, uses no API key, and requires developer review. The former --ai flag remains a deprecated local-only alias for compatibility.
+Use --guidance to add deterministic, rule-based explanations, prioritization, and possible remediation patterns. It runs locally, uses no API key, and requires developer review.
 
 ### Scan timeout
 
@@ -369,6 +345,8 @@ OBSERVER_SCAN_TIMEOUT=30m observer analyze ./my-project --phpstan --semgrep
 
 ### Example output
 
+Illustrative output from the PHP demo; counts vary with project contents and scan options.
+
 ```
 Scanning ./examples/php-demo ...
 
@@ -377,11 +355,11 @@ Language:  PHP
 Framework: CodeIgniter 3 3.1.11 [High]
 Database:  MySQL [High]
 
-Files:       6
-Directories: 4
+Files:       9
+Directories: 5
 
 Code structure:
-  Controllers: 1
+  Controllers: 2
   Models:      1
   Services:    1
   Config:      2
@@ -394,57 +372,33 @@ detected signals, code structure, and file-type breakdown.
 
 ---
 
-## Roadmap
-
-| Phase | Scope | Status |
-|------:|-------|--------|
-| 1 | Core CLI — scan a project, emit HTML report | ✅ Done |
-| 2 | Technology detection (framework / DB / infra) | ✅ Done |
-| 3 | Static code analysis (security & perf issues) | ✅ Done |
-| 4 | Runtime error collection (`observer-agent`) | ✅ Done |
-| 5 | Log analyzer (`observer analyze-log`) | ✅ Done |
-| 6 | Deterministic remediation guidance | Done |
-| 7 | Professional multi-section HTML report | ✅ Done |
-| 8 | Email reporting (SMTP) | ✅ Done |
-| 9 | Packaging & distribution — cross-platform single-binary builds | ✅ Done |
-| 10 | GitHub quality (README, badges, download/build, contributing) | ✅ Done |
-| 11 | `observer serve` — local web dashboard (multi-project, history, deltas) | ✅ Done |
-| 12 | Dependency CVE scanning (OSV.dev — PHP/npm/PyPI/Go) | ✅ Done |
-| 12+ | Optional engine wrappers — Semgrep / PHPStan / Bandit / gosec / ESLint ✅ (auto-detected) | ✅ Done |
-| 13 | CI & team workflow (SARIF, quality gate, baseline, GitHub workflow) | ✅ Done |
-| 14 | Changed-code scanning — `--diff` gate + attestation + pre-commit hook (AI-code safety net) | ✅ Done |
-| 15 | Deeper local analyzers and additional runtime agents | Planned |
-
-For the product vision, editions, and positioning see **[PRODUCT.md](PRODUCT.md)**.
-
----
 
 ## Community and Pro
 
-**Community: find and fix problems in your own code.**
+**Community** provides local auditing, rule-based remediation guidance, and development workflows.
 
-**Pro: perform deeper professional audits, automate repeat assessments, and create client-ready deliverables.**
+**Observer Pro** adds professional audit deliverables and integrated repeat-audit workflows through **one annual all-access subscription at $89/year**.
 
 | Capability | Community | Pro |
 |---|:---:|:---:|
-| Local scans, core rules, remediation, dashboard | Yes | Yes |
-| HTML, JSON, CSV, SARIF, CI, gates, baselines, changed-code scans | Yes | Yes |
-| Local heuristic or bring-your-own-key AI | Yes | Yes |
-| Premium framework-specific rules | - | Premium Rules |
-| Organization-ready PDF with document control, navigation, remediation plan, and branding | - | Professional PDF |
-| Integrated recurring scans and dashboard scheduling | - | Scheduled Scans |
+| Local CLI, core rules, rule-based guidance, and dashboard | Yes | Yes |
+| HTML, JSON, CSV, SARIF, CI gates, baselines, and changed-code scans | Yes | Yes |
+| Optional local analysis engines | Yes | Yes |
+| Premium framework-specific rules | - | Yes |
+| Professional PDF with document control, navigation, grouped remediation planning, and optional branding | - | Yes |
+| Integrated recurring scans and dashboard scheduling | - | Yes |
+| Git-history secret review and CycloneDX SBOM export | - | Yes |
+| HMAC companion for local scan attestations | - | Yes |
 
-**Recommended for professional use:** [Observer Pro All-Access Bundle - $89](https://observerly1.gumroad.com/l/observer-pro)
+[Get Observer Pro - $89/year](https://observerly1.gumroad.com/l/observer-pro-offline-code-audit)
 
-Individual add-ons:
+There are no separate add-on purchases in the current offer.
 
-- [Premium Framework Rule Packs - $49](https://observerly1.gumroad.com/l/observer-rules-php)
-- [Professional PDF Reports - $39](https://observerly1.gumroad.com/l/observer-pdf)
-- [Scheduled Scans - $29](https://observerly1.gumroad.com/l/observer-schedule)
+Community can be automated through CI, cron, or Windows Task Scheduler. Community HTML reports can be printed to PDF with Community Edition branding; Pro provides a clean, brandable professional PDF.
 
-Community automation through CI, cron, or Task Scheduler remains supported. Community HTML can be printed to PDF with an Observer Community Edition watermark; the paid PDF feature provides the clean, brandable, organization-ready professional assessment document. See the [verified edition matrix](docs/FREE-VS-PRO.md).
+See the [edition comparison](docs/FREE-VS-PRO.md) for details.
 
-Pro activation requires a purchased key. Gumroad keys are verified once online and then cached for offline use. Observer does not claim certification, guaranteed security, or replacement of full semantic SAST.
+Pro is distributed separately. Initial activation requires an online license check. Annual licenses are machine-bound, with local expiry verification and renewal handling; cached activation does not grant perpetual access. See the product listing and supplied Pro instructions for activation and renewal terms.
 
 ---
 
