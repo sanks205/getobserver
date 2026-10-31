@@ -35,5 +35,9 @@ See the [edition comparison](docs/FREE-VS-PRO.md). Existing legacy-license compa
 - Package-manager definitions must match the exact release assets.
 - No dedicated Homebrew tap or Scoop bucket is asserted by this document.
 - Scores are heuristic; findings and remediation require engineering review.
-- No reproducible benchmark or false-positive rate is claimed.
+- A reproducible DVWA reference scan is available; it does not establish overall accuracy or a false-positive rate.
 - Use the [release readiness checklist](docs/RELEASE-READINESS-CHECKLIST.md) for outstanding checks.
+
+## Detection evidence
+
+See the [rule inventory](docs/RULE-INVENTORY.md), [sample provenance](docs/SAMPLE-REPORT.md), [DVWA reference run](docs/benchmarks/DVWA-v0.8.2.md), and [improvement checklist](docs/COMMUNITY-IMPROVEMENT-CHECKLIST.md). The new artifacts require publication before the sample link becomes live.

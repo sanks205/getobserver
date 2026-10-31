@@ -84,6 +84,8 @@ The CLI binary is named **`observer`**.
 
 ## Demo
 
+[**Open the interactive sample report**](https://sanks205.github.io/getobserver/sample-report.html) - generated from intentionally insecure first-party fixtures; no installation required. See [sample provenance](docs/SAMPLE-REPORT.md).
+
 ![Observer scanning a project and opening the production-health report](docs/observer-demo.gif)
 
 Point it at any codebase and get one self-contained HTML report - no server, no
@@ -121,7 +123,9 @@ Security and Code Health scores are heuristic summaries. Findings can carry CWE 
 
 False positives and missed issues are possible. A clean report does not prove that an application is secure. Review findings and test remediation changes. Observer complements code review, testing, and deeper semantic analysis.
 
-No reproducible detection benchmark or false-positive rate is claimed here. See the [comparison evidence requirements](docs/marketing/COMPARISON-VALIDATION.md).
+The Community analyzer defines **54 distinct built-in rule IDs**: 29 line rules, 17 infrastructure rules, and 8 specialized checks. This excludes external engines and vulnerability database entries. See the [generated rule inventory](docs/RULE-INVENTORY.md) for IDs, input scope, severity, and mappings.
+
+See the [language and framework coverage](docs/COVERAGE.md) and [rating methodology](docs/RATING-METHODOLOGY.md). A [pinned DVWA reference scan](docs/benchmarks/DVWA-v0.8.2.md) records raw finding counts, reviewed examples, a false positive, and missed issue patterns. It is not an exhaustive benchmark or an overall false-positive-rate measurement.
 
 ---
 
