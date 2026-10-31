@@ -1,0 +1,59 @@
+{
+  "kind": "synthetic first-party demonstration; not benchmark",
+  "observer_version": "0.8.2",
+  "renderer": "post-release Community source build; updated rating wording and purchase URL",
+  "renderer_binary_sha256": "c2996510a70a70a3d40bbf9a304256300f0afbbf64e71621e68261ffef0e9837",
+  "fixture_source_commit": "4a9c0eed5610fbdc939087010982bf7061498204",
+  "fixture_tree_sha256_lf": "43a79a668995af00ba9ba1f72ee22e2912021e8f47b018bdcbb8ce80f1f1dce4",
+  "command": "observer analyze ./examples/php-demo --assert-offline --guidance --out report.html --json report.json",
+  "findings": 22,
+  "by_severity": {
+    "critical": 1,
+    "high": 12,
+    "medium": 2,
+    "low": 7
+  },
+  "publication_changes": [
+    "public-demo banner",
+    "absolute path removal",
+    "editor links replaced by pinned GitHub source links"
+  ],
+  "fixture_files": [
+    {
+      "path": "application/config/config.php",
+      "sha256": "a51ff34732faa452699656a149131ef6cb85c853955d510732d0ee3ea0cdbe63"
+    },
+    {
+      "path": "application/config/database.php",
+      "sha256": "c76f34b909e4f92640ee0f32522b8757bd003aff4ed3ea735a02666c57c8cc2f"
+    },
+    {
+      "path": "application/controllers/BookingController.php",
+      "sha256": "65615451968beb08ac8e0afbc03e2aed0e29d4e1cb9dd563c71bce5dcfd6a5ae"
+    },
+    {
+      "path": "application/controllers/PaymentService.php",
+      "sha256": "8a4ba238bb5f219b2c76bd040d9cb6d87ce503455f0c74f1c24134622708f046"
+    },
+    {
+      "path": "application/controllers/VulnController.php",
+      "sha256": "7d4fab3e075ad39445d57a8831ea16c2996a8e89174371e184bdb759c15e0d5a"
+    },
+    {
+      "path": "application/models/BookingModel.php",
+      "sha256": "8d0e92e3197123495887a292c60fca50d1a1438a2eed4da6ce5c3b57b29e5963"
+    },
+    {
+      "path": "composer.json",
+      "sha256": "5c9e031f54ab4b5afdfaa32cc49f8d949173dcb602303d11f7ad83a8ed926586"
+    },
+    {
+      "path": "logs/log-2026-06-19.php",
+      "sha256": "ac7f4e718c7aa8b9a67723299ee8b38b7fb5ddc9a32fb7f91d20a81381b70372"
+    },
+    {
+      "path": "runtime-demo.php",
+      "sha256": "7d85c2b1ee50d77abe80cb77c9734e5b4daab3131012eb0da9a1bdd1b415f9f9"
+    }
+  ]
+}
