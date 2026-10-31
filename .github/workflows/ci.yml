@@ -40,6 +40,9 @@ jobs:
           done < <(git ls-files '*.go')
           exit "$failed"
 
+      - name: Verify generated rule inventory
+        run: go run ./scripts/generate-rule-inventory.go -check
+
       - name: Run tests
         run: go test -count=1 ./...
 
