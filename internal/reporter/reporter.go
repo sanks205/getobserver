@@ -69,7 +69,7 @@ type HTMLModel struct {
 	TotalIssues         int
 	SecScore            int
 	SecGrade            string
-	SecurityRating      string // standards-aligned A–E (worst security severity present)
+	SecurityRating      string // Observer-defined A-E (worst security severity present)
 	SecurityRatingBasis string // the worst severity behind the rating (e.g. "High")
 	HealthScore         int
 	HealthGrade         string
