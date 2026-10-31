@@ -252,13 +252,12 @@ func grade(score int) string {
 	}
 }
 
-// SecurityRating returns a standards-style letter rating (A–E) based on the most
-// severe security-relevant finding present — the model SonarQube and similar
-// tools use. Unlike the density Score it is count-independent (one Critical → E
-// regardless of how many findings exist), so it maps cleanly onto CVSS severity
-// bands. It returns the rating and the worst severity label behind it.
+// SecurityRating returns an Observer-defined A-E grade based on the worst
+// security-relevant severity present. It is count-independent and separate from
+// the density-based numerical score. It is not a standards certification or a
+// vector-computed CVSS score.
 //
-//	E = a Critical present · D = High · C = Medium · B = Low · A = none
+// E = Critical, D = High, C = Medium, B = Low, A = no security findings.
 func SecurityRating(r *Result) (string, string) {
 	if r == nil {
 		return "A", "none"
