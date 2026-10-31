@@ -1,0 +1,2572 @@
+[
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "dvwa/includes/DBMS/MySQL.php",
+    "line": 55,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "dvwa/includes/DBMS/MySQL.php",
+    "line": 59,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "dvwa/includes/DBMS/PGSQL.php",
+    "line": 61,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "dvwa/includes/DBMS/PGSQL.php",
+    "line": 65,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "dvwa/includes/dvwaPage.inc.php",
+    "line": 22,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "dvwa/includes/dvwaPage.inc.php",
+    "line": 102,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "dvwa/includes/dvwaPage.inc.php",
+    "line": 103,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "dvwa/includes/dvwaPage.inc.php",
+    "line": 108,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "dvwa/includes/dvwaPage.inc.php",
+    "line": 193,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "dvwa/includes/dvwaPage.inc.php",
+    "line": 194,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "dvwa/includes/dvwaPage.inc.php",
+    "line": 204,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "dvwa/includes/dvwaPage.inc.php",
+    "line": 205,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "dvwa/includes/dvwaPage.inc.php",
+    "line": 227,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "instructions.php",
+    "line": 20,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "login.php",
+    "line": 10,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "login.php",
+    "line": 18,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "login.php",
+    "line": 20,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "login.php",
+    "line": 24,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "login.php",
+    "line": 27,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "login.php",
+    "line": 30,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PERF_SELECT_STAR",
+    "severity": "Medium",
+    "category": "Performance",
+    "title": "SELECT * query",
+    "file": "login.php",
+    "line": 46,
+    "cwe": "",
+    "owasp": ""
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "security.php",
+    "line": 13,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "security.php",
+    "line": 15,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "security.php",
+    "line": 18,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "setup.php",
+    "line": 12,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "setup.php",
+    "line": 20,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "setup.php",
+    "line": 58,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "setup.php",
+    "line": 61,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "setup.php",
+    "line": 73,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/api/index.php",
+    "line": 33,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/api/src/HealthController.php",
+    "line": 88,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_HARDCODED_CREDENTIAL",
+    "severity": "High",
+    "category": "Security",
+    "title": "Hardcoded credential",
+    "file": "vulnerabilities/api/src/Login.php",
+    "line": 10,
+    "cwe": "CWE-798",
+    "owasp": "A07:2021 Identification and Authentication Failures"
+  },
+  {
+    "rule": "SEC_HARDCODED_CREDENTIAL",
+    "severity": "High",
+    "category": "Security",
+    "title": "Hardcoded credential",
+    "file": "vulnerabilities/api/src/Login.php",
+    "line": 12,
+    "cwe": "CWE-798",
+    "owasp": "A07:2021 Identification and Authentication Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/api/src/LoginController.php",
+    "line": 89,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/api/src/LoginController.php",
+    "line": 93,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/api/src/LoginController.php",
+    "line": 94,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/api/src/LoginController.php",
+    "line": 110,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "JS_DOM_XSS",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Possible DOM XSS (document.write / innerHTML)",
+    "file": "vulnerabilities/authbypass/authbypass.js",
+    "line": 43,
+    "cwe": "CWE-79",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "JS_DOM_XSS",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Possible DOM XSS (document.write / innerHTML)",
+    "file": "vulnerabilities/authbypass/authbypass.js",
+    "line": 45,
+    "cwe": "CWE-79",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "JS_DOM_XSS",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Possible DOM XSS (document.write / innerHTML)",
+    "file": "vulnerabilities/authbypass/authbypass.js",
+    "line": 47,
+    "cwe": "CWE-79",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "JS_DOM_XSS",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Possible DOM XSS (document.write / innerHTML)",
+    "file": "vulnerabilities/authbypass/authbypass.js",
+    "line": 49,
+    "cwe": "CWE-79",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "DB_RAW_SQL_CONCAT",
+    "severity": "High",
+    "category": "Database",
+    "title": "SQL built with string concatenation",
+    "file": "vulnerabilities/authbypass/change_user_details.php",
+    "line": 47,
+    "cwe": "CWE-89",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/high.php",
+    "line": 21,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/high.php",
+    "line": 22,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/high.php",
+    "line": 25,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "CFG_DISPLAY_ERRORS",
+    "severity": "High",
+    "category": "Configuration",
+    "title": "display_errors enabled",
+    "file": "vulnerabilities/bac/source/impossible.php",
+    "line": 6,
+    "cwe": "CWE-209",
+    "owasp": "A05:2021 Security Misconfiguration"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/impossible.php",
+    "line": 14,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/impossible.php",
+    "line": 16,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/impossible.php",
+    "line": 19,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/low.php",
+    "line": 15,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/low.php",
+    "line": 16,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/low.php",
+    "line": 19,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/low.php",
+    "line": 30,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/low.php",
+    "line": 31,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/low.php",
+    "line": 89,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/low.php",
+    "line": 93,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/medium.php",
+    "line": 13,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/medium.php",
+    "line": 14,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/medium.php",
+    "line": 17,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/bac/source/medium.php",
+    "line": 26,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/high.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/high.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/high.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/high.php",
+    "line": 13,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/brute/source/high.php",
+    "line": 16,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PERF_SELECT_STAR",
+    "severity": "Medium",
+    "category": "Performance",
+    "title": "SELECT * query",
+    "file": "vulnerabilities/brute/source/high.php",
+    "line": 19,
+    "cwe": "",
+    "owasp": ""
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/impossible.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/impossible.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/impossible.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/impossible.php",
+    "line": 13,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/brute/source/impossible.php",
+    "line": 16,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PERF_SELECT_STAR",
+    "severity": "Medium",
+    "category": "Performance",
+    "title": "SELECT * query",
+    "file": "vulnerabilities/brute/source/impossible.php",
+    "line": 53,
+    "cwe": "",
+    "owasp": ""
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/low.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/low.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/low.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/brute/source/low.php",
+    "line": 9,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PERF_SELECT_STAR",
+    "severity": "Medium",
+    "category": "Performance",
+    "title": "SELECT * query",
+    "file": "vulnerabilities/brute/source/low.php",
+    "line": 12,
+    "cwe": "",
+    "owasp": ""
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/medium.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/medium.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/brute/source/medium.php",
+    "line": 9,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/brute/source/medium.php",
+    "line": 11,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PERF_SELECT_STAR",
+    "severity": "Medium",
+    "category": "Performance",
+    "title": "SELECT * query",
+    "file": "vulnerabilities/brute/source/medium.php",
+    "line": 14,
+    "cwe": "",
+    "owasp": ""
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/high.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/high.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/high.php",
+    "line": 9,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/high.php",
+    "line": 14,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/high.php",
+    "line": 20,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/captcha/source/high.php",
+    "line": 27,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/impossible.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/impossible.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/impossible.php",
+    "line": 11,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/captcha/source/impossible.php",
+    "line": 14,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/impossible.php",
+    "line": 16,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/captcha/source/impossible.php",
+    "line": 19,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/impossible.php",
+    "line": 21,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/captcha/source/impossible.php",
+    "line": 24,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/impossible.php",
+    "line": 29,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/low.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/low.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/low.php",
+    "line": 9,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/low.php",
+    "line": 14,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/low.php",
+    "line": 45,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/low.php",
+    "line": 50,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/low.php",
+    "line": 51,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/captcha/source/low.php",
+    "line": 57,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/medium.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/medium.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/medium.php",
+    "line": 9,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/medium.php",
+    "line": 14,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/medium.php",
+    "line": 46,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/medium.php",
+    "line": 51,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/medium.php",
+    "line": 52,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/captcha/source/medium.php",
+    "line": 55,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/captcha/source/medium.php",
+    "line": 65,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/cryptography/source/low.php",
+    "line": 29,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/cryptography/source/low.php",
+    "line": 30,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/cryptography/source/low.php",
+    "line": 39,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/cryptography/source/medium.php",
+    "line": 21,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "JS_DOM_XSS",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Possible DOM XSS (document.write / innerHTML)",
+    "file": "vulnerabilities/csp/source/high.js",
+    "line": 9,
+    "cwe": "CWE-79",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csp/source/high.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csp/source/high.php",
+    "line": 10,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "JS_DOM_XSS",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Possible DOM XSS (document.write / innerHTML)",
+    "file": "vulnerabilities/csp/source/impossible.js",
+    "line": 9,
+    "cwe": "CWE-79",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csp/source/impossible.php",
+    "line": 9,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csp/source/impossible.php",
+    "line": 11,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csp/source/jsonp.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csp/source/low.php",
+    "line": 13,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csp/source/low.php",
+    "line": 15,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csp/source/medium.php",
+    "line": 14,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csp/source/medium.php",
+    "line": 16,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/high.php",
+    "line": 24,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/high.php",
+    "line": 25,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/high.php",
+    "line": 26,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/csrf/source/high.php",
+    "line": 39,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "DB_RAW_SQL_CONCAT",
+    "severity": "High",
+    "category": "Database",
+    "title": "SQL built with string concatenation",
+    "file": "vulnerabilities/csrf/source/high.php",
+    "line": 43,
+    "cwe": "CWE-89",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/impossible.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/impossible.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/impossible.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/impossible.php",
+    "line": 9,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/impossible.php",
+    "line": 10,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/csrf/source/impossible.php",
+    "line": 15,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/csrf/source/impossible.php",
+    "line": 29,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/low.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/low.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/low.php",
+    "line": 6,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/csrf/source/low.php",
+    "line": 12,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "DB_RAW_SQL_CONCAT",
+    "severity": "High",
+    "category": "Database",
+    "title": "SQL built with string concatenation",
+    "file": "vulnerabilities/csrf/source/low.php",
+    "line": 16,
+    "cwe": "CWE-89",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/medium.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/medium.php",
+    "line": 7,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/source/medium.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/csrf/source/medium.php",
+    "line": 14,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "DB_RAW_SQL_CONCAT",
+    "severity": "High",
+    "category": "Database",
+    "title": "SQL built with string concatenation",
+    "file": "vulnerabilities/csrf/source/medium.php",
+    "line": 18,
+    "cwe": "CWE-89",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/test_credentials.php",
+    "line": 10,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/test_credentials.php",
+    "line": 12,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/csrf/test_credentials.php",
+    "line": 16,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_WEAK_HASH",
+    "severity": "Medium",
+    "category": "Security",
+    "title": "Weak hashing of credentials",
+    "file": "vulnerabilities/csrf/test_credentials.php",
+    "line": 19,
+    "cwe": "CWE-327",
+    "owasp": "A02:2021 Cryptographic Failures"
+  },
+  {
+    "rule": "PERF_SELECT_STAR",
+    "severity": "Medium",
+    "category": "Performance",
+    "title": "SELECT * query",
+    "file": "vulnerabilities/csrf/test_credentials.php",
+    "line": 21,
+    "cwe": "",
+    "owasp": ""
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/exec/source/high.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/exec/source/high.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/exec/source/high.php",
+    "line": 26,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/exec/source/high.php",
+    "line": 30,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/exec/source/impossible.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/exec/source/impossible.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/exec/source/impossible.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/exec/source/impossible.php",
+    "line": 22,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/exec/source/impossible.php",
+    "line": 26,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/exec/source/low.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/exec/source/low.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/exec/source/low.php",
+    "line": 10,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/exec/source/low.php",
+    "line": 14,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/exec/source/medium.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/exec/source/medium.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/exec/source/medium.php",
+    "line": 19,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/exec/source/medium.php",
+    "line": 23,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/fi/source/high.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/fi/source/impossible.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/fi/source/low.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/fi/source/medium.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/javascript/index.php",
+    "line": 37,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/javascript/index.php",
+    "line": 38,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "JS_EVAL",
+    "severity": "High",
+    "category": "Security",
+    "title": "Use of eval()",
+    "file": "vulnerabilities/javascript/source/high_unobfuscated.js",
+    "line": 83,
+    "cwe": "CWE-95",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "JS_EVAL",
+    "severity": "High",
+    "category": "Security",
+    "title": "Use of eval()",
+    "file": "vulnerabilities/javascript/source/high_unobfuscated.js",
+    "line": 84,
+    "cwe": "CWE-95",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/high.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/high.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/high.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/impossible.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/impossible.php",
+    "line": 6,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/info.php",
+    "line": 17,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/info.php",
+    "line": 18,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/low.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/low.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/medium.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/medium.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/open_redirect/source/medium.php",
+    "line": 11,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/sqli/help/help.php",
+    "line": 11,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli/session-input.php",
+    "line": 11,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli/session-input.php",
+    "line": 12,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli/source/impossible.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli/source/impossible.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli/source/impossible.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli/source/low.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli/source/low.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli/source/medium.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli/source/medium.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "SEC_HARDCODED_CREDENTIAL",
+    "severity": "High",
+    "category": "Security",
+    "title": "Hardcoded credential",
+    "file": "vulnerabilities/sqli/test.php",
+    "line": 4,
+    "cwe": "CWE-798",
+    "owasp": "A07:2021 Identification and Authentication Failures"
+  },
+  {
+    "rule": "PERF_SELECT_STAR",
+    "severity": "Medium",
+    "category": "Performance",
+    "title": "SELECT * query",
+    "file": "vulnerabilities/sqli/test.php",
+    "line": 9,
+    "cwe": "",
+    "owasp": ""
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/cookie-input.php",
+    "line": 11,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/cookie-input.php",
+    "line": 12,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/source/high.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/source/high.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/source/impossible.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/source/impossible.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/source/impossible.php",
+    "line": 9,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/source/low.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/source/low.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/source/medium.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/sqli_blind/source/medium.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/upload/help/help.php",
+    "line": 18,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/upload/help/help.php",
+    "line": 19,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/upload/source/high.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/upload/source/impossible.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/upload/source/impossible.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/upload/source/low.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/upload/source/medium.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/view_help.php",
+    "line": 14,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/view_help.php",
+    "line": 15,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/view_help.php",
+    "line": 16,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/view_help.php",
+    "line": 20,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_DANGEROUS_EXEC",
+    "severity": "High",
+    "category": "Security",
+    "title": "Dangerous code/command execution function",
+    "file": "vulnerabilities/view_help.php",
+    "line": 22,
+    "cwe": "CWE-78",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/view_source.php",
+    "line": 12,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/view_source.php",
+    "line": 13,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/view_source_all.php",
+    "line": 12,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_d/source/high.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_d/source/high.php",
+    "line": 7,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_d/source/medium.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_d/source/medium.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_r/source/high.php",
+    "line": 6,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_r/source/high.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_r/source/impossible.php",
+    "line": 4,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_r/source/impossible.php",
+    "line": 6,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_r/source/impossible.php",
+    "line": 9,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_r/source/low.php",
+    "line": 6,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_r/source/low.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_r/source/medium.php",
+    "line": 6,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_r/source/medium.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/high.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/high.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/high.php",
+    "line": 6,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/impossible.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/impossible.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/impossible.php",
+    "line": 8,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/impossible.php",
+    "line": 9,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/low.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/low.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/low.php",
+    "line": 6,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/medium.php",
+    "line": 3,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/medium.php",
+    "line": 5,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  },
+  {
+    "rule": "PHP_SUPERGLOBAL_INPUT",
+    "severity": "Low",
+    "category": "Security",
+    "title": "Unvalidated request input",
+    "file": "vulnerabilities/xss_s/source/medium.php",
+    "line": 6,
+    "cwe": "CWE-20",
+    "owasp": "A03:2021 Injection"
+  }
+]

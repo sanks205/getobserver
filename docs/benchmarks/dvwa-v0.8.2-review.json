@@ -1,0 +1,96 @@
+{
+  "reviewer": "Codex static source review; not independent human validation",
+  "selection": "10 deliberately selected observations covering detections, non-executable text, guarded paths, and missed patterns; not a random sample",
+  "observations": [
+    {
+      "file": "vulnerabilities/exec/source/low.php",
+      "line": 10,
+      "specific_rule": "PHP_DANGEROUS_EXEC",
+      "specific_rule_emitted": true,
+      "classification": "confirmed-risk-pattern",
+      "review_basis": "Request-derived target reaches shell execution without an observed guard in this low-level example.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/vulnerabilities/exec/source/low.php#L10"
+    },
+    {
+      "file": "vulnerabilities/api/src/Login.php",
+      "line": 10,
+      "specific_rule": "SEC_HARDCODED_CREDENTIAL",
+      "specific_rule_emitted": true,
+      "classification": "confirmed-risk-pattern",
+      "review_basis": "A fixed access-token secret is used in token creation and verification.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/vulnerabilities/api/src/Login.php#L10"
+    },
+    {
+      "file": "vulnerabilities/csrf/source/low.php",
+      "line": 12,
+      "specific_rule": "SEC_WEAK_HASH",
+      "specific_rule_emitted": true,
+      "classification": "confirmed-risk-pattern",
+      "review_basis": "MD5 is used to derive a stored password hash.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/vulnerabilities/csrf/source/low.php#L12"
+    },
+    {
+      "file": "vulnerabilities/sqli/help/help.php",
+      "line": 11,
+      "specific_rule": "PHP_DANGEROUS_EXEC",
+      "specific_rule_emitted": true,
+      "classification": "false-positive",
+      "review_basis": "Non-executable HTML prose mentions the file system followed by parentheses; it is not a PHP system call.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/vulnerabilities/sqli/help/help.php#L11"
+    },
+    {
+      "file": "setup.php",
+      "line": 58,
+      "specific_rule": "PHP_DANGEROUS_EXEC",
+      "specific_rule_emitted": true,
+      "classification": "context-dependent",
+      "review_basis": "The shell command is a fixed setup diagnostic; an execution primitive is present, but attacker-controlled command injection is not established.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/setup.php#L58"
+    },
+    {
+      "file": "vulnerabilities/exec/source/impossible.php",
+      "line": 22,
+      "specific_rule": "PHP_DANGEROUS_EXEC",
+      "specific_rule_emitted": true,
+      "classification": "context-dependent",
+      "review_basis": "Numeric checks and reconstruction precede shell execution. A matched function call alone does not establish exploitability.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/vulnerabilities/exec/source/impossible.php#L22"
+    },
+    {
+      "file": "vulnerabilities/xss_r/source/impossible.php",
+      "line": 9,
+      "specific_rule": "PHP_SUPERGLOBAL_INPUT",
+      "specific_rule_emitted": true,
+      "classification": "context-dependent",
+      "review_basis": "The input expression is passed to an HTML-escaping function; this generic input signal does not prove XSS.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/vulnerabilities/xss_r/source/impossible.php#L9"
+    },
+    {
+      "file": "vulnerabilities/sqli/source/low.php",
+      "line": 10,
+      "specific_rule": "DB_RAW_SQL_CONCAT",
+      "specific_rule_emitted": false,
+      "classification": "missed-specific-pattern",
+      "review_basis": "Untrusted input is interpolated into SQL. The specific SQL rule does not fire; generic input findings elsewhere are not equivalent.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/vulnerabilities/sqli/source/low.php#L10"
+    },
+    {
+      "file": "vulnerabilities/xss_r/source/low.php",
+      "line": 8,
+      "specific_rule": "XSS_REFLECTED",
+      "specific_rule_emitted": false,
+      "classification": "missed-specific-pattern",
+      "review_basis": "Unescaped request input is appended to an HTML buffer. The direct-output XSS rule does not fire; a generic input finding does.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/vulnerabilities/xss_r/source/low.php#L8"
+    },
+    {
+      "file": "vulnerabilities/sqli/source/impossible.php",
+      "line": 16,
+      "specific_rule": "DB_RAW_SQL_CONCAT",
+      "specific_rule_emitted": false,
+      "classification": "safe-counterpart",
+      "review_basis": "A parameterized query with integer binding is not reported by this SQL rule; this is not a claim that the whole file is secure.",
+      "source_url": "https://github.com/digininja/DVWA/blob/a1978a2fed195acd093010af6395f86a281537ca/vulnerabilities/sqli/source/impossible.php#L16"
+    }
+  ]
+}

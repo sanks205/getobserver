@@ -1,0 +1,41 @@
+{
+  "project": "DVWA",
+  "source_commit": "a1978a2fed195acd093010af6395f86a281537ca",
+  "archive_url": "https://codeload.github.com/digininja/DVWA/zip/a1978a2fed195acd093010af6395f86a281537ca",
+  "archive_sha256": "4bd1cb5dda6bdb889055bf0bcdbaf8fd9562ac358bb61918f3c0cb5199a76258",
+  "source_tree_sha256": "ccb71ce5ad5547531ffdaa33862059ec3b8275594788a27726ff19c314940c1e",
+  "observer_version": "0.8.2",
+  "observer_binary_sha256": "bb7af3859278099e2f92df3fa4f77b968d29ec8b2d0059930c01e584922f8a6c",
+  "scan_mode": "--assert-offline; built-in engine only; default exclusions",
+  "generated_at_utc": "2026-10-30T22:40:54Z",
+  "git_provenance": "archive scan; source pinned and hash-checked separately; no Git working tree",
+  "finding_count": 257,
+  "source_files_analyzed": 182,
+  "by_rule": {
+    "CFG_DISPLAY_ERRORS": 1,
+    "DB_RAW_SQL_CONCAT": 4,
+    "JS_DOM_XSS": 6,
+    "JS_EVAL": 2,
+    "PERF_SELECT_STAR": 7,
+    "PHP_DANGEROUS_EXEC": 18,
+    "PHP_SUPERGLOBAL_INPUT": 195,
+    "SEC_HARDCODED_CREDENTIAL": 3,
+    "SEC_WEAK_HASH": 21
+  },
+  "by_severity": {
+    "High": 28,
+    "Low": 195,
+    "Medium": 34
+  },
+  "security_score": {
+    "value": 47,
+    "grade": "F"
+  },
+  "code_health_score": {
+    "value": 96,
+    "grade": "A"
+  },
+  "scoring_model": "2",
+  "normalized_findings_sha256": "670b90b984201263b8c3130e27b0b7a0e22dce2135d0425cb38527728b939ddb",
+  "limits": "Finding counts are not verified vulnerabilities. No recall or overall false-positive rate is measured."
+}
