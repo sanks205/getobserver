@@ -32,3 +32,7 @@ Use wording such as “the tools reported different scopes and categories under 
 - [ ] At least a representative sample is manually adjudicated.
 - [ ] Infographic wording is reviewed against the evidence.
 - [ ] Supporting methodology is linked from any published image.
+
+## Separate reference evidence
+
+A [pinned DVWA reference scan](../benchmarks/DVWA-v0.8.2.md) now records a reproducible single-tool run and selected coverage limits. It does not validate the older multi-project comparison or establish comparative accuracy.
