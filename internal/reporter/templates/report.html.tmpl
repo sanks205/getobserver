@@ -176,6 +176,7 @@
     @media (max-width:1040px){.layout{grid-template-columns:190px minmax(0,1fr);} main{padding-inline:22px;}}
     @media (max-width:820px){.layout{grid-template-columns:1fr;} nav.toc{position:static;height:auto;display:flex;gap:4px;overflow-x:auto;padding:10px 14px;border-right:none;border-bottom:1px solid var(--border);} nav.toc h4{display:none;} nav.toc a{flex:0 0 auto;white-space:nowrap;} main{padding-inline:16px;} .hero{grid-template-columns:1fr;} .appbar{top:0;} }
     @media (max-width:560px){main{padding-inline:12px;} .appbar{min-height:56px;} .brandname{font-size:1rem;} .themebtn,.printbtn{padding:7px 9px;font-size:.78rem;} h1{font-size:1.42rem;} .hero{padding:17px 15px;gap:18px;} .gauges{width:100%;justify-content:space-around;gap:10px;} .gauge{width:88px;height:88px;} .gauge-inner{width:68px;height:68px;} .grid{grid-template-columns:repeat(2,minmax(0,1fr));} table{display:block;max-width:100%;overflow-x:auto;white-space:nowrap;} .fgroup>summary,.prio-item{align-items:flex-start;flex-wrap:wrap;} .fgroup-cat{white-space:normal;} .controls>*{width:100%;} .controls input{min-width:0;} }
+    @media (max-width:560px){.airow{flex-direction:column;gap:2px;align-items:stretch;}.airow>span{min-width:0;overflow-wrap:anywhere;}}
     @media print{
       nav.toc,.controls,.printbtn,.appbar-actions,.upsell{display:none!important;}
       .layout{grid-template-columns:1fr;max-width:none;}
@@ -252,7 +253,7 @@
     <div class="hero">
       <div class="hero-left">
         <div class="stats">
-          <div class="stat"><div class="k">Security rating</div><div class="v"><span class="secrating secrating-{{.SecurityRating}}" title="Standards-aligned: worst security severity present = {{.SecurityRatingBasis}}">{{.SecurityRating}}</span></div></div>
+          <div class="stat"><div class="k">Security severity grade</div><div class="v"><span class="secrating secrating-{{.SecurityRating}}" title="Observer severity grade: worst security severity present = {{.SecurityRatingBasis}}">{{.SecurityRating}}</span></div></div>
           <div class="stat"><div class="k">Language</div><div class="v">{{.Language}}</div></div>
           <div class="stat"><div class="k">Findings</div><div class="v">{{.TotalIssues}}</div></div>
           <div class="stat"><div class="k">Est. fix effort</div><div class="v">{{.RemediationEffort}}</div></div>
@@ -289,6 +290,7 @@
       use scoring model v{{.ScoringModel}} over first-party files. Code Health includes all enabled engines; Observer Built-in isolates native rules. Optional engines contributed {{.ExternalHealthCount}} health finding(s).
     </p>
 
+    <p class="muted">Observer severity grade: A = no security finding; B = Low; C = Medium; D = High; E = Critical. The grade reflects the worst detected security severity. Scores and standards mappings are heuristic summaries, not certification or proof of compliance.</p>
     <h2 id="tech">Technology Stack</h2>
     {{template "techtable" dict "Title" "Frameworks" "Items" .Frameworks}}
     {{template "techtable" dict "Title" "Databases" "Items" .Databases}}
